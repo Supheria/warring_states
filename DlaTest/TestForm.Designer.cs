@@ -1,4 +1,4 @@
-﻿namespace test
+﻿namespace DlaTest
 {
     partial class TestForm
     {

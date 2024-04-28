@@ -9,55 +9,51 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace test;
+namespace DlaTest;
 
-public class DlaMap(VoronoiCell region, int walkerNumber) : Roster<(int, int), DlaWalker>
+public class DlaMap()
 {
-    public int WalkerNumber { get; set; } = walkerNumber;
+    static Dictionary<(int X, int Y), DlaPixel> PixelMap { get; } = [];
 
-    public VoronoiCell Region { get; set; } = region;
+    static VoronoiCell Cell { get; set; } = new();
 
-    public Rectangle Bounds { get; private set; }
+    static Rectangle Bounds { get; set; }
 
-    public int HeightMax { get; set; } = 0;
-
-    public DlaMap() : this(new(), 0)
+    public static DlaPixel[] Generate(VoronoiCell cell, int pixelCount)
     {
-
-    }
-
-    public bool Generate()
-    {
-        Bounds = Region.GetBounds();
-        //var root = Region.GetCentroid();
-        var root = Region.Site;
-        RosterMap[root] = new(root);
+        Cell = cell;
+        Bounds = cell.GetBounds();
+        PixelMap.Clear();
+        (int X, int Y) root = Cell.Centroid;
+        //var root = Region.Site;
+        PixelMap[root] = new(root);
 #if DEBUG
         var testForm = new TestForm()
         {
-            Total = WalkerNumber,
+            Total = pixelCount,
         };
         testForm.Show();
 #endif
-        for (int i = 0; RosterMap.Count < WalkerNumber; i++)
+        for (int i = 0; PixelMap.Count < pixelCount; i++)
         {
-            AddWalker(out var walker);
-            RosterMap[(walker.X, walker.Y)] = walker;
-            testForm.Now = RosterMap.Count;
+            AddWalker(out var pixel);
+            PixelMap[(pixel.X, pixel.Y)] = pixel;
+            testForm.Now = PixelMap.Count;
             testForm.Progress();
         }
-        return true;
+        ComputeHeight();
+        return PixelMap.Values.ToArray();
     }
 
-    private void AddWalker(out DlaWalker walker)
+    private static void AddWalker(out DlaPixel pixel)
     {
-        walker = new DlaWalker((
+        pixel = new DlaPixel((
                 new Random().Next(Bounds.Left, Bounds.Right + 1),
                 new Random().Next(Bounds.Top, Bounds.Bottom + 1)
                 ));
-        while (!walker.CheckStuck(RosterMap))
+        while (!CheckStuck(pixel))
         {
-            int x = walker.X, y = walker.Y;
+            int x = pixel.X, y = pixel.Y;
             switch (new Random().Next(0, 8))
             {
                 case 0: // left
@@ -89,96 +85,166 @@ public class DlaMap(VoronoiCell region, int walkerNumber) : Roster<(int, int), D
                     y++;
                     break;
             }
-            if (!Region.Contains(x, y))
+            if (!Cell.Contains(x, y))
             {
                 x = new Random().Next(Bounds.Left, Bounds.Right + 1);
                 y = new Random().Next(Bounds.Top, Bounds.Bottom + 1);
             }
-            walker.SetSignature = (x, y);
+            pixel = new((x, y));
         } 
     }
 
-    public void ComputeHeight()
+    private static bool CheckStuck(DlaPixel pixel)
     {
-        foreach (var pair in RosterMap)
+        var X = pixel.X;
+        var Y = pixel.Y;
+        var left = X - 1;//Math.Max(x - 1, Bounds.Left);
+        var top = Y - 1;//Math.Max(y - 1, Bounds.Top);
+        var right = X + 1;//Math.Min(x + 1, Bounds.Right);
+        var bottom = Y + 1; //Math.Min(y + 1, Bounds.Bottom);
+        bool isStucked = false;
+        if (PixelMap.ContainsKey((X, Y)))
+            return false;
+        if (PixelMap.TryGetValue((left, Y), out var stucked))
         {
-            var walker = pair.Value;
-            CheckDirection(Direction.Left, walker);
-            CheckDirection(Direction.Top, walker);
-            CheckDirection(Direction.Right, walker);
-            CheckDirection(Direction.Bottom, walker);
-            CheckDirection(Direction.LeftTop, walker);
-            CheckDirection(Direction.TopRight, walker);
-            CheckDirection(Direction.LeftBottom, walker);
-            CheckDirection(Direction.BottomRight, walker);
-            var height = walker.Height;
-            HeightMax = Math.Max(HeightMax, height);
+            pixel.Neighbor[Direction.Left] = (left, Y);
+            stucked.Neighbor[Direction.Right] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((right, Y), out stucked))
+        {
+            pixel.Neighbor[Direction.Right] = (right, Y);
+            stucked.Neighbor[Direction.Left] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((X, top), out stucked))
+        {
+            pixel.Neighbor[Direction.Top] = (X, top);
+            stucked.Neighbor[Direction.Bottom] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((X, bottom), out stucked))
+        {
+            pixel.Neighbor[Direction.Bottom] = (X, bottom);
+            stucked.Neighbor[Direction.Top] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((left, top), out stucked))
+        {
+            pixel.Neighbor[Direction.LeftTop] = (left, top);
+            stucked.Neighbor[Direction.BottomRight] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((left, bottom), out stucked))
+        {
+            pixel.Neighbor[Direction.LeftBottom] = (left, bottom);
+            stucked.Neighbor[Direction.TopRight] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((right, top), out stucked))
+        {
+            pixel.Neighbor[Direction.TopRight] = (right, top);
+            stucked.Neighbor[Direction.LeftBottom] = (X, Y);
+            isStucked = true;
+        }
+        if (PixelMap.TryGetValue((right, bottom), out stucked))
+        {
+            pixel.Neighbor[Direction.BottomRight] = (right, bottom);
+            stucked.Neighbor[Direction.LeftTop] = (X, Y);
+            isStucked = true;
+        }
+
+        return isStucked;
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pixelMap"></param>
+    /// <returns>the max of heights</returns>
+    private static void ComputeHeight()
+    {
+        foreach (var pair in PixelMap)
+        {
+            var pixel = pair.Value;
+            CheckDirection(Direction.Left, pixel);
+            CheckDirection(Direction.Top, pixel);
+            CheckDirection(Direction.Right, pixel);
+            CheckDirection(Direction.Bottom, pixel);
+            CheckDirection(Direction.LeftTop, pixel);
+            CheckDirection(Direction.TopRight, pixel);
+            CheckDirection(Direction.LeftBottom, pixel);
+            CheckDirection(Direction.BottomRight, pixel);
+            var height = pixel.Height;
         }
     }
 
-    private int CheckDirection(Direction direction, DlaWalker walker)
+    private static int CheckDirection(Direction direction, DlaPixel walker)
     {
         if (!walker.ConnetNumber.ContainsKey(direction))
         {
             if (walker.Neighbor.TryGetValue(direction, out var neighbor))
 
-                walker.ConnetNumber[direction] = CheckDirection(direction, RosterMap[neighbor]) + 1;
+                walker.ConnetNumber[direction] = CheckDirection(direction, PixelMap[neighbor]) + 1;
             else
                 walker.ConnetNumber[direction] = 0;
         }
         return walker.ConnetNumber[direction];
     }
 
-    public void ResetRelation()
+    public static Dictionary<(int X, int Y), DlaPixel> RelocatePixels(ICollection<DlaPixel> pixels)
     {
-        foreach(var walker in  RosterMap.Values)
+        var pixelMap = new Dictionary<(int X, int Y), DlaPixel>();
+        foreach (var pixel in pixels)
+            pixelMap[(pixel.X, pixel.Y)] = pixel;
+        foreach (var pixel in pixelMap.Values)
         {
-            var x = walker.X;
-            var y = walker.Y;
+            var x = pixel.X;
+            var y = pixel.Y;
             var left = x - 1;//Math.Max(x - 1, Bounds.Left);
             var top = y - 1;//Math.Max(y - 1, Bounds.Top);
             var right = x + 1;//Math.Min(x + 1, Bounds.Right);
             var bottom = y + 1; //Math.Min(y + 1, Bounds.Bottom);
-            if (RosterMap.TryGetValue((left, y), out var other) && (!other.Neighbor.ContainsKey(Direction.Right)))
+            if (pixelMap.TryGetValue((left, y), out var other) && (!other.Neighbor.ContainsKey(Direction.Right)))
             {
-                walker.Neighbor[Direction.Left] = (left, y);
+                pixel.Neighbor[Direction.Left] = (left, y);
                 other.Neighbor[Direction.Right] = (x, y);
             }
-            if (RosterMap.TryGetValue((right, y), out other) && (!other.Neighbor.ContainsKey(Direction.Left)))
+            if (pixelMap.TryGetValue((right, y), out other) && (!other.Neighbor.ContainsKey(Direction.Left)))
             {
-                walker.Neighbor[Direction.Right] = (right, y);
+                pixel.Neighbor[Direction.Right] = (right, y);
                 other.Neighbor[Direction.Left] = (x, y);
             }
-            if (RosterMap.TryGetValue((x, top), out other) && (!other.Neighbor.ContainsKey(Direction.Bottom)))
+            if (pixelMap.TryGetValue((x, top), out other) && (!other.Neighbor.ContainsKey(Direction.Bottom)))
             {
-                walker.Neighbor[Direction.Top] = (x, top);
+                pixel.Neighbor[Direction.Top] = (x, top);
                 other.Neighbor[Direction.Bottom] = (x, y);
             }
-            if (RosterMap.TryGetValue((x, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.Top)))
+            if (pixelMap.TryGetValue((x, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.Top)))
             {
-                walker.Neighbor[Direction.Bottom] = (x, bottom);
+                pixel.Neighbor[Direction.Bottom] = (x, bottom);
                 other.Neighbor[Direction.Top] = (x, y);
             }
-            if (RosterMap.TryGetValue((left, top), out other) && (!other.Neighbor.ContainsKey(Direction.BottomRight)))
+            if (pixelMap.TryGetValue((left, top), out other) && (!other.Neighbor.ContainsKey(Direction.BottomRight)))
             {
-                walker.Neighbor[Direction.LeftTop] = (left, top);
+                pixel.Neighbor[Direction.LeftTop] = (left, top);
                 other.Neighbor[Direction.BottomRight] = (x, y);
             }
-            if (RosterMap.TryGetValue((left, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.TopRight)))
+            if (pixelMap.TryGetValue((left, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.TopRight)))
             {
-                walker.Neighbor[Direction.LeftBottom] = (left, bottom);
+                pixel.Neighbor[Direction.LeftBottom] = (left, bottom);
                 other.Neighbor[Direction.TopRight] = (x, y);
             }
-            if (RosterMap.TryGetValue((right, top), out other) && (!other.Neighbor.ContainsKey(Direction.LeftBottom)))
+            if (pixelMap.TryGetValue((right, top), out other) && (!other.Neighbor.ContainsKey(Direction.LeftBottom)))
             {
-                walker.Neighbor[Direction.TopRight] = (right, top);
+                pixel.Neighbor[Direction.TopRight] = (right, top);
                 other.Neighbor[Direction.LeftBottom] = (x, y);
             }
-            if (RosterMap.TryGetValue((right, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.LeftTop)))
+            if (pixelMap.TryGetValue((right, bottom), out other) && (!other.Neighbor.ContainsKey(Direction.LeftTop)))
             {
-                walker.Neighbor[Direction.BottomRight] = (right, bottom);
+                pixel.Neighbor[Direction.BottomRight] = (right, bottom);
                 other.Neighbor[Direction.LeftTop] = (x, y);
             }
         }
+        return pixelMap;
     }
 }
