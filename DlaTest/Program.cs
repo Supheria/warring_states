@@ -101,6 +101,7 @@ public class Program
 
     public static void Main()
     {
+        new VoronoiForm().ShowDialog();
         var atlas = new Atlas(1000, 1000, 5, 5, 350000);
         atlas.Generate();
         Bitmap image;
