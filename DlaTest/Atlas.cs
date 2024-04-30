@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using LocalUtilities.GdiUtilities;
 using LocalUtilities.Interface;
 using LocalUtilities.VoronoiDiagram;
+using LocalUtilities.VoronoiDiagram.Model;
 
 namespace DlaTest;
 
 public class Atlas(int width, int height, int widthSegmentNumber, int heightSegmentNumber, int pixelNumber)
 {
-    public Dictionary<(int X, int Y), DlaPixel[]> BlockMap { get; } = [];
+    public Dictionary<Coordinate, DlaPixel[]> CellMap { get; } = [];
 
     public int Width { get; } = width;
 
@@ -30,23 +31,18 @@ public class Atlas(int width, int height, int widthSegmentNumber, int heightSegm
 
     }
 
-    public void Generate()
+    public void Generate(IPointsGeneration pointGeneration)
     {
-        var sites = new List<(double, double)>();
-        var pointsGenerator = new RandomPointsGenerationGaussian();
-        var widthSegment = Width / WidthSegmentNumber;
-        var heightSegment = Height / HeightSegmentNumber;
-        for (int i = 0; i < WidthSegmentNumber; i++)
-        {
-            for (int j = 0; j < HeightSegmentNumber; j++)
-                sites.Add(
-                    pointsGenerator.Generate(widthSegment * i, heightSegment * j, widthSegment * (i + 1), heightSegment * (j + 1), 1).First()
-                    );
-        }
-        var voronoiPlane = new VoronoiPlane(0, 0, Width, Height);
-        voronoiPlane.Generate(sites);
         long area = Width * Height;
-        foreach (var cell in voronoiPlane.Cells)
-            BlockMap[cell.Centroid] = DlaMap.Generate(cell, (int)(cell.GetArea() / area * TotalPixelNumber));
+        foreach (var cell in VoronoiPlane.Generate(Width, Height, WidthSegmentNumber, HeightSegmentNumber, pointGeneration))
+            CellMap[cell.Centroid] = DlaMap.Generate(cell, (int)(cell.GetArea() / area * TotalPixelNumber));
     }
+
+#if DEBUG
+    [Obsolete("just for test")]
+    public List<VoronoiCell> GenerateVoronoi(IPointsGeneration pointGeneration)
+    {
+        return VoronoiPlane.Generate(Width, Height, WidthSegmentNumber, HeightSegmentNumber, pointGeneration);
+    }
+#endif
 }

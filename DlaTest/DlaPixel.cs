@@ -1,3 +1,4 @@
+using LocalUtilities;
 using LocalUtilities.GdiUtilities;
 using LocalUtilities.Interface;
 using System;
@@ -11,19 +12,6 @@ using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DlaTest;
-
-public enum Direction
-{
-    None,
-    Left,
-    Top,
-    Right,
-    Bottom,
-    LeftTop,
-    TopRight,
-    LeftBottom,
-    BottomRight,
-}
 
 public class DlaPixel((int X, int Y) point)
 {

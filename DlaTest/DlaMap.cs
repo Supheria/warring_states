@@ -1,3 +1,4 @@
+using LocalUtilities;
 using LocalUtilities.GdiUtilities;
 using LocalUtilities.Interface;
 using LocalUtilities.VoronoiDiagram.Model;
@@ -24,7 +25,7 @@ public class DlaMap()
         Cell = cell;
         Bounds = cell.GetBounds();
         PixelMap.Clear();
-        (int X, int Y) root = Cell.Centroid;
+        (int X, int Y) root = ((int)Cell.Centroid.X, (int)Cell.Centroid.Y);
         //var root = Region.Site;
         PixelMap[root] = new(root);
 #if DEBUG
@@ -85,7 +86,7 @@ public class DlaMap()
                     y++;
                     break;
             }
-            if (!Cell.Contains(x, y))
+            if (!Cell.ContainPoint(x, y))
             {
                 x = new Random().Next(Bounds.Left, Bounds.Right + 1);
                 y = new Random().Next(Bounds.Top, Bounds.Bottom + 1);
