@@ -1,3 +1,4 @@
+using LocalUtilities;
 using LocalUtilities.FileUtilities;
 using LocalUtilities.GdiUtilities;
 using LocalUtilities.Serializations;
@@ -101,6 +102,10 @@ public class Program
 
     public static void Main()
     {
+        var a = new Coordinate(0.192389234, 123.235346356);
+        var b = new Coordinate(0.192389234, 123.235346356);
+        var c = a == b;
+
         new VoronoiForm().ShowDialog();
         var atlas = new Atlas(1000, 1000, 5, 5, 350000);
         atlas.Generate(new RandomPointsGenerationGaussian());
@@ -125,7 +130,7 @@ public class Program
         var mountainRatio = 0.2505f; // 3/12
         // waterRatio                // 8/12
         double mountain = 0, water = 0, forest = 0;
-        foreach (var pixels in atlas.CellMap.Values)
+        foreach (var pixels in atlas.PixelsMap.Values)
         {
             var heightMax = GetHeightMax(pixels);
             foreach (var pixel in pixels)
@@ -156,7 +161,7 @@ public class Program
         forest = Math.Round(forest / total * 100, 2);
         var plain = Math.Round(100 - (mountain + water + forest), 2);
         var totalCount = 0;
-        foreach (var pixels in atlas.CellMap.Values)
+        foreach (var pixels in atlas.PixelsMap.Values)
             totalCount += pixels.Length;
         g.DrawString($"\n\n\n生成数 {totalCount}\n\n范围 {atlas.Bounds}\n\n山地{mountain}% 平原{plain}%\n河水{water}% 树林{forest}%",
             new("仿宋", 15, FontStyle.Bold, GraphicsUnit.Pixel), new SolidBrush(Color.White), new RectangleF(0, image.Height - 200, image.Width, 200));

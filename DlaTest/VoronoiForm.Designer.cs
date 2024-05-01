@@ -80,6 +80,7 @@ namespace DlaTest
             label1.Size = new Size(142, 23);
             label1.TabIndex = 2;
             label1.Text = "label1";
+            label1.AutoSize = true;
             // 
             // numericUpDown1
             // 
