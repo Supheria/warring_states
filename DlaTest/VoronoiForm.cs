@@ -43,96 +43,63 @@ public partial class VoronoiForm : Form
         g.Clear(Color.White);
         DrawVoronoi();
         var cellMap = new Dictionary<(int, int), List<VoronoiCell>>();
-        foreach (var cell in Cells)
+        foreach (var c in Cells)
         {
-            if (cellMap.TryGetValue(cell.Location, out var value))
-                value.Add(cell);
+            if (cellMap.TryGetValue(c.Location, out var value))
+                value.Add(c);
             else
-                cellMap[cell.Location] = [cell];
+                cellMap[c.Location] = [c];
         }
-        //var path = new List<VoronoiPoint>();
-        var visited = new HashSet<VoronoiVertice>();
-        var cellPath = new List<VoronoiCell>();
+        HashSet<Node> nodes = [];
+        HashSet<Edge> edges = [];
+        foreach(var c in Cells)
+        {
+            foreach(var v in c.Vertices)
+            {
+                var n = new Node(v.X, v.Y);
+                if (!nodes.Contains(n))
+                {
+                    nodes.Add(new(v.X, v.Y));
+                }
+                var nV = c.VerticeNeighbor(v, true);
+                var nextNode = new Node(nV.X, nV.Y);
+                var edge = new Edge(n, nextNode);
+                if (!edges.Contains(edge))
+                {
+                    edges.Add(edge);
+                }
+            }
+        }
+        DijkstraRouter.Initialize(edges, nodes);
         var random = new Random();
-        //var currentCell = cellMap[Direction.Left][random.Next(0, cellMap[Direction.Left].Count)];
-        //visited.Add(currentCell.Centroid);
-        //cellPath.Add(currentCell);
-        //var nextPoint = currentCell.Vertices.First();
-        ////foreach (var v in currentCell.Vertices)
-        ////{
-        ////    if (v.BorderLocation is Direction.Left)
-        ////    {
-        ////        if (nextPoint.BorderLocation is not Direction.Left || v.Y < nextPoint.Y)
-        ////            nextPoint = v;
-        ////    }
-        ////}
-        ////g.FillEllipse(Brushes.Green, (float)nextPoint.X - 3f, (float)nextPoint.Y - 3f, 6, 6);
-        //g.FillEllipse(Brushes.DarkGreen, (float)currentCell.Centroid.X - 5f, (float)currentCell.Centroid.Y - 5f, 10, 10);
-        ////path.Add(nextPoint);
-        ////var closewise = true;
-        ////var prevCell = currentCell;
-        ////var leftVisited = new HashSet<VoronoiPoint>() { currentCell.Centroid };
-        //do
-        //{
-        //    //nextPoint = currentCell.VerticeNeighbor(nextPoint, closewise);
-        //    //path.Add(nextPoint);
-        //    //if (nextPoint.BorderLocation == Direction.Top || nextPoint.BorderLocation == Direction.Bottom)
-        //    //    currentCell = prevCell;
-        //    //else
-        //    //    path.Add(nextPoint);
-        //    var tempCell = currentCell;
-        //    var ved = new HashSet<VoronoiPoint>();
-        //    bool fallBack = false;
-        //    //bool finish = false;
-        //    do
-        //    {
-        //        tempCell = currentCell.Neighbours[random.Next(0, currentCell.Neighbours.Count)];
-        //        ved.Add(tempCell.Centroid);
-        //        if (ved.Count == currentCell.Neighbours.Count)
-        //        {
-        //            if (cellPath.Count is 0)
-        //            {
-        //                //currentCell = cellMap[Direction.Left][random.Next(0, cellMap[Direction.Left].Count)];
-        //                visited.Clear();
-        //                cellPath.Add(currentCell);
-        //                //leftVisited.Add(currentCell.Centroid);
-        //                //if (leftVisited.Count == cellMap[Direction.Left].Count)
-        //                //{
-        //                //    finish = true;
-        //                //    break;
-        //                //}
-        //            }
-        //            else
-        //            {
-        //                currentCell = cellPath[cellPath.Count - 2 < 0 ? 0 : cellPath.Count - 2];
-        //                cellPath.RemoveAt(cellPath.Count - 1);
-        //            }
-        //            fallBack = true;
-        //            break;
-        //        }
-        //        //if (tempCell.Location is Direction.Top || tempCell.Location is Direction.Bottom)
-        //        //{
-        //        //    currentCell = cellPath[cellPath.Count - 2 < 0 ? 0 : cellPath.Count - 2];
-        //        //    cellPath.RemoveAt(cellPath.Count - 1);
-        //        //    continue;
-        //        //}
-        //        //ved.Add(tempCell.Centroid);
-        //        //if (ved.Count == currentCell.Neighbours.Count)
-        //        //    break;
-        //    } while (visited.Contains(tempCell.Centroid) || tempCell.Location is Direction.Top || tempCell.Location is Direction.Bottom || tempCell.Location.HasFlag(Direction.Left));
-        //    if (fallBack)
-        //        continue;
-        //    //if (finish)
-        //    //    break;
-        //    currentCell = tempCell;
-        //    visited.Add(currentCell.Centroid);
-        //    cellPath.Add(currentCell);
-        //    //closewise = !closewise;
-        //} while (!currentCell.Location.HasFlag(Direction.Right));
-        //foreach(var v in path)
-        //    g.FillEllipse(Brushes.DarkGreen, (float)v.X - 5f, (float)v.Y - 5f, 10, 10);
-        foreach (var v in cellPath)
-            g.DrawEllipse(Pens.DarkGreen, (float)v.Centroid.X - 5f, (float)v.Centroid.Y - 5f, 10, 10);
+        var location = (0, random.Next(0, HeightSegmentNumber));
+        var cell = cellMap[location].First();
+        VoronoiVertex vertice = cell.Vertices.First();
+        foreach(var v in cell.Vertices)
+        {
+            if(v.DirectionOnBorder is Direction.Left)
+            {
+                if (vertice.DirectionOnBorder is not Direction.Left || v.Y < vertice.Y)
+                    vertice = v;
+            }
+        }
+        var startNode = new Node(vertice.X, vertice.Y);
+        location = new(WidthSegmentNumber - 1, random.Next(0, HeightSegmentNumber));
+        cell = cellMap[location].First();
+        vertice = cell.Vertices.First();
+        foreach (var v in cell.Vertices)
+        {
+            if (v.DirectionOnBorder is Direction.Right)
+            {
+                if (vertice.DirectionOnBorder is not Direction.Right || v.Y < vertice.Y)
+                    vertice = v;
+            }
+        }
+        var endNode = new Node(vertice.X, vertice.Y);
+        var route = DijkstraRouter.GetRoute(startNode.Id, endNode.Id);
+
+        foreach (var r in route.Edges)
+            g.DrawLine(new Pen(Color.Green, 2f), new PointF((float)r.StartNode.X, (float)r.StartNode.Y), new((float)r.EndNode.X, (float)r.EndNode.Y));
         pb.Image = bitmap;
     }
 
