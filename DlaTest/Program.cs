@@ -102,12 +102,9 @@ public class Program
 
     public static void Main()
     {
-        var a = new Coordinate(0.192389234, 123.235346356);
-        var b = new Coordinate(0.192389234, 123.235346356);
-        var c = a == b;
-
         new VoronoiForm().ShowDialog();
-        var atlas = new Atlas(1000, 1000, 5, 5, 350000);
+        //var atlas = new Atlas(1000, 1000, 5, 5, 350000);
+        var atlas = new Atlas(200, 200, 3, 3, 10000);
         atlas.Generate(new RandomPointsGenerationGaussian());
         Bitmap image;
         try

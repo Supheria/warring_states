@@ -41,7 +41,7 @@ public partial class VoronoiForm : Form
     {
         var atlas = new Atlas(1000, 1000, WidthSegmentNumber, HeightSegmentNumber, 0);
         if (Cells.Count is 0)
-            Cells = atlas.GenerateVoronoi(new RandomPointsGenerationUniform());
+            Cells = atlas.GenerateVoronoi(new RandomPointsGenerationGaussian());
         var river = atlas.GenerateRiver(Cells);
         g.Clear(Color.White);
         DrawVoronoi();

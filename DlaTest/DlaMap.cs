@@ -12,18 +12,16 @@ using System.Threading.Tasks;
 
 namespace DlaTest;
 
-public class DlaMap()
+public class DlaMap(VoronoiCell cell)
 {
-    static Dictionary<(int X, int Y), DlaPixel> PixelMap { get; } = [];
+    Dictionary<(int X, int Y), DlaPixel> PixelMap { get; } = [];
 
-    static VoronoiCell Cell { get; set; } = new();
+    VoronoiCell Cell { get; set; } = cell;
 
-    static Rectangle Bounds { get; set; }
+    Rectangle Bounds { get; set; } = cell.GetBounds();
 
-    public static DlaPixel[] Generate(VoronoiCell cell, int pixelCount)
+    public DlaPixel[] Generate(int pixelCount)
     {
-        Cell = cell;
-        Bounds = cell.GetBounds();
         PixelMap.Clear();
         (int X, int Y) root = ((int)Cell.Centroid.X, (int)Cell.Centroid.Y);
         //var root = Region.Site;
@@ -46,7 +44,7 @@ public class DlaMap()
         return PixelMap.Values.ToArray();
     }
 
-    private static void AddWalker(out DlaPixel pixel)
+    private void AddWalker(out DlaPixel pixel)
     {
         pixel = new DlaPixel((
                 new Random().Next(Bounds.Left, Bounds.Right + 1),
@@ -95,7 +93,7 @@ public class DlaMap()
         } 
     }
 
-    private static bool CheckStuck(DlaPixel pixel)
+    private bool CheckStuck(DlaPixel pixel)
     {
         var X = pixel.X;
         var Y = pixel.Y;
@@ -162,7 +160,7 @@ public class DlaMap()
     /// </summary>
     /// <param name="pixelMap"></param>
     /// <returns>the max of heights</returns>
-    private static void ComputeHeight()
+    private void ComputeHeight()
     {
         foreach (var pair in PixelMap)
         {
@@ -179,7 +177,7 @@ public class DlaMap()
         }
     }
 
-    private static int CheckDirection(Direction direction, DlaPixel walker)
+    private int CheckDirection(Direction direction, DlaPixel walker)
     {
         if (!walker.ConnetNumber.ContainsKey(direction))
         {

@@ -16,17 +16,20 @@ public class Atlas(int width, int height, int widthSegmentNumber, int heightSegm
 {
     List<VoronoiCell> Cells { get; set; } = [];
 
-    Dictionary<Direction, List<VoronoiCell>> CellDirectionMap { get; } = new()
-    {
-        [Direction.Left] = [],
-        [Direction.Top] = [],
-        [Direction.Right] = [],
-        [Direction.Bottom] = [],
-    };
-
     public Dictionary<Coordinate, DlaPixel[]> PixelsMap { get; } = [];
 
-    public List<Edge> River { get; } = [];
+    List<Dictionary<Direction, List<VoronoiCell>>> CellMapForRiver { get; } = [[], []];
+
+    public List<Edge> Rivers { get; } = [];
+
+    // [riverOverlayType is 0]  [riverOverlayType is 1)
+    //         _______                 _______
+    //        | _____ |               | |   | |
+    //        |       |               | |   | |
+    //        |       |               | |   | |
+    //        | ----- |               | |   | |
+    //         -------                 -------
+    int RiverOverlayType { get; set; } = 0;
 
     public int Width { get; } = width;
 
@@ -54,36 +57,38 @@ public class Atlas(int width, int height, int widthSegmentNumber, int heightSegm
     public void Generate(IPointsGeneration pointGeneration)
     {
         long area = Width * Height;
-        Cells = VoronoiPlane.Generate(Width, Height, WidthSegmentNumber, HeightSegmentNumber, pointGeneration);
+        Cells = new VoronoiPlane(Width, Height).Generate(WidthSegmentNumber, HeightSegmentNumber, pointGeneration);
         GenerateRiver();
         foreach (var cell in Cells)
-            PixelsMap[cell.Centroid] = DlaMap.Generate(cell, (int)(cell.GetArea() / area * TotalPixelNumber));
+            PixelsMap[cell.Centroid] = new DlaMap(cell).Generate((int)(cell.GetArea() / area * TotalPixelNumber));
     }
 
     private void GenerateRiver()
     {
-        CellDirectionMap[Direction.Left].Clear();
-        CellDirectionMap[Direction.Top].Clear();
-        CellDirectionMap[Direction.Right].Clear();
-        CellDirectionMap[Direction.Bottom].Clear();
+        RiverOverlayType = Random.Next() % 2;
+        if (RiverOverlayType is 0)
+            CellMapForRiver.ForEach(m => { m.Clear(); m.Add(Direction.Left, []); m.Add(Direction.Right, []); });
+        else
+            CellMapForRiver.ForEach(m => { m.Clear(); m.Add(Direction.Top, []); m.Add(Direction.Bottom, []); });
         HashSet<Coordinate> nodes = [];
         HashSet<Edge> edges = [];
-        var riverOverlayType = Random.Next() % 2;
         foreach (var cell in Cells)
         {
-            if (RiverOverlayFilter(cell.Centroid, cell.DirectionOnBorder, riverOverlayType, true))
+            if (RiverOverlayType is 0)
             {
+                var index = cell.Centroid.Y.ApproxLessThanOrEqualTo(HeightHalf) ? 0 : 1;
                 if (cell.DirectionOnBorder.HasFlag(Direction.Left))
-                    CellDirectionMap[Direction.Left].Add(cell);
+                    CellMapForRiver[index][Direction.Left].Add(cell);
                 else if (cell.DirectionOnBorder.HasFlag(Direction.Right))
-                    CellDirectionMap[Direction.Right].Add(cell);
+                    CellMapForRiver[index][Direction.Right].Add(cell);
             }
-            if (RiverOverlayFilter(cell.Centroid, cell.DirectionOnBorder, riverOverlayType, false))
+            else
             {
+                var index = cell.Centroid.X.ApproxLessThanOrEqualTo(WidthHalf) ? 0 : 1;
                 if (cell.DirectionOnBorder.HasFlag(Direction.Top))
-                    CellDirectionMap[Direction.Top].Add(cell);
+                    CellMapForRiver[index][Direction.Top].Add(cell);
                 else if (cell.DirectionOnBorder.HasFlag(Direction.Bottom))
-                    CellDirectionMap[Direction.Bottom].Add(cell);
+                    CellMapForRiver[index][Direction.Bottom].Add(cell);
             }
             foreach (var vertex in cell.Vertexes)
             {
@@ -93,88 +98,57 @@ public class Atlas(int width, int height, int widthSegmentNumber, int heightSegm
                 edges.Add(new(vertex.Coordinate, nextVertex.Coordinate));
             }
         }
-        var startVertical = GetRiverEndPoint(Direction.Top, riverOverlayType);
-        var endVertical = GetRiverEndPoint(Direction.Bottom, riverOverlayType);
-        var startHorizontal = GetRiverEndPoint(Direction.Left, riverOverlayType);
-        var endHorizontal = GetRiverEndPoint(Direction.Right, riverOverlayType);
-        nodes.Add(startVertical);
-        nodes.Add(endVertical);
-        nodes.Add(startHorizontal);
-        nodes.Add(endHorizontal);
+        var start1st = GetRiverEndpoint(true, true);
+        var end1st = GetRiverEndpoint(true, false);
+        var start2nd = GetRiverEndpoint(false, true);
+        var end2nd = GetRiverEndpoint(false, false);
+        nodes.Add(start1st);
+        nodes.Add(end1st);
+        nodes.Add(start2nd);
+        nodes.Add(end2nd);
         Dijkstra.Initialize(edges.ToList(), nodes.ToList());
-        River.AddRange(Dijkstra.GetPath(startVertical, endVertical));
-        River.AddRange(Dijkstra.GetPath(startHorizontal, endHorizontal));
+        Rivers.AddRange(Dijkstra.GetPath(start1st, end1st));
+        Rivers.AddRange(Dijkstra.GetPath(start2nd, end2nd));
     }
 
-    private Coordinate GetRiverEndPoint(Direction direction, int riverOverlayType)
+    private Coordinate GetRiverEndpoint(bool firstRiver, bool startEndpoint)
     {
-        var cells = CellDirectionMap[direction];
-        var cell = cells[Random.Next(0, cells.Count)];
+        var direction = RiverOverlayType is 0 ? 
+            startEndpoint ? Direction.Left : Direction.Right : 
+            startEndpoint ? Direction.Top : Direction.Bottom;
+        var cells = CellMapForRiver[firstRiver ? 0 : 1][direction];
         var vertexes = new List<VoronoiVertex>();
-        foreach(var vertex in cell.Vertexes)
+        do
         {
-            if (vertex.DirectionOnBorder != direction)
-                continue;
-            if (RiverOverlayFilter(vertex.Coordinate, vertex.DirectionOnBorder, riverOverlayType, true) ||
-                RiverOverlayFilter(vertex.Coordinate, vertex.DirectionOnBorder, riverOverlayType, false))
-                vertexes.Add(vertex);
-        }
+            var cell = cells[Random.Next(0, cells.Count)];
+            foreach (var vertex in cell.Vertexes)
+            {
+                if (vertex.DirectionOnBorder != direction)
+                    continue;
+                if (RiverOverlayType is 0)
+                {
+                    if (firstRiver && vertex.Y.ApproxLessThanOrEqualTo(HeightHalf))
+                        vertexes.Add(vertex);
+                    else if ((!firstRiver) && vertex.Y.ApproxGreaterThanOrEqualTo(HeightHalf))
+                        vertexes.Add(vertex);
+                }
+                else
+                {
+                    if (firstRiver && vertex.X.ApproxLessThanOrEqualTo(WidthHalf))
+                        vertexes.Add(vertex);
+                    else if ((!firstRiver) && vertex.X.ApproxGreaterThanOrEqualTo(WidthHalf))
+                        vertexes.Add(vertex);
+                }
+            }
+        } while (vertexes.Count is 0);
         return vertexes[Random.Next(0, vertexes.Count)].Coordinate;
-
-    }
-
-    // [riverOverlayType is 0]  [riverOverlayType is 1)
-    //         _______                 _______
-    //        |     / |               | \     |
-    //        |\      |               |      /|
-    //        |      \|               |/      |
-    //        | /     |               |     \ |
-    //         -------                 -------
-    private bool RiverOverlayFilter(Coordinate coordinate, Direction direction, int riverOverlayType, bool horizontal)
-    {
-        if (horizontal)
-        {
-            if (direction.HasFlag(Direction.Left))
-            {
-                if ((riverOverlayType is 0 && coordinate.Y.ApproxLessThan(HeightHalf)) ||
-                    (riverOverlayType is 1 && coordinate.Y.ApproxGreaterThan(HeightHalf)))
-                    return true;
-                return false;
-            }
-            else if (direction.HasFlag(Direction.Right))
-            {
-                if ((riverOverlayType is 0 && coordinate.Y.ApproxGreaterThan(HeightHalf)) ||
-                    (riverOverlayType is 1 && coordinate.Y.ApproxLessThan(HeightHalf)))
-                    return true;
-                return false;
-            }
-            return false;
-        }
-        else
-        {
-            if (direction.HasFlag(Direction.Top))
-            {
-                if ((riverOverlayType is 0 && coordinate.X.ApproxGreaterThan(WidthHalf)) ||
-                    (riverOverlayType is 1 && coordinate.X.ApproxLessThan(WidthHalf)))
-                    return true;
-                return false;
-            }
-            else if (direction.HasFlag(Direction.Bottom))
-            {
-                if ((riverOverlayType is 0 && coordinate.X.ApproxLessThan(WidthHalf)) ||
-                    (riverOverlayType is 1 && coordinate.X.ApproxGreaterThan(WidthHalf)))
-                    return true;
-                return false;
-            }
-            return false;
-        }
     }
 
 #if DEBUG
     [Obsolete("just for test")]
     public List<VoronoiCell> GenerateVoronoi(IPointsGeneration pointGeneration)
     {
-        return VoronoiPlane.Generate(Width, Height, WidthSegmentNumber, HeightSegmentNumber, pointGeneration);
+        return new VoronoiPlane(Width, Height).Generate(WidthSegmentNumber, HeightSegmentNumber, pointGeneration);
     }
 
     [Obsolete("just for test")]
@@ -182,7 +156,7 @@ public class Atlas(int width, int height, int widthSegmentNumber, int heightSegm
     {
         Cells = cells;
         GenerateRiver();
-        return River;
+        return Rivers;
     }
 #endif
 }
