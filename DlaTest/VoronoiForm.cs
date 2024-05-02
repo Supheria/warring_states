@@ -39,10 +39,10 @@ public partial class VoronoiForm : Form
 
     void SpreadPoints()
     {
-        var atlas = new Atlas(1000, 1000, WidthSegmentNumber, HeightSegmentNumber, 0);
+        var atlas = new Atlas(new(1000, 1000), new(WidthSegmentNumber, HeightSegmentNumber), new(5, 5), 0, new RandomPointsGenerationGaussian());
         if (Cells.Count is 0)
-            Cells = atlas.GenerateVoronoi(new RandomPointsGenerationGaussian());
-        var river = atlas.GenerateRiver(Cells);
+            Cells = atlas.GenerateVoronoi();
+        var river = atlas.GenerateRiver();
         g.Clear(Color.White);
         DrawVoronoi();
         foreach (var p in river)
@@ -76,6 +76,8 @@ public partial class VoronoiForm : Form
         foreach (var c in Cells)
             g.DrawPolygon(Pens.LightGray, c.Vertexes.Select(p => new PointF((float)p.X, (float)p.Y)).ToArray());
         g.DrawPolygon(Pens.Black, cell.Vertexes.Select(p => new PointF((float)p.X, (float)p.Y)).ToArray());
+        label1.Text = cell.GetArea().ToString() + "\n";
+        label1.Text += (cell.GetArea() / (1000 * 1000) * 100).ToString() + "%";
     }
 
     void Button1Click(object sender, EventArgs e)

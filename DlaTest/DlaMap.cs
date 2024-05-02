@@ -23,7 +23,7 @@ public class DlaMap(VoronoiCell cell)
     public DlaPixel[] Generate(int pixelCount)
     {
         PixelMap.Clear();
-        (int X, int Y) root = ((int)Cell.Centroid.X, (int)Cell.Centroid.Y);
+        (int X, int Y) root = ((int)Cell.Site.X, (int)Cell.Site.Y);
         //var root = Region.Site;
         PixelMap[root] = new(root);
 #if DEBUG
@@ -33,9 +33,18 @@ public class DlaMap(VoronoiCell cell)
         };
         testForm.Show();
 #endif
+        bool innerFilter(int x, int y) => Cell.ContainPoint(x, y);
+        for (int i = 0; PixelMap.Count < (int)(pixelCount * 0.2f); i++)
+        {
+            var pixel = AddWalker(innerFilter);
+            PixelMap[(pixel.X, pixel.Y)] = pixel;
+            testForm.Now = PixelMap.Count;
+            testForm.Progress();
+        }
+        bool outerFilter(int x, int y) => Bounds.Contains(x, y);
         for (int i = 0; PixelMap.Count < pixelCount; i++)
         {
-            AddWalker(out var pixel);
+            var pixel = AddWalker(outerFilter);
             PixelMap[(pixel.X, pixel.Y)] = pixel;
             testForm.Now = PixelMap.Count;
             testForm.Progress();
@@ -44,9 +53,9 @@ public class DlaMap(VoronoiCell cell)
         return PixelMap.Values.ToArray();
     }
 
-    private void AddWalker(out DlaPixel pixel)
+    private DlaPixel AddWalker(Func<int, int, bool> pixelFilter)
     {
-        pixel = new DlaPixel((
+        var pixel = new DlaPixel((
                 new Random().Next(Bounds.Left, Bounds.Right + 1),
                 new Random().Next(Bounds.Top, Bounds.Bottom + 1)
                 ));
@@ -84,13 +93,14 @@ public class DlaMap(VoronoiCell cell)
                     y++;
                     break;
             }
-            if (!Cell.ContainPoint(x, y))
-            {
-                x = new Random().Next(Bounds.Left, Bounds.Right + 1);
-                y = new Random().Next(Bounds.Top, Bounds.Bottom + 1);
-            }
-            pixel = new((x, y));
-        } 
+            if(pixelFilter(x, y))
+                pixel = new((x, y));
+            else
+                pixel = new((
+                    new Random().Next(Bounds.Left, Bounds.Right + 1),
+                    new Random().Next(Bounds.Top, Bounds.Bottom + 1)));
+        }
+        return pixel;
     }
 
     private bool CheckStuck(DlaPixel pixel)
@@ -173,7 +183,6 @@ public class DlaMap(VoronoiCell cell)
             CheckDirection(Direction.TopRight, pixel);
             CheckDirection(Direction.LeftBottom, pixel);
             CheckDirection(Direction.BottomRight, pixel);
-            var height = pixel.Height;
         }
     }
 
@@ -199,10 +208,10 @@ public class DlaMap(VoronoiCell cell)
         {
             var x = pixel.X;
             var y = pixel.Y;
-            var left = x - 1;//Math.Max(x - 1, Bounds.Left);
-            var top = y - 1;//Math.Max(y - 1, Bounds.Top);
-            var right = x + 1;//Math.Min(x + 1, Bounds.Right);
-            var bottom = y + 1; //Math.Min(y + 1, Bounds.Bottom);
+            var left = x - 1;
+            var top = y - 1;
+            var right = x + 1;
+            var bottom = y + 1;
             if (pixelMap.TryGetValue((left, y), out var other) && (!other.Neighbor.ContainsKey(Direction.Right)))
             {
                 pixel.Neighbor[Direction.Left] = (left, y);

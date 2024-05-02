@@ -104,8 +104,8 @@ public class Program
     {
         new VoronoiForm().ShowDialog();
         //var atlas = new Atlas(1000, 1000, 5, 5, 350000);
-        var atlas = new Atlas(200, 200, 3, 3, 10000);
-        atlas.Generate(new RandomPointsGenerationGaussian());
+        var atlas = new Atlas(new(200, 200), new(2, 2), new(10, 10), 20000, new RandomPointsGenerationGaussian());
+        atlas.Generate();
         Bitmap image;
         try
         {
@@ -119,6 +119,10 @@ public class Program
         var g = Graphics.FromImage(image);
         g.Clear(Color.Black);
         g.FillRectangle(new SolidBrush(Color.LightYellow), atlas.Bounds);
+        foreach (var r in atlas.Rivers)
+        {
+            g.DrawLine(new Pen(Color.LightBlue, 3f), r.Starter, r.Ender);
+        }
         //g.DrawPolygon(Pens.Black, bigMap.PolygonRegion.Select(p => new PointF(p.X, p.Y)).ToArray());
         //image.Save("test.bmp");
         var pImage = new PointBitmap(image);
@@ -150,8 +154,11 @@ public class Program
                 }
             }
         }
-        
         pImage.UnlockBits();
+        foreach (var r in atlas.Rivers)
+        {
+            g.DrawLine(new Pen(Color.LightBlue, 2f), r.Starter, r.Ender);
+        }
         var total = atlas.Width * atlas.Height;
         mountain = Math.Round(mountain / total * 100, 2);
         water = Math.Round(water / total * 100, 2);
