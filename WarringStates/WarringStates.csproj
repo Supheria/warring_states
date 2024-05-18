@@ -9,13 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\_lib\AtlasGenerator\AtlasGenerator.csproj" />
     <ProjectReference Include="..\_lib\LocalUtilities\LocalUtilities.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="TestForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
   </ItemGroup>
 
 </Project>
