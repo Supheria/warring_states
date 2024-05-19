@@ -15,9 +15,12 @@ namespace WarringStates
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
 
-            //var data = new AtlasData(nameof(Atlas), new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.BackwardSlash, 2.25, 45000, 0.66f, new RandomPointsGenerationGaussian());
-            //Terrain.Atlas = new(data);
-            //Terrain.Atlas.SaveToSimpleScript(false);
+            //var data = new AtlasData("testmap", new(300, 300), new(2, 2), new(3, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
+            //var atlas = new Atlas(data);
+            //atlas.SaveToSimpleScript(true, "shit.ss");
+            var atlas = new Atlas("testmap").LoadFromSimpleScript("shit.ss");
+            atlas.SaveToSimpleScript(false, "shit.ss");
+            atlas.SetTerrainMap();
 
             //ApplicationConfiguration.Initialize();
             Application.Run(new GameForm());
