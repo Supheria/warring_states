@@ -33,12 +33,18 @@ public class RandomTable
 
     public double Next()
     {
+        Index++;
         Index = Index < Table.Length ? Index : 0;
-        return Table[Index++];
+        return Table[Index];
     }
 
     public void ResetIndex()
     {
         Index = 0;
+    }
+
+    public double Current()
+    {
+        return Table[Index];
     }
 }
