@@ -34,7 +34,7 @@ internal class GameDisplayer : PictureBox
 
         var infoRect = new Rectangle(0, Image.Height - 100, Image.Width, 100);
         g.FillRectangle(new SolidBrush(Color.Gray), infoRect);
-        g.DrawString($"\n生成数 {Terrain.Type.Total.GetCount()}\n\n山地{Terrain.Type.Hill.GetCount()}% 平原{Terrain.Type.Plain.GetCount()}%\n河水{Terrain.Type.Stream.GetCount()}% 树林{Terrain.Type.Woodland.GetCount()}%",
+        g.DrawString($"\n水源{Terrain.Type.Stream.GetCount()}\n平原{Terrain.Type.Plain.GetCount()}\n树林{Terrain.Type.Woodland.GetCount()}\n山地{Terrain.Type.Hill.GetCount()}",
             new("仿宋", 15, FontStyle.Bold, GraphicsUnit.Pixel), new SolidBrush(Color.White), infoRect);
         Image.Save("map.bmp");
     }

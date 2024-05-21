@@ -13,7 +13,6 @@ public static class Terrain
         Hill,
         Stream,
         Woodland,
-        Total
     }
 
     public static TerrainOverviewColors OverviewColors { get; set; } = new TerrainOverviewColors().LoadFromSimpleScript();
