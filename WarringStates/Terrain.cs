@@ -5,61 +5,51 @@ using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace WarringStates;
 
-internal class Terrain
+public static class Terrain
 {
     public enum Type
     {
         Plain,
         Hill,
         Stream,
-        Woodland
+        Woodland,
     }
 
-    public static Atlas Atlas
+    public static TerrainOverviewColors OverviewColors { get; set; } = new TerrainOverviewColors().LoadFromSimpleScript();
+
+    static TerrainMap TerrainMap { get; } = new();
+
+    public static Bitmap? Overview { get; private set; }
+
+    public static Type GetTerrain(this Coordinate coordinate)
     {
-        get => _atlas;
-        set
+        return TerrainMap[coordinate];
+    }
+
+    public static string GetCount(this Type type)
+    {
+        return TerrainMap.GetTerrainCount(type);
+    }
+
+    public static void SetTerrainMap(this Atlas atlas)
+    {
+        TerrainMap.Relocate(atlas);
+        DrawOverView();
+    }
+
+    public static void DrawOverView()
+    {
+        if (TerrainMap is null)
+            return;
+        Overview?.Dispose();
+        Overview = new(TerrainMap.Width, TerrainMap.Height);
+        var pOverview = new PointBitmap(Overview);
+        pOverview.LockBits();
+        for (int i = 0; i < Overview.Width; i++)
         {
-            _atlas = value;
-            SetTerrainMap();
+            for (int j = 0; j < Overview.Height; j++)
+                pOverview.SetPixel(i, j, OverviewColors[TerrainMap[new(i, j)]]);
         }
-    }
-    private static Atlas _atlas = new Atlas().LoadFromSimpleScript();
-
-    public static Dictionary<Coordinate, Type> TerrainMap
-    {
-        get
-        {
-            if (_terrainMap is null)
-            {
-                _terrainMap = [];
-                SetTerrainMap();
-            }
-            return _terrainMap;
-        }
-    }
-    static Dictionary<Coordinate, Type>? _terrainMap = null;
-
-    private static void SetTerrainMap()
-    {
-        Atlas.RiverPoints.ForEach(p => TerrainMap[p] = Type.Stream);
-        Atlas.AltitudePoints.ForEach(p => TerrainMap[p] = GetTerrainType(p.Altitude / Atlas.AltitudeMax));
-    }
-
-    public static Type GetTerrainType(double altitudeRatio)
-    {
-        if (altitudeRatio < 0 || altitudeRatio > 1)
-            throw AtlasException.AltitudeRatioOutRange();
-        if (altitudeRatio.ApproxLessThan(1d / 35d))
-            return Type.Plain;
-        if (altitudeRatio.ApproxLessThan(3d / 35d))
-            return Type.Woodland;
-        if (altitudeRatio.ApproxLessThan(5d / 35d))
-            return Type.Stream;
-        if (altitudeRatio.ApproxGreaterThan(20d / 35d))
-            return Type.Stream;
-        if (altitudeRatio.ApproxGreaterThan(15d / 35d))
-            return Type.Woodland;
-        return Type.Hill;
+        pOverview.UnlockBits();
     }
 }
