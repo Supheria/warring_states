@@ -7,7 +7,7 @@ public class GridData : ISsSerializable
     /// <summary>
     /// 格元边框绘制用笔
     /// </summary>
-    public Pen CellPen { get; } = new(Color.FromArgb(200, Color.AliceBlue), 1.5f);
+    public Pen CellPen { get; } = new(Color.FromArgb(200, Color.LightGray), 5f);
     /// <summary>
     /// 节点边框绘制用笔（直线）
     /// </summary>

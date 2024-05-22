@@ -6,6 +6,12 @@ namespace WarringStates;
 
 public partial class GameDisplayer : Displayer
 {
+    double PaddingFactor { get; set; } = 0.02;
+
+    new Size Padding => new((int)(Width * PaddingFactor), (int)(Height * PaddingFactor));
+
+    int InfoBrandHeight { get; set; } = 100;
+
     public GameDisplayer()
     {
         OnRelocate += Relocate;
@@ -24,8 +30,9 @@ public partial class GameDisplayer : Displayer
     {
         var g = Graphics.FromImage(Image);
         g.Clear(Color.Transparent);
-        Image.DrawLatticeGrid();
-        var infoRect = new Rectangle(0, Image.Height - 100, Image.Width, 100);
+        var padding = Padding;
+        Image.DrawLatticeGrid(new(padding.Width, padding.Height, Width - 2 * padding.Width, Height - InfoBrandHeight - 2 * Padding.Height));
+        var infoRect = new Rectangle(0, Height - InfoBrandHeight, Width, InfoBrandHeight);
         g.FillRectangle(new SolidBrush(Color.Gray), infoRect);
         g.DrawString($"\n水源{Terrain.Type.Stream.GetCount()}\n平原{Terrain.Type.Plain.GetCount()}\n树林{Terrain.Type.Woodland.GetCount()}\n山地{Terrain.Type.Hill.GetCount()}",
             new("仿宋", 15, FontStyle.Bold, GraphicsUnit.Pixel), new SolidBrush(Color.White), infoRect);

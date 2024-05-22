@@ -3,9 +3,9 @@
 namespace WarringStates;
 
 using Type = Terrain.Type;
-public class TerrainOverviewColors : ISsSerializable
+public class TerrainColors : ISsSerializable
 {
-    public string LocalName { get; set; } = nameof(TerrainOverviewColors);
+    public string LocalName { get; set; } = nameof(TerrainColors);
 
     public static int Alpha { get; set; } = 233;
 

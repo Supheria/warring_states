@@ -14,7 +14,7 @@ public static class Terrain
         Woodland,
     }
 
-    public static TerrainOverviewColors OverviewColors { get; set; } = new TerrainOverviewColors().LoadFromSimpleScript();
+    public static TerrainColors TerrainColors { get; set; } = new TerrainColors().LoadFromSimpleScript();
 
     static TerrainMap TerrainMap { get; } = new();
 
@@ -34,16 +34,14 @@ public static class Terrain
         return TerrainMap.GetTerrainCount(type);
     }
 
+    public static Color GetColor(this Type type)
+    {
+        return TerrainColors[type];
+    }
+
     public static void SetTerrainMap(this Atlas atlas)
     {
         TerrainMap.Relocate(atlas);
-        DrawOverView();
-    }
-
-    public static void DrawOverView()
-    {
-        if (TerrainMap is null)
-            return;
         Overview?.Dispose();
         Overview = new(Width, Height);
         var pOverview = new PointBitmap(Overview);
@@ -51,8 +49,19 @@ public static class Terrain
         for (int i = 0; i < Overview.Width; i++)
         {
             for (int j = 0; j < Overview.Height; j++)
-                pOverview.SetPixel(i, j, OverviewColors[TerrainMap[new(i, j)]]);
+                pOverview.SetPixel(i, j, TerrainColors[TerrainMap[new(i, j)]]);
         }
         pOverview.UnlockBits();
+    }
+
+    public static Coordinate ToCoordinateInTerrainMap(this LatticePoint point)
+    {
+        if (Width is 0 || Height is 0)
+            return new();
+        var modX = point.Col % Width;
+        var modY = point.Row % Height;
+        var x = modX < 0 ? Width + modX : modX;
+        var y = modY < 0 ? Height + modY : modY;
+        return new(x, y);
     }
 }
