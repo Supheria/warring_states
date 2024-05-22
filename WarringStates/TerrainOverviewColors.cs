@@ -1,10 +1,4 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WarringStates;
 
@@ -33,7 +27,7 @@ public class TerrainOverviewColors : ISsSerializable
     public void Serialize(SsSerializer serializer)
     {
         serializer.WriteTag(nameof(Alpha), Alpha.ToString());
-        foreach(var pair in ColorMap)
+        foreach (var pair in ColorMap)
             serializer.WriteTag(pair.Key.ToString(), pair.Value.Name);
     }
 

@@ -1,13 +1,7 @@
 ﻿using AtlasGenerator;
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace WarringStates;
 
@@ -16,10 +10,6 @@ using Type = Terrain.Type;
 internal class TerrainMap()
 {
     internal Size Size { get; set; }
-
-    internal int Width => Size.Width;
-
-    internal int Height => Size.Height;
 
     Dictionary<Coordinate, Type> TerrainPoints { get; set; } = [];
 

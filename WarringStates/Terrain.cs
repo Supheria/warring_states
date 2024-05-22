@@ -1,7 +1,6 @@
 ﻿using AtlasGenerator;
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace WarringStates;
 
@@ -20,6 +19,10 @@ public static class Terrain
     static TerrainMap TerrainMap { get; } = new();
 
     public static Bitmap? Overview { get; private set; }
+
+    public static int Width => TerrainMap.Size.Width;
+
+    public static int Height => TerrainMap.Size.Height;
 
     public static Type GetTerrain(this Coordinate coordinate)
     {
@@ -42,7 +45,7 @@ public static class Terrain
         if (TerrainMap is null)
             return;
         Overview?.Dispose();
-        Overview = new(TerrainMap.Width, TerrainMap.Height);
+        Overview = new(Width, Height);
         var pOverview = new PointBitmap(Overview);
         pOverview.LockBits();
         for (int i = 0; i < Overview.Width; i++)

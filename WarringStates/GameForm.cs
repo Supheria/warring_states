@@ -10,16 +10,24 @@ internal class GameForm : ResizeableForm
 
     GameDisplayer Displayer { get; } = new();
 
+    OverviewDisplayer Overview { get; } = new();
+
     protected override void InitializeComponent()
     {
         OnDrawingClient += DrawClient;
-        Controls.Add(Displayer);
+        Controls.AddRange([
+            Overview,
+            Displayer,
+            ]);
+        Controls.SetChildIndex(Overview, 0);
+        Controls.SetChildIndex(Displayer, 1);
     }
 
     private void DrawClient()
     {
-        if (Math.Min(ClientRectangle.Width, ClientRectangle.Height) <= 0)
+        if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        Displayer.Bounds = new(Left, Top, Width, Height);
+        Displayer.SetRange(ClientSize);
+        Overview.SetRange(ClientSize);
     }
 }
