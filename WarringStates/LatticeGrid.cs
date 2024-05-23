@@ -1,81 +1,99 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Windows.Forms;
 
 namespace WarringStates;
 
-public static class LatticeGrid
+public class LatticeGrid : IEventListener
 {
-    public static GridData GridData { get; set; } = new GridData().LoadFromSimpleScript();
+    public GridData GridData { get; set; } = new GridData().LoadFromSimpleScript();
 
-    static Rectangle DrawRect { get; set; }
+    Rectangle DrawRect { get; set; }
 
-    static Graphics? Graphics { get; set; }
+    Graphics? Graphics { get; set; }
 
-    static public int OriginX { get; set; }
+    public Coordinate Origin { get; set; } = new();
 
-    static public int OriginY { get; set; }
+    Rectangle LastDrawRect { get; set; } = new();
 
-    static Rectangle LastDrawRect { get; set; } = new();
+    Coordinate LastOrigin { get; set; } = new();
 
-    static Point LastOrigin { get; set; }
+    Dictionary<Coordinate, Color> LastCellColor { get; set; } = [];
 
-    static Dictionary<Coordinate, Color> LastCellColor { get; set; } = [];
+    Rectangle LastGuideLineRectHorizon { get; set; } = new();
 
-    static Rectangle LastGuideLineRectHorizon { get; set; } = new();
+    Rectangle LastGuideLineRectVertical { get; set; } = new();
 
-    static Rectangle LastGuideLineRectVertical { get; set; } = new();
+    Color BackColor { get; set; }
 
-    static Color BackColor { get; set; }
-
-    public static void DrawLatticeGrid(this Image image, Rectangle drawRect, Color backColor)
+    public LatticeGrid()
     {
-        Graphics = Graphics.FromImage(image);
-        DrawRect = drawRect;
-        BackColor = backColor;
+        EventManager.Instance.AddEvent(LocalEventId.ImageUpdate, this);
+    }
+
+    public void HandleEvent(int eventId, IEventArgument argument)
+    {
+        if (argument is not GridToUpdateEventArgument arg)
+            return;
+        if (eventId is LocalEventId.ImageUpdate)
+            DrawLatticeGrid(arg);
+    }
+
+    private void DrawLatticeGrid(GridToUpdateEventArgument arg)
+    {
+        var x = Origin.X + arg.OriginOffset.X;
+        var y = Origin.Y + arg.OriginOffset.Y;
+        var edgeLength = LatticeCell.CellData.EdgeLength;
+        var width = Terrain.Width * edgeLength;
+        x = x < 0 ? (x % width) + width : x % width;
+        var height = Terrain.Height * edgeLength;
+        y = y < 0 ? (y % height) + height : y % height;
+        Origin = new(x, y);
+        DrawRect = arg.DrawRect;
+        BackColor = arg.BackColor;
+        Graphics = Graphics.FromImage(arg.Source);
         DrawLatticeCells();
         DrawGuideLine();
         Graphics.Flush();
         Graphics.Dispose();
-        LastOrigin = new(OriginX, OriginY);
-        LastDrawRect = drawRect;
+        LastOrigin = Origin;
+        LastDrawRect = DrawRect;
+        EventManager.Instance.Dispatch(LocalEventId.GridUpdate, new GridUpdatedEventArgument(DrawRect, Origin));
     }
 
-    private static void DrawGuideLine()
+    private void DrawGuideLine()
     {
         var brush = new SolidBrush(GridData.GuideLineColor);
         var brushClear = new SolidBrush(BackColor);
-        var lineRectVertical = GetCrossLineRect(new(OriginX, DrawRect.Top), new(OriginX, DrawRect.Bottom), GridData.GuideLineWidth);
+        var lineRectVertical = GetCrossLineRect(new(Origin.X, DrawRect.Top), new(Origin.X, DrawRect.Bottom), GridData.GuideLineWidth);
+        Graphics?.FillRectangle(brush, lineRectVertical);
         if (lineRectVertical != LastGuideLineRectVertical)
         {
-            Graphics?.FillRectangle(brush, lineRectVertical);
             Graphics?.FillRectangle(brushClear, LastGuideLineRectVertical);
             LastGuideLineRectVertical = lineRectVertical;
         }
-        var lineRectHorizon = GetCrossLineRect(new(DrawRect.Left, OriginY), new(DrawRect.Right, OriginY), GridData.GuideLineWidth);
+        var lineRectHorizon = GetCrossLineRect(new(DrawRect.Left, Origin.Y), new(DrawRect.Right, Origin.Y), GridData.GuideLineWidth);
+        Graphics?.FillRectangle(brush, lineRectHorizon);
         if (lineRectHorizon != LastGuideLineRectHorizon)
         {
-            Graphics?.FillRectangle(brush, lineRectHorizon);
             Graphics?.FillRectangle(brushClear, LastGuideLineRectHorizon);
             LastGuideLineRectHorizon = lineRectHorizon;
         }
     }
 
-    /// <summary>
-    /// 绘制循环格元（格元左上角坐标与栅格坐标系中心偏移量近似投射在一个格元大小范围内）
-    /// </summary>
-    /// <param name="g"></param>
-    private static void DrawLatticeCells()
+    private void DrawLatticeCells()
     {
         var edgeLength = LatticeCell.CellData.EdgeLength;
-        var dX = DrawRect.X - OriginX;
-        var dY = DrawRect.Y - OriginY;
+        var dX = DrawRect.X - Origin.X;
+        var dY = DrawRect.Y - Origin.Y;
         var colOffset = dX / edgeLength - (dX < 0 ? 1 : 0);
         var rowOffset = dY / edgeLength - (dY < 0 ? 1 : 0);
         var colNumber = DrawRect.Width / edgeLength + (dX == 0 ? 0 : 2);
         var rowNumber = DrawRect.Height / edgeLength + (dY == 0 ? 0 : 2);
-        dX = OriginX - LastOrigin.X;
-        dY = OriginY - LastOrigin.Y;
+        dX = Origin.X - LastOrigin.X;
+        dY = Origin.Y - LastOrigin.Y;
         var cellBrush = new Dictionary<Color, SolidBrush>();
         if (DrawRect != LastDrawRect || DrawRect.Height > LastDrawRect.Height || dX % edgeLength != 0 || dY % edgeLength != 0)
         {
@@ -108,7 +126,7 @@ public static class LatticeGrid
         void drawCell(Coordinate point, Color color)
         {
             var cell = new LatticeCell(point);
-            if (cell.CenterRealRect().CutRectInRange(DrawRect, out var rect))
+            if (cell.CenterRealRect(this).CutRectInRange(DrawRect, out var rect))
             {
                 if (!cellBrush.TryGetValue(color, out SolidBrush? brush))
                     brush = cellBrush[color] = new SolidBrush(color);
@@ -117,7 +135,7 @@ public static class LatticeGrid
         }
     }
 
-    public static Rectangle GetCrossLineRect(Coordinate p1, Coordinate p2, double lineWidth)
+    public Rectangle GetCrossLineRect(Coordinate p1, Coordinate p2, double lineWidth)
     {
         Rectangle lineRect;
         if (p1.Y == p2.Y)

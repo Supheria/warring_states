@@ -1,5 +1,8 @@
 ﻿//#define MOUSE_DRAG_FREE
 
+using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.EventProcess;
+
 namespace WarringStates;
 
 partial class GameDisplayer
@@ -13,6 +16,8 @@ partial class GameDisplayer
 #else
     static int DragMoveSensibility => LatticeCell.CellData.EdgeLength;
 #endif
+
+    public OnComponentRunning? OnDragImage { get; set; }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)
     {
@@ -36,12 +41,12 @@ partial class GameDisplayer
                 LatticeGrid.OriginY += (args.Location.Y - DragStartPoint.Y) * DragMoveSensibility;
 #else
                 dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
-                LatticeGrid.OriginX += dX * DragMoveSensibility;
+                dX *= DragMoveSensibility;
                 dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
-                LatticeGrid.OriginY += dY * DragMoveSensibility;
+                dY *= DragMoveSensibility;
 #endif
+                Relocate(dX, dY);
                 DragStartPoint = args.Location;
-                Relocate();
             }
         }
     }

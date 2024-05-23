@@ -2,7 +2,7 @@
 
 namespace WarringStates;
 
-internal class GameForm : ResizeableForm
+public class GameForm : ResizeableForm
 {
     public override string LocalName { get; set; } = nameof(GameForm);
 
@@ -11,6 +11,8 @@ internal class GameForm : ResizeableForm
     GameDisplayer Displayer { get; } = new();
 
     OverviewDisplayer Overview { get; } = new();
+
+    LatticeGrid Grid { get; } = new();
 
     protected override void InitializeComponent()
     {
@@ -27,7 +29,7 @@ internal class GameForm : ResizeableForm
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        Displayer.SetRange(ClientSize);
         Overview.SetRange(ClientSize);
+        Displayer.SetRange(ClientSize);
     }
 }

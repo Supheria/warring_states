@@ -15,26 +15,23 @@ public sealed class LatticeCell
         return (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
     }
 
-    public Rectangle RealRect()
+    public Rectangle RealRect(LatticeGrid grid)
     {
         return new(
-        CellData.EdgeLength * LatticedPoint.X + LatticeGrid.OriginX,
-        CellData.EdgeLength * LatticedPoint.Y + LatticeGrid.OriginY,
+        CellData.EdgeLength * LatticedPoint.X + grid.Origin.X,
+        CellData.EdgeLength * LatticedPoint.Y + grid.Origin.Y,
         CellData.EdgeLength, CellData.EdgeLength
         );
     }
 
-    public Rectangle CenterRealRect()
+    public Rectangle CenterRealRect(LatticeGrid grid)
     {
-        var cellRect = RealRect();
+        var cellRect = RealRect(grid);
         var nodePadding = CenterPadding();
         return new(
             cellRect.Left + nodePadding, cellRect.Top + nodePadding,
             cellRect.Width - nodePadding * 2, cellRect.Height - nodePadding * 2);
     }
-    /// <summary>
-    /// 格元栅格化坐标
-    /// </summary>
 
     public LatticeCell() : this(new Coordinate())
     {
@@ -49,10 +46,10 @@ public sealed class LatticeCell
     /// 使用真实坐标创建格元
     /// </summary>
     /// <param name="realPoint"></param>
-    public LatticeCell(Point realPoint)
+    public LatticeCell(Point realPoint, LatticeGrid grid)
     {
-        var widthDiff = realPoint.X - LatticeGrid.OriginX;
-        var heightDiff = realPoint.Y - LatticeGrid.OriginY;
+        var widthDiff = realPoint.X - grid.Origin.X;
+        var heightDiff = realPoint.Y - grid.Origin.Y;
         var col = widthDiff / CellData.EdgeLength;
         var raw = heightDiff / CellData.EdgeLength;
         if (widthDiff < 0) { col--; }
@@ -65,11 +62,11 @@ public sealed class LatticeCell
     /// </summary>
     /// <param name="part"></param>
     /// <returns></returns>
-    public Rectangle CellPartsRealRect(Direction part)
+    public Rectangle CellPartsRealRect(Direction part, LatticeGrid grid)
     {
-        var cellRect = RealRect();
+        var cellRect = RealRect(grid);
         var centerPadding = CenterPadding();
-        var centerRect = CenterRealRect();
+        var centerRect = CenterRealRect(grid);
         return part switch
         {
             Direction.Center => centerRect,
@@ -89,25 +86,25 @@ public sealed class LatticeCell
     /// </summary>
     /// <param name="point">坐标</param>
     /// <returns></returns>
-    public Direction PointOnCellPart(Point point)
+    public Direction PointOnCellPart(Point point, LatticeGrid grid)
     {
-        if (CellPartsRealRect(Direction.Center).Contains(point))
+        if (CellPartsRealRect(Direction.Center, grid).Contains(point))
             return Direction.Center;
-        if (CellPartsRealRect(Direction.Left).Contains(point))
+        if (CellPartsRealRect(Direction.Left, grid).Contains(point))
             return Direction.Left;
-        if (CellPartsRealRect(Direction.Top).Contains(point))
+        if (CellPartsRealRect(Direction.Top, grid).Contains(point))
             return Direction.Top;
-        if (CellPartsRealRect(Direction.Right).Contains(point))
+        if (CellPartsRealRect(Direction.Right, grid).Contains(point))
             return Direction.Right;
-        if (CellPartsRealRect(Direction.Bottom).Contains(point))
+        if (CellPartsRealRect(Direction.Bottom, grid).Contains(point))
             return Direction.Bottom;
-        if (CellPartsRealRect(Direction.LeftTop).Contains(point))
+        if (CellPartsRealRect(Direction.LeftTop, grid).Contains(point))
             return Direction.LeftTop;
-        if (CellPartsRealRect(Direction.TopRight).Contains(point))
+        if (CellPartsRealRect(Direction.TopRight, grid).Contains(point))
             return Direction.TopRight;
-        if (CellPartsRealRect(Direction.BottomRight).Contains(point))
+        if (CellPartsRealRect(Direction.BottomRight, grid).Contains(point))
             return Direction.BottomRight;
-        if (CellPartsRealRect(Direction.LeftBottom).Contains(point))
+        if (CellPartsRealRect(Direction.LeftBottom, grid).Contains(point))
             return Direction.LeftBottom;
         return Direction.None;
     }
