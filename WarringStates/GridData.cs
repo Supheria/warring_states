@@ -8,6 +8,8 @@ public class GridData : ISsSerializable
 
     public Color BorderColor { get; set; } = Color.LightGray;
 
+    public SolidBrush BorderBrush { get; set; } = new SolidBrush(Color.LightGray);
+
     /// <summary>
     /// 格元边框绘制用笔
     /// </summary>
