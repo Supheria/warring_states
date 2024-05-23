@@ -8,7 +8,7 @@ public sealed class LatticeCell
 {
     public static CellData CellData { get; set; } = new CellData().LoadFromSimpleScript();
 
-    public LatticePoint LatticedPoint { get; set; }
+    public Coordinate LatticedPoint { get; set; }
 
     public static int CenterPadding()
     {
@@ -18,8 +18,8 @@ public sealed class LatticeCell
     public Rectangle RealRect()
     {
         return new(
-        CellData.EdgeLength * LatticedPoint.Col + LatticeGrid.OriginX,
-        CellData.EdgeLength * LatticedPoint.Row + LatticeGrid.OriginY,
+        CellData.EdgeLength * LatticedPoint.X + LatticeGrid.OriginX,
+        CellData.EdgeLength * LatticedPoint.Y + LatticeGrid.OriginY,
         CellData.EdgeLength, CellData.EdgeLength
         );
     }
@@ -36,12 +36,12 @@ public sealed class LatticeCell
     /// 格元栅格化坐标
     /// </summary>
 
-    public LatticeCell() : this(new LatticePoint())
+    public LatticeCell() : this(new Coordinate())
     {
 
     }
 
-    public LatticeCell(LatticePoint latticedPoint)
+    public LatticeCell(Coordinate latticedPoint)
     {
         LatticedPoint = latticedPoint;
     }
