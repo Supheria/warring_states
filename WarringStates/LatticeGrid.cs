@@ -1,8 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Diagnostics;
 
 namespace WarringStates;
 
@@ -12,34 +10,57 @@ public static class LatticeGrid
 
     static Rectangle DrawRect { get; set; }
 
-    static Image? ImageSource { get; set; } = null;
+    static Graphics? Graphics { get; set; }
 
-    public static int OriginX { get; set; }
+    static public int OriginX { get; set; }
 
-    public static int OriginY { get; set; }
+    static public int OriginY { get; set; }
+
+    static Rectangle LastDrawRect { get; set; } = new();
 
     static Point LastOrigin { get; set; }
 
-    public static void DrawLatticeGrid(this Image image, Rectangle drawRect)
+    static Dictionary<Coordinate, Color> LastCellColor { get; set; } = [];
+
+    static Rectangle LastGuideLineRectHorizon { get; set; } = new();
+
+    static Rectangle LastGuideLineRectVertical { get; set; } = new();
+
+    static Color BackColor { get; set; }
+
+    public static void DrawLatticeGrid(this Image image, Rectangle drawRect, Color backColor)
     {
-        ImageSource = image;
+        Graphics = Graphics.FromImage(image);
         DrawRect = drawRect;
+        BackColor = backColor;
         DrawLatticeCells();
-        //
-        // draw guide line
-        //
-        var g = Graphics.FromImage(ImageSource);
-        g.DrawLine(GridData.GuidePen, new(OriginX, DrawRect.Top), new(OriginX, DrawRect.Bottom));
-        g.DrawLine(GridData.GuidePen, new(DrawRect.Left, OriginY), new(DrawRect.Right, OriginY));
-        g.Flush(); 
-        g.Dispose();
+        DrawGuideLine();
+        Graphics.Flush();
+        Graphics.Dispose();
         LastOrigin = new(OriginX, OriginY);
+        LastDrawRect = drawRect;
     }
 
-    static TerrainSettingForm testForm = new()
+    private static void DrawGuideLine()
     {
-        TopMost = true,
-    };
+        var brush = new SolidBrush(GridData.GuideLineColor);
+        var brushClear = new SolidBrush(BackColor);
+        var lineRectVertical = GetCrossLineRect(new(OriginX, DrawRect.Top), new(OriginX, DrawRect.Bottom), GridData.GuideLineWidth);
+        if (lineRectVertical != LastGuideLineRectVertical)
+        {
+            Graphics?.FillRectangle(brush, lineRectVertical);
+            Graphics?.FillRectangle(brushClear, LastGuideLineRectVertical);
+            LastGuideLineRectVertical = lineRectVertical;
+        }
+        var lineRectHorizon = GetCrossLineRect(new(DrawRect.Left, OriginY), new(DrawRect.Right, OriginY), GridData.GuideLineWidth);
+        if (lineRectHorizon != LastGuideLineRectHorizon)
+        {
+            Graphics?.FillRectangle(brush, lineRectHorizon);
+            Graphics?.FillRectangle(brushClear, LastGuideLineRectHorizon);
+            LastGuideLineRectHorizon = lineRectHorizon;
+        }
+    }
+
     /// <summary>
     /// 绘制循环格元（格元左上角坐标与栅格坐标系中心偏移量近似投射在一个格元大小范围内）
     /// </summary>
@@ -53,111 +74,46 @@ public static class LatticeGrid
         var rowOffset = dY / edgeLength - (dY < 0 ? 1 : 0);
         var colNumber = DrawRect.Width / edgeLength + (dX == 0 ? 0 : 2);
         var rowNumber = DrawRect.Height / edgeLength + (dY == 0 ? 0 : 2);
-        var pSource = new PointBitmap((Bitmap)ImageSource!);
-        var stop = new Stopwatch();
-        testForm.Show();
-        stop.Start();
-        pSource.LockBits();
-        for (var i = 0; i < colNumber; i++)
+        dX = OriginX - LastOrigin.X;
+        dY = OriginY - LastOrigin.Y;
+        var cellBrush = new Dictionary<Color, SolidBrush>();
+        if (DrawRect != LastDrawRect || DrawRect.Height > LastDrawRect.Height || dX % edgeLength != 0 || dY % edgeLength != 0)
         {
-            for (var j = 0; j < rowNumber; j++)
+            Graphics?.Clear(BackColor);
+            for (var i = 0; i < colNumber; i++)
             {
-                DrawCell(new(colOffset + i, rowOffset + j), pSource);
-            }
-        }
-        pSource.UnlockBits();
-        stop.Stop();
-        testForm.Text = ($"PointBitmap: {stop.ElapsedMilliseconds} ");
-        stop.Restart();
-        stop.Start();
-        var g = Graphics.FromImage(ImageSource!);
-        for (var i = 0; i < colNumber; i++)
-        {
-            for (var j = 0; j < rowNumber; j++)
-            {
-                DrawCell(new(colOffset + i, rowOffset + j), g);
-            }
-        }
-
-        g.Flush();
-        g.Dispose();
-        stop.Stop();
-        testForm.Text += ($"Graphics: {stop.ElapsedMilliseconds}");
-    }
-
-    private static void DrawCell(LatticePoint point, Graphics g)
-    {
-        var color = point
-            .ToCoordinateInTerrainMap()
-            .GetTerrain()
-            .GetColor();
-        var cell = new LatticeCell(point);
-        var cellRect = cell.RealRect();
-        //var g = Graphics.FromImage(source);
-        //
-        // draw border
-        //
-        var lineRect = GetCrossLineRect(new(cellRect.Left, cellRect.Bottom), new(cellRect.Right, cellRect.Bottom), GridData.BorderWidth);
-        g.FillRectangle(GridData.BorderBrush, lineRect);
-        lineRect = GetCrossLineRect(new(cellRect.Left, cellRect.Top), new(cellRect.Left, cellRect.Bottom), GridData.BorderWidth);
-        g.FillRectangle(GridData.BorderBrush, lineRect);
-
-        if (cell.CenterRealRect().CutRectInRange(DrawRect, out var orect))
-            g.FillRectangle(new SolidBrush(color), orect.Value);
-    }
-
-    private static void DrawCell(LatticePoint point, PointBitmap pSource)
-    {
-        var color = point
-            .ToCoordinateInTerrainMap()
-            .GetTerrain()
-            .GetColor();
-        var cell = new LatticeCell(point);
-        var cellRect = cell.RealRect();
-        //var g = Graphics.FromImage(source);
-        //
-        // draw border
-        //
-        var lineRect = GetCrossLineRect(new(cellRect.Left, cellRect.Bottom), new(cellRect.Right, cellRect.Bottom), GridData.BorderWidth);
-        for (var i = lineRect.Left; i < lineRect.Right; i++)
-        {
-            for (var j = lineRect.Top; j < lineRect.Bottom; j++)
-            {
-                pSource.SetPixel(i, j, GridData.BorderColor);
-            }
-        }
-        lineRect = GetCrossLineRect(new(cellRect.Left, cellRect.Top), new(cellRect.Left, cellRect.Bottom), GridData.BorderWidth);
-        for (var i = lineRect.Left; i < lineRect.Right; i++)
-        {
-            for (var j = lineRect.Top; j < lineRect.Bottom; j++)
-            {
-                pSource.SetPixel(i, j, GridData.BorderColor);
-            }
-        }
-        if (cell.CenterRealRect().CutRectInRange(DrawRect, out var orect))
-        {
-            var rect = orect.Value;
-            for (var i = rect.Left; i < rect.Right; i++)
-            {
-                for (var j = rect.Top; j < rect.Bottom; j++)
+                for (var j = 0; j < rowNumber; j++)
                 {
-                    pSource.SetPixel(i, j, color);
+                    var point = new Coordinate(colOffset + i, rowOffset + j);
+                    var color = point.ToCoordinateWithinTerrainMap().GetTerrain().GetColor();
+                    drawCell(point, color);
                 }
             }
+            return;
         }
-
-        //
-        // draw center
-        //
-        //var saveAll = RectWithin(cell.CenterRealRect(), out var saveRect);
-        //if (saveRect is not null)
-        //    g.FillRectangle(new SolidBrush(color), saveRect.Value);
+        dX /= edgeLength;
+        dY /= edgeLength;
+        for (var i = 0; i < colNumber; i++)
         {
-            //if (saveAll)
-            //    Graphics.DrawRectangle(GridData.NodePenLine, saveRect.Value);
-            //else
-            //    Graphics.DrawRectangle(GridData.NodePenDash, saveRect.Value);
-
+            for (var j = 0; j < rowNumber; j++)
+            {
+                var point = new Coordinate(colOffset + i, rowOffset + j);
+                var color = point.ToCoordinateWithinTerrainMap().GetTerrain().GetColor();
+                var lastPoint = new Coordinate(point.X + dX, point.Y + dY);
+                if (!LastCellColor.TryGetValue(lastPoint, out var lastColor) || color != lastColor)
+                    drawCell(point, color);
+                LastCellColor[point] = color;
+            }
+        }
+        void drawCell(Coordinate point, Color color)
+        {
+            var cell = new LatticeCell(point);
+            if (cell.CenterRealRect().CutRectInRange(DrawRect, out var rect))
+            {
+                if (!cellBrush.TryGetValue(color, out SolidBrush? brush))
+                    brush = cellBrush[color] = new SolidBrush(color);
+                Graphics?.FillRectangle(brush, rect.Value);
+            }
         }
     }
 

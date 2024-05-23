@@ -54,12 +54,12 @@ public static class Terrain
         pOverview.UnlockBits();
     }
 
-    public static Coordinate ToCoordinateInTerrainMap(this LatticePoint point)
+    public static Coordinate ToCoordinateWithinTerrainMap(this Coordinate point)
     {
         if (Width is 0 || Height is 0)
             return new();
-        var modX = point.Col % Width;
-        var modY = point.Row % Height;
+        var modX = point.X % Width;
+        var modY = point.Y % Height;
         var x = modX < 0 ? Width + modX : modX;
         var y = modY < 0 ? Height + modY : modY;
         return new(x, y);

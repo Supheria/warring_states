@@ -4,11 +4,12 @@ namespace WarringStates;
 
 public class GridData : ISsSerializable
 {
-    public double BorderWidth { get; set; } = 3.33;
-
-    public Color BorderColor { get; set; } = Color.LightGray;
-
     public SolidBrush BorderBrush { get; set; } = new SolidBrush(Color.LightGray);
+
+    public double GuideLineWidth { get; set; } = 1.75;
+
+    public Color GuideLineColor { get; set; } = Color.Red;
+
 
     /// <summary>
     /// 格元边框绘制用笔

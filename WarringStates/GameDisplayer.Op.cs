@@ -1,7 +1,5 @@
 ﻿//#define MOUSE_DRAG_FREE
 
-using LocalUtilities.TypeGeneral;
-
 namespace WarringStates;
 
 partial class GameDisplayer
@@ -29,16 +27,18 @@ partial class GameDisplayer
     {
         if (DoDragGraph)
         {
-            var dWidth = args.Location.X - DragStartPoint.X;
-            var dHeight = args.Location.Y - DragStartPoint.Y;
-            if (Math.Abs(dWidth) > DragMoveSensibility || Math.Abs(dHeight) > DragMoveSensibility)
+            var dX = args.Location.X - DragStartPoint.X;
+            var dY = args.Location.Y - DragStartPoint.Y;
+            if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
             {
 #if MOUSE_DRAG_FREE
                 LatticeGrid.OriginX += (args.Location.X - DragStartPoint.X) * DragMoveSensibility;
                 LatticeGrid.OriginY += (args.Location.Y - DragStartPoint.Y) * DragMoveSensibility;
 #else
-                LatticeGrid.OriginX += (args.Location.X - DragStartPoint.X) / DragMoveSensibility * LatticeCell.CellData.EdgeLength;
-                LatticeGrid.OriginY += (args.Location.Y - DragStartPoint.Y) / DragMoveSensibility * LatticeCell.CellData.EdgeLength;
+                dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
+                LatticeGrid.OriginX += dX * DragMoveSensibility;
+                dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
+                LatticeGrid.OriginY += dY * DragMoveSensibility;
 #endif
                 DragStartPoint = args.Location;
                 Relocate();
