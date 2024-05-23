@@ -1,7 +1,7 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using static System.Windows.Forms.AxHost;
 
 namespace WarringStates;
 
@@ -11,7 +11,7 @@ public static class LatticeGrid
 
     static Rectangle DrawRect { get; set; }
 
-    static Graphics? Graphics { get; set; } = null;
+    static Image? ImageSource { get; set; } = null;
 
     public static int OriginX { get; set; }
 
@@ -22,15 +22,16 @@ public static class LatticeGrid
     public static void DrawLatticeGrid(this Image image, Rectangle drawRect)
     {
         DrawRect = drawRect;
-        Graphics = Graphics.FromImage(image);
+        ImageSource = image;
         DrawLatticeCells();
         //
         // draw guide line
         //
-        Graphics.DrawLine(GridData.GuidePen, new(OriginX, DrawRect.Top), new(OriginX, DrawRect.Bottom));
-        Graphics.DrawLine(GridData.GuidePen, new(DrawRect.Left, OriginY), new(DrawRect.Right, OriginY));
-        Graphics.Flush(); 
-        Graphics.Dispose();
+        var g = Graphics.FromImage(ImageSource);
+        g.DrawLine(GridData.GuidePen, new(OriginX, DrawRect.Top), new(OriginX, DrawRect.Bottom));
+        g.DrawLine(GridData.GuidePen, new(DrawRect.Left, OriginY), new(DrawRect.Right, OriginY));
+        g.Flush(); 
+        g.Dispose();
         LastOrigin = new(OriginX, OriginY);
     }
 
@@ -40,47 +41,94 @@ public static class LatticeGrid
     /// <param name="g"></param>
     private static void DrawLatticeCells()
     {
-        var cell = new LatticeCell();
-        var cellRect = cell.RealRect();
+        var edgeLength = LatticeCell.CellData.EdgeLength;
         var dX = DrawRect.X - OriginX;
         var dY = DrawRect.Y - OriginY;
-        var colOffset = dX / cellRect.Width - (dX < 0 ? 1 : 0);
-        var rowOffset = dY / cellRect.Height - (dY < 0 ? 1 : 0);
-        cell.LatticedPoint.Col = colOffset;
-        cell.LatticedPoint.Row = rowOffset;
-        var colNumber = DrawRect.Width / cellRect.Width + (dX == 0 ? 0 : 2);
-        var rowNumber = DrawRect.Height / cellRect.Height + (dY == 0 ? 0 : 2);
-        for (var i = 0; i < colNumber; i++)
+        var colOffset = dX / edgeLength - (dX < 0 ? 1 : 0);
+        var rowOffset = dY / edgeLength - (dY < 0 ? 1 : 0);
+        //for (var i = 0; i < colNumber; i++)
+        //{
+        //    for (var j = 0; j < rowNumber; j++)
+        //    {
+        //        DrawCell(new(new LatticePoint(colOffset + i, rowOffset + j)));
+        //    }
+        //}
+        var imageParts = new Image[Environment.ProcessorCount];
+        var widthSegment = ImageSource!.Width / imageParts.Length;
+        widthSegment -= widthSegment % edgeLength;
+        var widthSum = 0;
+        for (int i = 0; i < imageParts.Length - 1; i++)
         {
-            cell.LatticedPoint.Row = rowOffset;
-            for (var j = 0; j < rowNumber; j++)
+            widthSum += widthSegment;
+            imageParts[i] = new Bitmap(widthSegment, ImageSource.Height);
+        }
+        imageParts[imageParts.Length - 1] = new Bitmap(ImageSource.Width - widthSum, ImageSource.Height);
+        //for (int i = 0; i < imageParts.Length; i++)
+        Parallel.For(0, imageParts.Length, i =>
+        {
+            var image = imageParts[i];
+            int xOffset = widthSegment * i;
+            var startCol = xOffset / edgeLength + colOffset;
+            var pSource = new PointBitmap((Bitmap)image);
+            var colNumber = image.Width / edgeLength + (dX == 0 ? 0 : 2);
+            var rowNumber = image.Height / edgeLength + (dY == 0 ? 0 : 2);
+            pSource.LockBits();
+            for (var col = 0; col < colNumber; col++)
             {
-                DrawCell(cell);
-                cell.LatticedPoint.Row++;
+                for (var row = 0; row < rowNumber; row++)
+                {
+                    var color = new LatticePoint(startCol + col, rowOffset + row)
+                        .ToCoordinateInTerrainMap()
+                        .GetTerrain()
+                        .GetColor();
+                    var cell = new LatticeCell(new LatticePoint(colOffset + col, rowOffset + row));
+                    DrawCell(cell, pSource, color);
+                }
             }
-            cell.LatticedPoint.Col++;
+            pSource.UnlockBits();
+            //image.Save($@"test\{i}.bmp");
+        });
+        for (var i = 0; i < imageParts.Length; i++)
+        {
+            var image = (Bitmap)imageParts[i];
+            image.TemplateDrawIntoRect((Bitmap)ImageSource, new(new(widthSegment * i, 0), image.Size), true);
+            image.Dispose();
         }
     }
 
-    private static void DrawCell(LatticeCell cell)
+    private static void DrawCell(LatticeCell cell, PointBitmap pSource, Color color)
     {
         var coordinate = cell.LatticedPoint.ToCoordinateInTerrainMap();
         var terrain = coordinate.GetTerrain();
-        var color = terrain.GetColor();
+        //var color = terrain.GetColor();
         var cellRect = cell.RealRect();
+        var bounds = new Rectangle(new(0, 0), pSource.Size);
+        //var g = Graphics.FromImage(source);
         //
         // draw border
         //
-        if (CrossLineWithin(new(cellRect.Left, cellRect.Bottom), new(cellRect.Right, cellRect.Bottom), GridData.CellPen.Width, out var p1, out var p2)) 
-            Graphics?.DrawLine(GridData.CellPen, p1, p2);
-        if (CrossLineWithin(new(cellRect.Right, cellRect.Top), new(cellRect.Right, cellRect.Bottom), GridData.CellPen.Width, out p1, out p2)) 
-            Graphics?.DrawLine(GridData.CellPen, p1, p2);
+        var lineRect = GetCrossLineRect(bounds, new(cellRect.Left, cellRect.Bottom), new(cellRect.Right, cellRect.Bottom), GridData.BorderWidth);
+        for (var i = lineRect.Left; i < lineRect.Right; i++)
+        {
+            for (var j = lineRect.Top; j < lineRect.Bottom; j++)
+            {
+                pSource.SetPixel(i, j, GridData.BorderColor);
+            }
+        }
+        lineRect = GetCrossLineRect(bounds, new(cellRect.Right, cellRect.Top), new(cellRect.Right, cellRect.Bottom), GridData.BorderWidth);
+        for (var i = lineRect.Left; i < lineRect.Right; i++)
+        {
+            for (var j = lineRect.Top; j < lineRect.Bottom; j++)
+            {
+                pSource.SetPixel(i, j, GridData.BorderColor);
+            }
+        }
         //
         // draw center
         //
-        var saveAll = RectWithin(cell.CenterRealRect(), out var saveRect);
-        if (saveRect is not null)
-            Graphics?.FillRectangle(new SolidBrush(color), saveRect.Value);
+        //var saveAll = RectWithin(cell.CenterRealRect(), out var saveRect);
+        //if (saveRect is not null)
+        //    g.FillRectangle(new SolidBrush(color), saveRect.Value);
         {
             //if (saveAll)
             //    Graphics.DrawRectangle(GridData.NodePenLine, saveRect.Value);
@@ -88,105 +136,25 @@ public static class LatticeGrid
             //    Graphics.DrawRectangle(GridData.NodePenDash, saveRect.Value);
 
         }
-
     }
 
-    /// <summary>
-    /// 获取给定的矩形在栅格绘图区域内的矩形
-    /// </summary>
-    /// <param name="rect"></param>
-    /// <param name="saveRect"></param>
-    /// <returns>完全在绘图区域内返回true，否则返回false</returns>
-    public static bool RectWithin(Rectangle rect, out Rectangle? saveRect)
+    public static Rectangle GetCrossLineRect(Rectangle bounds, Coordinate p1, Coordinate p2, double lineWidth)
     {
-        saveRect = null;
-        bool saveAll = true;
-        var left = rect.Left;
-        var right = rect.Right;
-        var top = rect.Top;
-        var bottom = rect.Bottom;
-        if (left < DrawRect.Left)
+        Rectangle lineRect;
+        if (p1.Y == p2.Y)
         {
-            saveAll = false;
-            if (right <= DrawRect.Left)
-                return false;
-            left = DrawRect.Left;
+            var y = p1.Y - lineWidth / 2;
+            var xMin = Math.Min(p1.X, p2.X);
+            lineRect = new(xMin, (int)y, Math.Abs(p1.X - p2.X), (int)lineWidth);
         }
-        if (right > DrawRect.Right)
-        {
-            saveAll = false;
-            if (left >= DrawRect.Right)
-                return false;
-            right = DrawRect.Right;
-        }
-        if (top < DrawRect.Top)
-        {
-            saveAll = false;
-            if (bottom <= DrawRect.Top)
-                return false;
-            top = DrawRect.Top;
-        }
-        if (bottom > DrawRect.Bottom)
-        {
-            saveAll = false;
-            if (top >= DrawRect.Bottom)
-                return false;
-            bottom = DrawRect.Bottom;
-        }
-        saveRect = new(left, top, right - left, bottom - top);
-        return saveAll;
-    }
-
-    /// <summary>
-    /// 获取给定横纵直线在栅格绘图区域内的矩形
-    /// </summary>
-    /// <param name="p1">直线的端点</param>
-    /// <param name="p2">直线的另一端点</param>
-    /// <param name="lineWidth">直线的宽度</param>
-    /// <param name="endMin"></param>
-    /// <param name="endMax"></param>
-    /// <returns></returns>
-    public static bool CrossLineWithin(PointF p1, PointF p2, float lineWidth, out PointF endMin, out PointF endMax)
-    {
-        endMin = endMax = PointF.Empty;
-        //
-        // horizontal line
-        //
-        if (DoubleEx.ApproxEqualTo(p1.Y, p2.Y))
-        {
-            if (!CrossLineWithin(lineWidth / 2, p1.Y, DrawRect.Top, DrawRect.Bottom, (p1.X, p2.X), DrawRect.Left, DrawRect.Right, out var xMin, out var xMax))
-                return false;
-            endMin = new((float)xMin, p1.Y);
-            endMax = new((float)xMax, p1.Y);
-        }
-        //
-        // vetical line
-        //
         else
         {
-            if (!CrossLineWithin(lineWidth / 2, p1.X, DrawRect.Left, DrawRect.Right, (p1.Y, p2.Y), DrawRect.Top, DrawRect.Bottom, out var yMin, out var yMax)) 
-                return false;
-            endMin = new(p1.X, (float)yMin);
-            endMax = new(p1.X, (float)yMax);
+            var x = p1.X - lineWidth / 2;
+            var yMin = Math.Min(p1.Y, p2.Y);
+            lineRect = new((int)x, yMin, (int)lineWidth, Math.Abs(p1.Y - p2.Y));
         }
-        return true;
-    }
-
-    private static bool CrossLineWithin(double halfLineWidth, double theSame, double theSameLimitMin, double theSameLimitMax, (double, double) ends, double endLimitMin, double endLimitMax, out double endMin, out double endMax)
-    {
-        endMin = endMax = 0;
-        if (ends.Item1.ApproxEqualTo(ends.Item2) ||
-            theSame.ApproxLessThan(theSameLimitMin) ||
-            theSame.ApproxGreaterThan(theSameLimitMax))
-            return false;
-        endMin = Math.Min(ends.Item1, ends.Item2) - halfLineWidth;
-        endMax = Math.Max(ends.Item1, ends.Item2) + halfLineWidth;
-        if (endMin.ApproxGreaterThanOrEqualTo(endLimitMax))
-            return false;
-        if (endMax.ApproxLessThanOrEqualTo(endLimitMin))
-            return false;
-        endMin = endMin.ApproxLessThan(endLimitMin) ? endLimitMin : endMin;
-        endMax = endMax.ApproxGreaterThan(endLimitMax) ? endLimitMax : endMax;
-        return true;
+        if (lineRect.CutRectInRange(bounds, out var result))
+            return result.Value;
+        return new();
     }
 }

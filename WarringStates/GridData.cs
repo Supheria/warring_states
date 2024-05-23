@@ -4,6 +4,10 @@ namespace WarringStates;
 
 public class GridData : ISsSerializable
 {
+    public double BorderWidth { get; set; } = 3.33;
+
+    public Color BorderColor { get; set; } = Color.LightGray;
+
     /// <summary>
     /// 格元边框绘制用笔
     /// </summary>
