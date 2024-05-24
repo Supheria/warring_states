@@ -21,8 +21,8 @@ namespace WarringStates
             //var data = new AtlasData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Type.Horizontal, 2.25, 100000, 0.66f);
             //var data = new AtlasData(new(1000, 1000), new(8, 8), new(8, 8), RiverLayout.Type.ForwardSlash, 7, 650000, 0.75f);
             //var file = "shit_1000.ss";
-            var file = "shit_500_300.ss";
-            //var file = "shit_300.ss";
+            //var file = "shit_500_300.ss";
+            var file = "shit_300.ss";
 #if gen
 
             var atlas = new Atlas(data);
@@ -34,6 +34,7 @@ namespace WarringStates
             atlas.SetTerrainMap();
 
             Application.Run(new GameForm());
+            new TestForm() { TopMost = true }.Show();
         }
     }
 }

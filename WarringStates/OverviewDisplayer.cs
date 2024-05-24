@@ -41,7 +41,7 @@ public class OverviewDisplayer : Displayer, IEventListener
     protected override void Relocate()
     {
         //Image = Terrain.Overview?.CopyToNewSize(Size);
-        Invalidate();
+        //Invalidate();
     }
 
     private void Relocate(GridUpdatedEventArgument arg)
@@ -49,16 +49,26 @@ public class OverviewDisplayer : Displayer, IEventListener
         //Relocate();
         Image = Terrain.Overview?.CopyToNewSize(Size);
         var edgeLength = LatticeCell.CellData.EdgeLength;
-        var width = arg.DrawRect.Width / edgeLength;
-        var height = arg.DrawRect.Height / edgeLength;
         var widthRatio = Terrain.Width / (double)Width;
         var heightRatio = Terrain.Height / (double)Height;
-        width = (int)(width * widthRatio);
-        height = (int)(height * heightRatio);
-        var x = width / (double)arg.DrawRect.Width * arg.DrawRect.X;
-        var y = height / (double)arg.DrawRect.Height * arg.DrawRect.Y;
+        var width = arg.DrawRect.Width / edgeLength;
+        var height = arg.DrawRect.Height / edgeLength;
+        var x = Terrain.Width - arg.Origin.X / (double)edgeLength/* - width / 2*/;
+        var y = Terrain.Height - arg.Origin.Y / (double)edgeLength/* - height / 2*/;
+        var rect = new Rectangle((x / widthRatio).ToInt(), (y / heightRatio).ToInt(), (width / widthRatio).ToInt(), (height / heightRatio).ToInt());
         var g = Graphics.FromImage(Image);
-        g.DrawRectangle(Pens.Red, new((int)x, (int)y, width, height));
+        var testInfo = $"{arg.Origin / edgeLength} => {Math.Round(x, 0)},{Math.Round(y, 0)}";
+        EventManager.Instance.Dispatch(LocalEventId.TestInfo, new TestForm.TestInfo("origin", testInfo));
+        testInfo = $"{Width},{Height}";
+        EventManager.Instance.Dispatch(LocalEventId.TestInfo, new TestForm.TestInfo("size", testInfo));
+        EventManager.Instance.Dispatch(LocalEventId.TestInfo, new TestForm.TestInfo("col row", $"{width},{height}"));
+        EventManager.Instance.Dispatch(LocalEventId.TestInfo, new TestForm.TestInfo("rect", rect.ToString()));
+        //var edges = rect.CutRectLoopEdgesInRange(new(new(0, 0), Size));
+        //foreach (var edge in edges)
+        //    g.DrawLine(Pens.Red, edge.Starter, edge.Ender);
+        //g.DrawRectangle(Pens.Red, rect);
+        var rects = rect.CutRectLoopRectsInRange(new(new(0, 0), Size));
+        rects.ForEach(r => g.DrawRectangle(Pens.Red, r));
         g.Flush();
         g.Dispose();
         Invalidate();

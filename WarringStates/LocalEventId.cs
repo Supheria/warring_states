@@ -8,6 +8,7 @@ namespace WarringStates;
 
 internal class LocalEventId
 {
+    public const int TestInfo = -1;
     //public const int InitializeImage = 1000;
     public const int ImageUpdate = 1000;
     public const int GridUpdate = 1001;
