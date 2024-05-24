@@ -3,7 +3,7 @@ using LocalUtilities.TypeToolKit.EventProcess;
 
 namespace WarringStates;
 
-public partial class GameDisplayer : Displayer
+public partial class GameDisplayer : Displayer, IEventListener
 {
     double GridPaddingFactor { get; set; } = 0.02;
 
@@ -11,10 +11,24 @@ public partial class GameDisplayer : Displayer
 
     public GameDisplayer()
     {
-        OnRelocate += Relocate;
         MouseDown += OnMouseDown;
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
+    }
+    public void EnableListener()
+    {
+        EventManager.Instance.AddEvent(LocalEventId.GameFormUpdate, this);
+    }
+
+    public void HandleEvent(int eventId, IEventArgument argument)
+    {
+        if (eventId is LocalEventId.GameFormUpdate)
+        {
+            if (argument is not GameFormUpdateEventArgument arg)
+                return;
+            Size = arg.ClientSize;
+            Relocate(0, 0);
+        }
     }
 
     private Rectangle GetGridRect()
@@ -23,19 +37,9 @@ public partial class GameDisplayer : Displayer
         return new Rectangle(padding.Width, padding.Height, Width - 2 * padding.Width, Height - InfoBrandHeight - 2 * padding.Height);
     }
 
-    protected override bool OnSetRange(Size range)
-    {
-        Size = range;
-        return true;
-    }
-
-    protected override void Relocate()
-    {
-        Relocate(0, 0);
-    }
-
     private void Relocate(int dX, int dY)
     {
+        Relocate();
         EventManager.Instance.Dispatch(LocalEventId.ImageUpdate, new GridToUpdateEventArgument(Image, GetGridRect(), BackColor, new(dX, dY)));
         DrawInfoBrand();
         Invalidate();

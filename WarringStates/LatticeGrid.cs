@@ -28,7 +28,7 @@ public class LatticeGrid : IEventListener
 
     Color BackColor { get; set; }
 
-    public LatticeGrid()
+    public void EnableListner()
     {
         EventManager.Instance.AddEvent(LocalEventId.ImageUpdate, this);
     }

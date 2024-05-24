@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.EventProcess;
 
 namespace WarringStates;
 
@@ -23,13 +24,15 @@ public class GameForm : ResizeableForm
             ]);
         Controls.SetChildIndex(Overview, 0);
         Controls.SetChildIndex(Displayer, 1);
+        Grid.EnableListner();
+        Overview.EnableListener();
+        Displayer.EnableListener();
     }
 
     private void DrawClient()
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        Overview.SetRange(ClientSize);
-        Displayer.SetRange(ClientSize);
+        EventManager.Instance.Dispatch(LocalEventId.GameFormUpdate, new GameFormUpdateEventArgument(ClientSize));
     }
 }

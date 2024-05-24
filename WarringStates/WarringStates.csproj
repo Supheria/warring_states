@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="e4yxpoa5.qu4~" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\_lib\AtlasGenerator\AtlasGenerator.csproj" />
     <ProjectReference Include="..\_lib\LocalUtilities\LocalUtilities.csproj" />
   </ItemGroup>

@@ -10,6 +10,7 @@ internal class LocalEventId
 {
     public const int TestInfo = -1;
     //public const int InitializeImage = 1000;
-    public const int ImageUpdate = 1000;
-    public const int GridUpdate = 1001;
+    public const int GameFormUpdate = 1000;
+    public const int ImageUpdate = 1001;
+    public const int GridUpdate = 1002;
 }
