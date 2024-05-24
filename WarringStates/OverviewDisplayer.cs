@@ -2,53 +2,41 @@
 using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System;
 
 namespace WarringStates;
 
-public class OverviewDisplayer : Displayer, IEventListener
+public class OverviewDisplayer : Displayer
 {
     bool FullScreen { get; set; } = false;
 
     public void EnableListener()
     {
-        EventManager.Instance.AddEvent(LocalEventId.GameFormUpdate, this);
-        EventManager.Instance.AddEvent(LocalEventId.GridUpdate, this);
+        LocalEvents.Hub.AddListener<GameFormUpdateEventArgument>(LocalEventNames.GameFormUpdate, SetSize);
+        LocalEvents.Hub.AddListener<GridUpdatedEventArgument>(LocalEventNames.GridUpdate, Relocate);
     }
 
-    public void HandleEvent(int eventId, IEventArgument argument)
+    private void SetSize(GameFormUpdateEventArgument args)
     {
-        if (eventId is LocalEventId.GameFormUpdate)
-        {
-            if (argument is not GameFormUpdateEventArgument arg)
-                return;
-            if (Terrain.Overview is null)
-                return;
-            var range = arg.ClientSize;
-            var size = FullScreen ? range : new((int)(range.Width * 0.25), (int)(range.Height * 0.25));
-            size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
-            Location = FullScreen ? new((range - size) / 2) : new(range.Width - size.Width, 0);
-            Size = size;
-        }
-        else if (eventId is LocalEventId.GridUpdate)
-        {
-            if (argument is not GridUpdatedEventArgument arg)
-                return;
-            Relocate(arg);
-        }
+        if (Terrain.Overview is null)
+            return;
+        var range = args.ClientSize;
+        var size = FullScreen ? range : new((int)(range.Width * 0.25), (int)(range.Height * 0.25));
+        size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
+        Location = FullScreen ? new((range - size) / 2) : new(range.Width - size.Width, 0);
+        Size = size;
     }
 
-    private void Relocate(GridUpdatedEventArgument arg)
+    private void Relocate(GridUpdatedEventArgument args)
     {
-        if (Width is 0 || Height is 0 || Terrain.Overview is null) 
+        if (Width is 0 || Height is 0 || Terrain.Overview is null)
             return;
         Relocate();
         Image = Terrain.Overview.CopyToNewSize(Size);
         var edgeLength = LatticeCell.CellData.EdgeLength;
-        var width = arg.DrawRect.Width / edgeLength;
-        var height = arg.DrawRect.Height / edgeLength;
-        var x = Terrain.Width - arg.Origin.X / (double)edgeLength/* - width / 2*/;
-        var y = Terrain.Height - arg.Origin.Y / (double)edgeLength/* - height / 2*/;
+        var width = args.DrawRect.Width / edgeLength;
+        var height = args.DrawRect.Height / edgeLength;
+        var x = Terrain.Width - args.Origin.X / (double)edgeLength/* - width / 2*/;
+        var y = Terrain.Height - args.Origin.Y / (double)edgeLength/* - height / 2*/;
         var widthRatio = Terrain.Width / (double)Width;
         var heightRatio = Terrain.Height / (double)Height;
         var rect = new Rectangle((x / widthRatio).ToInt(), (y / heightRatio).ToInt(), (width / widthRatio).ToInt(), (height / heightRatio).ToInt());

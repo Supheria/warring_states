@@ -2,11 +2,10 @@
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Windows.Forms;
 
 namespace WarringStates;
 
-public class LatticeGrid : IEventListener
+public class LatticeGrid
 {
     public GridData GridData { get; set; } = new GridData().LoadFromSimpleScript();
 
@@ -30,37 +29,29 @@ public class LatticeGrid : IEventListener
 
     public void EnableListner()
     {
-        EventManager.Instance.AddEvent(LocalEventId.ImageUpdate, this);
+        LocalEvents.Hub.AddListener<GridToUpdateEventArgument>(LocalEventNames.ImageUpdate, DrawLatticeGrid);
     }
 
-    public void HandleEvent(int eventId, IEventArgument argument)
+    private void DrawLatticeGrid(GridToUpdateEventArgument args)
     {
-        if (argument is not GridToUpdateEventArgument arg)
-            return;
-        if (eventId is LocalEventId.ImageUpdate)
-            DrawLatticeGrid(arg);
-    }
-
-    private void DrawLatticeGrid(GridToUpdateEventArgument arg)
-    {
-        var x = Origin.X + arg.OriginOffset.X;
-        var y = Origin.Y + arg.OriginOffset.Y;
+        var x = Origin.X + args.OriginOffset.X;
+        var y = Origin.Y + args.OriginOffset.Y;
         var edgeLength = LatticeCell.CellData.EdgeLength;
         var width = Terrain.Width * edgeLength;
         x = x < 0 ? (x % width) + width : x % width;
         var height = Terrain.Height * edgeLength;
         y = y < 0 ? (y % height) + height : y % height;
         Origin = new(x, y);
-        DrawRect = arg.DrawRect;
-        BackColor = arg.BackColor;
-        Graphics = Graphics.FromImage(arg.Source);
+        DrawRect = args.DrawRect;
+        BackColor = args.BackColor;
+        Graphics = Graphics.FromImage(args.Source);
         DrawLatticeCells();
         DrawGuideLine();
         Graphics.Flush();
         Graphics.Dispose();
         LastOrigin = Origin;
         LastDrawRect = DrawRect;
-        EventManager.Instance.Dispatch(LocalEventId.GridUpdate, new GridUpdatedEventArgument(DrawRect, Origin));
+        LocalEvents.Hub.Broadcast(LocalEventNames.GridUpdate, new GridUpdatedEventArgument(DrawRect, Origin));
     }
 
     private void DrawGuideLine()

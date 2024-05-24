@@ -1,13 +1,6 @@
-﻿using LocalUtilities.TypeToolKit.EventProcess;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace WarringStates;
 
-namespace WarringStates;
-
-internal class GameFormUpdateEventArgument(Size clientSize) : IEventArgument
+internal class GameFormUpdateEventArgument(Size clientSize)
 {
     public Size ClientSize { get; } = clientSize;
 }

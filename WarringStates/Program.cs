@@ -11,10 +11,6 @@ namespace WarringStates
         [STAThread]
         static void Main()
         {
-            var b = new ClassB();
-            b.OnEnable();
-            var a = new ClassA();
-            //a.DoTest();
 
             //Application.Run(new GameForm());
             var data = new AtlasData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);

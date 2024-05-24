@@ -1,14 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.EventProcess;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WarringStates;
 
-public class GridToUpdateEventArgument(Image source, Rectangle drawRect, Color backColor, Coordinate originOffset) : IEventArgument
+public class GridToUpdateEventArgument(Image source, Rectangle drawRect, Color backColor, Coordinate originOffset)
 {
     public Image Source { get; } = source;
 

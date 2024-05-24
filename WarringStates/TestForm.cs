@@ -1,16 +1,20 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.EventProcess;
-using System.Text;
 using LocalUtilities.TypeToolKit.Text;
+using System.Text;
 
 namespace WarringStates;
 
-internal class TestForm : ResizeableForm, IEventListener
+internal class TestForm : ResizeableForm
 {
     public TestForm()
     {
         FormClosing += OnFormClosing;
-        EventManager.Instance.AddEvent(LocalEventId.TestInfo, this);
+        LocalEvents.Hub.AddListener<TestInfo>(LocalEventNames.TestInfo, info =>
+        {
+            InfoMap[info.Name] = info.Info;
+            UpdateInfo();
+        });
     }
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)
@@ -33,7 +37,7 @@ internal class TestForm : ResizeableForm, IEventListener
             ]);
     }
 
-    public class TestInfo(string name, string info) : IEventArgument
+    public class TestInfo(string name, string info)
     {
         public string Name { get; } = name;
 
@@ -41,17 +45,6 @@ internal class TestForm : ResizeableForm, IEventListener
     }
 
     Dictionary<string, string> InfoMap { get; } = [];
-
-    public void HandleEvent(int eventId, IEventArgument argument)
-    {
-        if (eventId == LocalEventId.TestInfo)
-        {
-            if (argument is not TestInfo info)
-                return;
-            InfoMap[info.Name] = info.Info;
-            UpdateInfo();
-        }
-    }
 
     private void UpdateInfo()
     {

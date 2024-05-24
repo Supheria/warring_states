@@ -24,15 +24,15 @@ public class GameForm : ResizeableForm
             ]);
         Controls.SetChildIndex(Overview, 0);
         Controls.SetChildIndex(Displayer, 1);
-        Grid.EnableListner();
         Overview.EnableListener();
         Displayer.EnableListener();
+        Grid.EnableListner();
     }
 
     private void DrawClient()
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        EventManager.Instance.Dispatch(LocalEventId.GameFormUpdate, new GameFormUpdateEventArgument(ClientSize));
+        LocalEvents.Hub.Broadcast(LocalEventNames.GameFormUpdate, new GameFormUpdateEventArgument(ClientSize));
     }
 }
