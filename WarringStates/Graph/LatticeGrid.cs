@@ -1,9 +1,10 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Events;
+using WarringStates.Map;
 
-namespace WarringStates;
+namespace WarringStates.Graph;
 
 public class LatticeGrid
 {
@@ -29,10 +30,10 @@ public class LatticeGrid
 
     public void EnableListner()
     {
-        LocalEvents.Hub.AddListener<GridToUpdateEventArgument>(LocalEvents.Types.Hub.ImageUpdate, DrawLatticeGrid);
+        LocalEvents.Hub.AddListener<GridToUpdateCallback>(LocalEvents.Types.Hub.ImageUpdate, DrawLatticeGrid);
     }
 
-    private void DrawLatticeGrid(GridToUpdateEventArgument args)
+    private void DrawLatticeGrid(GridToUpdateCallback args)
     {
         var x = Origin.X + args.OriginOffset.X;
         var y = Origin.Y + args.OriginOffset.Y;
@@ -51,7 +52,7 @@ public class LatticeGrid
         Graphics.Dispose();
         LastOrigin = Origin;
         LastDrawRect = DrawRect;
-        LocalEvents.Hub.Broadcast(LocalEvents.Types.Hub.GridUpdate, new GridUpdatedEventArgument(DrawRect, Origin));
+        LocalEvents.Hub.Broadcast(LocalEvents.Types.Hub.GridUpdate, new GridUpdatedCallback(DrawRect, Origin));
     }
 
     private void DrawGuideLine()

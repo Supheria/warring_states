@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 
-namespace WarringStates;
+namespace WarringStates.Map;
 
 using Type = Terrain.Type;
+
 public class TerrainColors : ISsSerializable
 {
     public string LocalName { get; set; } = nameof(TerrainColors);

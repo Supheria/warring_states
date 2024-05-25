@@ -1,18 +1,23 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
+using WarringStates.Events;
 
-namespace WarringStates;
+namespace WarringStates.UI;
 
 internal class TestForm : ResizeableForm
 {
     public TestForm()
     {
         FormClosing += OnFormClosing;
-        LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Types.Hub.TestInfo, info =>
+        LocalEvents.TestHub.AddListener<TestInfo>(LocalEvents.Types.TestHub.AddInfo, info =>
         {
-            InfoMap[info.Name] = info.Info;
+            InfoMap.Add(new(info.Name, info.Info));
+            UpdateInfo();
+        });
+        LocalEvents.TestHub.AddListener<List<TestInfo>>(LocalEvents.Types.TestHub.AddInfoList, infoList =>
+        {
+            infoList.ForEach(info => InfoMap.Add(new(info.Name, info.Info)));
             UpdateInfo();
         });
     }
@@ -44,7 +49,7 @@ internal class TestForm : ResizeableForm
         public string Info { get; } = info;
     }
 
-    Dictionary<string, string> InfoMap { get; } = [];
+    List<KeyValuePair<string, string>> InfoMap { get; } = [];
 
     private void UpdateInfo()
     {

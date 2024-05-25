@@ -1,9 +1,11 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.EventProcess;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Events;
+using WarringStates.Graph;
+using WarringStates.Map;
 
-namespace WarringStates;
+namespace WarringStates.UI;
 
 public class OverviewDisplayer : Displayer
 {
@@ -11,11 +13,11 @@ public class OverviewDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdateEventArgument>(LocalEvents.Types.Hub.GameFormUpdate, SetSize);
-        LocalEvents.Hub.AddListener<GridUpdatedEventArgument>(LocalEvents.Types.Hub.GridUpdate, Relocate);
+        LocalEvents.Hub.AddListener<GameFormUpdateCallback>(LocalEvents.Types.Hub.GameFormUpdate, SetSize);
+        LocalEvents.Hub.AddListener<GridUpdatedCallback>(LocalEvents.Types.Hub.GridUpdate, Relocate);
     }
 
-    private void SetSize(GameFormUpdateEventArgument args)
+    private void SetSize(GameFormUpdateCallback args)
     {
         if (Terrain.Overview is null)
             return;
@@ -26,7 +28,7 @@ public class OverviewDisplayer : Displayer
         Size = size;
     }
 
-    private void Relocate(GridUpdatedEventArgument args)
+    private void Relocate(GridUpdatedCallback args)
     {
         if (Width is 0 || Height is 0 || Terrain.Overview is null)
             return;

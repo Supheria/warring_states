@@ -1,8 +1,9 @@
 ﻿//#define MOUSE_DRAG_FREE
 
 using LocalUtilities.TypeGeneral;
+using WarringStates.Graph;
 
-namespace WarringStates;
+namespace WarringStates.UI;
 
 partial class GameDisplayer
 {

@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 
-namespace WarringStates;
+namespace WarringStates.Graph;
 
 public class CellData : ISsSerializable
 {

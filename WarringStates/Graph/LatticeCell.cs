@@ -2,7 +2,7 @@
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 
-namespace WarringStates;
+namespace WarringStates.Graph;
 
 public sealed class LatticeCell
 {

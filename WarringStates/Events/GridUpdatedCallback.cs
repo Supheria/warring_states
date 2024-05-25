@@ -1,8 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
 
-namespace WarringStates;
+namespace WarringStates.Events;
 
-internal class GridUpdatedEventArgument(Rectangle drawRect, Coordinate origin)
+internal class GridUpdatedCallback(Rectangle drawRect, Coordinate origin)
 {
     public Rectangle DrawRect { get; } = drawRect;
 

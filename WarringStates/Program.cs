@@ -3,6 +3,9 @@
 using AtlasGenerator;
 using AtlasGenerator.Layout;
 using LocalUtilities.SimpleScript.Serialization;
+using WarringStates.Events;
+using WarringStates.Map;
+using WarringStates.UI;
 
 namespace WarringStates
 {
@@ -28,8 +31,8 @@ namespace WarringStates
 #endif
             atlas.SetTerrainMap();
 
-            Application.Run(new GameForm());
             new TestForm() { TopMost = true }.Show();
+            Application.Run(new GameForm());
         }
     }
 }
