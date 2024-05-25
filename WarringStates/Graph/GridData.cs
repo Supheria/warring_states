@@ -4,6 +4,8 @@ namespace WarringStates.Graph;
 
 public class GridData : ISsSerializable
 {
+    public string LocalName => nameof(GridData);
+
     public SolidBrush BorderBrush { get; set; } = new SolidBrush(Color.LightGray);
 
     public double GuideLineWidth { get; set; } = 1.75;
@@ -31,8 +33,6 @@ public class GridData : ISsSerializable
     /// 坐标辅助线绘制用笔
     /// </summary>
     public Pen GuidePen { get; } = new(Color.FromArgb(200, Color.Red), 1.75f);
-
-    public string LocalName { get; set; } = nameof(GridData);
 
     public void Serialize(SsSerializer serializer)
     {

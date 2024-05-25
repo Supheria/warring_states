@@ -4,7 +4,7 @@ namespace WarringStates.Graph;
 
 public class CellData : ISsSerializable
 {
-    public string LocalName { get; set; } = nameof(CellData);
+    public string LocalName => nameof(CellData);
 
     public int EdgeLength
     {

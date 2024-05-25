@@ -13,8 +13,8 @@ public class OverviewDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdateCallback>(LocalEvents.Types.Hub.GameFormUpdate, SetSize);
-        LocalEvents.Hub.AddListener<GridUpdatedCallback>(LocalEvents.Types.Hub.GridUpdate, Relocate);
+        LocalEvents.Global.AddListener<GameFormUpdateCallback>(LocalEvents.Types.Global.GameFormUpdate, SetSize);
+        LocalEvents.Global.AddListener<GridUpdatedCallback>(LocalEvents.Types.Global.GridUpdate, Relocate);
     }
 
     private void SetSize(GameFormUpdateCallback args)

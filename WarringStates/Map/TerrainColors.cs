@@ -6,7 +6,7 @@ using Type = Terrain.Type;
 
 public class TerrainColors : ISsSerializable
 {
-    public string LocalName { get; set; } = nameof(TerrainColors);
+    public string LocalName => nameof(TerrainColors);
 
     Dictionary<Type, Color> ColorMap { get; } = new()
     {

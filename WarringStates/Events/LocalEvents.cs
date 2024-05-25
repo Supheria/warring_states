@@ -1,5 +1,4 @@
-﻿using AtlasGenerator.Test;
-using LocalUtilities.TypeGeneral.Convert;
+﻿using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.EventProcess;
 using System.Text;
 using WarringStates.UI;
@@ -8,30 +7,39 @@ namespace WarringStates.Events;
 
 public static class LocalEvents
 {
-    public static EventHub TestHub { get; } = new();
+    public static EventHub Test { get; } = new();
 
-    public static EventHub Hub { get; } = new();
+    public static EventHub Global { get; } = new();
+
+    public static EventHub Loop { get; } = new();
 
     public static class Types
     {
-        public enum TestHub
+        public enum Test
         {
             AddInfo,
             AddInfoList,
         }
 
-        public enum Hub
+        public enum Global
         {
+            TimeTickOn,
             GameFormUpdate,
             ImageUpdate,
             GridUpdate
+        }
+
+        public enum Loop
+        {
+            StopSpanFlow,
+            StartSpanFlow,
         }
     }
 
     public static void ForTest()
     {
         var testInfoList = new List<TestForm.TestInfo>();
-        foreach (var (type, callback) in Hub.GetEventList())
+        foreach (var (type, callback) in Global.GetEventList())
         {
             if (callback is null)
             {
@@ -39,13 +47,13 @@ public static class LocalEvents
                 continue;
             }
             var callBackNames = new StringBuilder();
-            foreach(var c in callback.GetInvocationList())
+            foreach (var c in callback.GetInvocationList())
             {
                 var info = $"{c.Target?.ToString()} + {c}";
                 testInfoList.Add(new(type.ToWholeString(), info));
                 continue;
             }
         }
-        TestHub.Broadcast(Types.TestHub.AddInfoList, testInfoList);
+        Test.Broadcast(Types.Test.AddInfoList, testInfoList);
     }
 }

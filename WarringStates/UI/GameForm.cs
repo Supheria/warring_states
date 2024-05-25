@@ -6,7 +6,7 @@ namespace WarringStates.UI;
 
 public class GameForm : ResizeableForm
 {
-    public override string LocalName { get; set; } = nameof(GameForm);
+    public override string LocalName => nameof(GameForm);
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
@@ -25,17 +25,17 @@ public class GameForm : ResizeableForm
             ]);
         Controls.SetChildIndex(Overview, 0);
         Controls.SetChildIndex(Displayer, 1);
+        Grid.EnableListner();
         Overview.EnableListener();
         Displayer.EnableListener();
-        Grid.EnableListner();
     }
 
     private void DrawClient()
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Hub.Broadcast(LocalEvents.Types.Hub.GameFormUpdate, new GameFormUpdateCallback(ClientSize));
+        LocalEvents.Global.Broadcast(LocalEvents.Types.Global.GameFormUpdate, new GameFormUpdateCallback(ClientSize));
 
-        LocalEvents.ForTest();
+        //LocalEvents.ForTest();
     }
 }

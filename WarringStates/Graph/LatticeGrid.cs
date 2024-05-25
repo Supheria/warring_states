@@ -30,7 +30,7 @@ public class LatticeGrid
 
     public void EnableListner()
     {
-        LocalEvents.Hub.AddListener<GridToUpdateCallback>(LocalEvents.Types.Hub.ImageUpdate, DrawLatticeGrid);
+        LocalEvents.Global.AddListener<GridToUpdateCallback>(LocalEvents.Types.Global.ImageUpdate, DrawLatticeGrid);
     }
 
     private void DrawLatticeGrid(GridToUpdateCallback args)
@@ -52,7 +52,7 @@ public class LatticeGrid
         Graphics.Dispose();
         LastOrigin = Origin;
         LastDrawRect = DrawRect;
-        LocalEvents.Hub.Broadcast(LocalEvents.Types.Hub.GridUpdate, new GridUpdatedCallback(DrawRect, Origin));
+        LocalEvents.Global.Broadcast(LocalEvents.Types.Global.GridUpdate, new GridUpdatedCallback(DrawRect, Origin));
     }
 
     private void DrawGuideLine()
