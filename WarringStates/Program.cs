@@ -11,7 +11,6 @@ namespace WarringStates
         [STAThread]
         static void Main()
         {
-
             //Application.Run(new GameForm());
             var data = new AtlasData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
             //var data = new AtlasData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Type.Horizontal, 2.25, 100000, 0.66f);

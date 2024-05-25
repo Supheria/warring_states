@@ -17,7 +17,7 @@ public partial class GameDisplayer : Displayer
     }
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdateEventArgument>(LocalEventNames.GameFormUpdate, args =>
+        LocalEvents.Hub.AddListener<GameFormUpdateEventArgument>(LocalEvents.Types.Hub.GameFormUpdate, args =>
         {
             Size = args.ClientSize;
             Relocate(0, 0);
@@ -33,7 +33,7 @@ public partial class GameDisplayer : Displayer
     private void Relocate(int dX, int dY)
     {
         Relocate();
-        LocalEvents.Hub.Broadcast(LocalEventNames.ImageUpdate, new GridToUpdateEventArgument(Image, GetGridRect(), BackColor, new(dX, dY)));
+        LocalEvents.Hub.Broadcast(LocalEvents.Types.Hub.ImageUpdate, new GridToUpdateEventArgument(Image, GetGridRect(), BackColor, new(dX, dY)));
         DrawInfoBrand();
         Invalidate();
     }
