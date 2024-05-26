@@ -11,10 +11,9 @@ public partial class GameDisplayer : Displayer
 
     public GameDisplayer()
     {
-        MouseDown += OnMouseDown;
-        MouseMove += OnMouseMove;
-        MouseUp += OnMouseUp;
+        AddOperations();
     }
+
     public void EnableListener()
     {
         LocalEvents.Hub.AddListener<GameFormUpdateArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);
@@ -25,9 +24,9 @@ public partial class GameDisplayer : Displayer
         Location = args.GameRect.Location;
         Size = new(args.GameRect.Width, args.GameRect.Height - InfoBrandHeight);
         Relocate();
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GameImageUpdate, new GameImageUpdateArgs(Image, BackColor, new(0, 0)));
         var otherRect = new Rectangle(Left, Bottom, Width, args.GameRect.Height - Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameDisplayerUpdate, new GameDisplayerUpdateArgs(otherRect));
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameDisplayerUpdate, new GameDisplayerUpdateArgs(Bounds, otherRect));
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GameImageUpdate, new GameImageUpdateArgs(Image, BackColor, new(0, 0)));
         Invalidate();
     }
 

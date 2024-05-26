@@ -23,7 +23,7 @@ public partial class GameForm : ResizeableForm
 
     LatticeGrid Grid { get; } = new();
 
-    SpanFlow Tick { get; set; } = new();
+    SpanFlow SpanFlow { get; set; } = new();
 
     protected override void InitializeComponent()
     {
@@ -46,13 +46,13 @@ public partial class GameForm : ResizeableForm
 
     private void SaveForm(SsSerializer serializer)
     {
-        serializer.WriteTag(nameof(Tick.CurrentSpan), Tick.CurrentSpan.ToString());
+        serializer.WriteTag(nameof(SpanFlow.CurrentSpan), SpanFlow.CurrentSpan.ToString());
     }
 
     private void LoadForm(SsDeserializer deserializer)
     {
-        var startSpan = deserializer.ReadTag(nameof(Tick.CurrentSpan), int.Parse);
-        Tick.Relocate(startSpan);
+        var startSpan = deserializer.ReadTag(nameof(SpanFlow.CurrentSpan), int.Parse);
+        SpanFlow.Relocate(startSpan);
     }
 
     private void GameForm_Shown(object? sender, EventArgs e)
@@ -64,10 +64,9 @@ public partial class GameForm : ResizeableForm
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        ToolBrand.SetSize(new(ClientSize.Width, 50));
-        var gameRect = new Rectangle(0, ClientRectangle.Top + ToolBrand.Height, ClientSize.Width, ClientSize.Height - ToolBrand.Height);
+        var gameRect = new Rectangle(ClientLeft, ClientTop + ToolBrand.Height, ClientWidth, ClientHeight - ToolBrand.Height);
         LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameFormUpdate, new GameFormUpdateArgs(gameRect));
 
-        //LocalEvents.ForTest();
+        LocalEvents.ForTest();
     }
 }

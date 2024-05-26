@@ -23,6 +23,8 @@ public static class LocalEvents
     {
         GameImageUpdate,
         GridUpdate,
+        PointOnGameImage,
+        LatticePointOnGrid,
     }
 
     public enum UserInterface

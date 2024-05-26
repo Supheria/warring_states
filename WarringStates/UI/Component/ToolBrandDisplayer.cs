@@ -13,12 +13,14 @@ public class ToolBrandDisplayer : Displayer
 
     public ToolBrandDisplayer()
     {
+        LocalEvents.Hub.AddListener<GameFormUpdateArgs>(LocalEvents.UserInterface.GameFormUpdate, SetWidth);
         LocalEvents.Hub.AddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
+        Height = 30;
     }
 
-    public void SetSize(Size size)
+    private void SetWidth(GameFormUpdateArgs args)
     {
-        Size = size;
+        Width = args.GameRect.Width;
         Relocate();
         DrawDate();
     }

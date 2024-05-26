@@ -31,6 +31,7 @@ public class SpanFlow
     public SpanFlow()
     {
         Timer.Tick += (sender, e) => TickOn();
+        Relocate(0);
     }
 
     public void Relocate(int startSpan)

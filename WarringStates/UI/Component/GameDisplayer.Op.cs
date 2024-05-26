@@ -1,6 +1,7 @@
 ﻿//#define MOUSE_DRAG_FREE
 
 using LocalUtilities.TypeGeneral;
+using WarringStates.Events;
 using WarringStates.Graph;
 
 namespace WarringStates.UI.Component;
@@ -11,13 +12,23 @@ partial class GameDisplayer
 
     Point DragStartPoint { get; set; } = new();
 
-#if MOUSE_DRAG_FREE
-    static int DragMoveSensibility = 1;
-#else
     static int DragMoveSensibility => LatticeCell.CellData.EdgeLength;
-#endif
 
     public OnComponentRunning? OnDragImage { get; set; }
+
+    private void AddOperations()
+    {
+        MouseDown += OnMouseDown;
+        MouseMove += OnMouseMove;
+        MouseUp += OnMouseUp;
+        MouseWheel += OnMouseWheel;
+        LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.LatticePointOnGrid, PointOnCell);
+    }
+
+    private void PointOnCell(Coordinate args)
+    {
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddInfo, new TestForm.TestInfo("lattice point", args.ToString()));
+    }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)
     {
@@ -28,32 +39,37 @@ partial class GameDisplayer
         }
     }
 
-    private void OnMouseMove(object? sender, MouseEventArgs args)
-    {
-        if (DoDragGraph)
-        {
-            var dX = args.Location.X - DragStartPoint.X;
-            var dY = args.Location.Y - DragStartPoint.Y;
-            if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
-            {
-#if MOUSE_DRAG_FREE
-                LatticeGrid.OriginX += (args.Location.X - DragStartPoint.X) * DragMoveSensibility;
-                LatticeGrid.OriginY += (args.Location.Y - DragStartPoint.Y) * DragMoveSensibility;
-#else
-                dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
-                dX *= DragMoveSensibility;
-                dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
-                dY *= DragMoveSensibility;
-#endif
-                Relocate(dX, dY);
-                DragStartPoint = args.Location;
-            }
-        }
-    }
-
     private void OnMouseUp(object? sender, MouseEventArgs args)
     {
         if (DoDragGraph)
             DoDragGraph = false;
+    }
+
+    private void OnMouseMove(object? sender, MouseEventArgs args)
+    {
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.PointOnGameImage, args.Location);
+        if (!DoDragGraph)
+            return;
+        var dX = args.Location.X - DragStartPoint.X;
+        var dY = args.Location.Y - DragStartPoint.Y;
+        if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
+        {
+            dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
+            dX *= DragMoveSensibility;
+            dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
+            dY *= DragMoveSensibility;
+            Relocate(dX, dY);
+            DragStartPoint = args.Location;
+        }
+    }
+
+    private void OnMouseWheel(object? sender, MouseEventArgs args)
+    {
+        var diffInWidth = args.Location.X - Width / 2;
+        var diffInHeight = args.Location.Y - Height / 2;
+        var dX = diffInWidth / LatticeCell.CellData.EdgeLength * Width / 200;
+        var dY = diffInHeight / LatticeCell.CellData.EdgeLength * Height / 200;
+        LatticeCell.CellData.EdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
+        Relocate(dX, dY);
     }
 }

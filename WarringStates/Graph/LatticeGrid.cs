@@ -24,11 +24,14 @@ public class LatticeGrid
 
     Rectangle[] LastGuideLineRects { get; set; } = new Rectangle[2];
 
+    int LastCellEdgeLength { get; set; } = LatticeCell.CellData.EdgeLength;
+
     Color BackColor { get; set; }
 
     public void EnableListner()
     {
         LocalEvents.Hub.AddListener<GameImageUpdateArgs>(LocalEvents.Graph.GameImageUpdate, DrawLatticeGrid);
+        LocalEvents.Hub.AddListener<Point>(LocalEvents.Graph.PointOnGameImage, RealPointToLatticePoint);
     }
 
     private void DrawLatticeGrid(GameImageUpdateArgs args)
@@ -50,6 +53,7 @@ public class LatticeGrid
         Graphics.Dispose();
         LastOrigin = Origin;
         LastDrawRect = DrawRect;
+        LastCellEdgeLength = LatticeCell.CellData.EdgeLength;
         LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdate, new GridUpdatedArgs(DrawRect, Origin));
     }
 
@@ -79,7 +83,13 @@ public class LatticeGrid
         dX = Origin.X - LastOrigin.X;
         dY = Origin.Y - LastOrigin.Y;
         var cellBrush = new Dictionary<Color, SolidBrush>();
-        if (DrawRect != LastDrawRect || DrawRect.Height > LastDrawRect.Height || dX % edgeLength != 0 || dY % edgeLength != 0)
+        //
+        // redraw all
+        //
+        if (DrawRect != LastDrawRect ||
+            DrawRect.Height > LastDrawRect.Height || 
+            dX % edgeLength != 0 || dY % edgeLength != 0 || 
+            LastCellEdgeLength != LatticeCell.CellData.EdgeLength)
         {
             Graphics?.Clear(BackColor);
             for (var i = 0; i < colNumber; i++)
@@ -93,6 +103,9 @@ public class LatticeGrid
             }
             return;
         }
+        //
+        // redraw changed
+        //
         dX /= edgeLength;
         dY /= edgeLength;
         for (var i = 0; i < colNumber; i++)
@@ -137,5 +150,18 @@ public class LatticeGrid
         if (lineRect.CutRectInRange(DrawRect, out var result))
             return result.Value;
         return new();
+    }
+
+    public void RealPointToLatticePoint(Point point)
+    {
+        var dX = point.X - Origin.X;
+        var dY = point.Y - Origin.Y;
+        var x = dX / LatticeCell.CellData.EdgeLength;
+        if (dX < 0)
+            x += Terrain.Width;
+        var y = dY / LatticeCell.CellData.EdgeLength;
+        if (dY < 0)
+            y += Terrain.Height;
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.LatticePointOnGrid, new Coordinate(x, y));
     }
 }

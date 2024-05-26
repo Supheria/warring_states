@@ -12,12 +12,12 @@ internal class TestForm : ResizeableForm
         FormClosing += OnFormClosing;
         LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Test.AddInfo, info =>
         {
-            InfoMap[info.Name] = info.Info;
+            InfoMap.Add(new(info.Name, info.Info));
             UpdateInfo();
         });
         LocalEvents.Hub.AddListener<List<TestInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         {
-            //infoList.ForEach(info => InfoMap.Add(new(info.Name, info.Info)));
+            infoList.ForEach(info => InfoMap.Add(new(info.Name, info.Info)));
             UpdateInfo();
         });
     }
@@ -49,7 +49,7 @@ internal class TestForm : ResizeableForm
         public string Info { get; } = info;
     }
 
-    Dictionary<string, string> InfoMap { get; } = [];
+    List<KeyValuePair<string, string>> InfoMap { get; } = [];
 
     private void UpdateInfo()
     {

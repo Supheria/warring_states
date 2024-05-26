@@ -13,19 +13,19 @@ public class OverviewDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdateArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<GameDisplayerUpdateArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
         LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdate, Relocate);
     }
 
-    private void SetBounds(GameFormUpdateArgs args)
+    private void SetBounds(GameDisplayerUpdateArgs args)
     {
         if (Terrain.Overview is null)
             Size = new();
         else
         {
-            var size = FullScreen ? args.GameRect.Size : new((int)(args.GameRect.Width * 0.25), (int)(args.GameRect.Height * 0.25));
+            var size = FullScreen ? args.DisplayRect.Size : new((int)(args.DisplayRect.Width * 0.25), (int)(args.DisplayRect.Height * 0.25));
             Size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
-            Location = FullScreen ? new((args.GameRect.Size - Size) / 2) : new(args.GameRect.Right - Width, args.GameRect.Top);
+            Location = FullScreen ? new((args.DisplayRect.Size - Size) / 2) : new(args.DisplayRect.Right - Width, args.DisplayRect.Top);
         }
     }
 
