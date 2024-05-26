@@ -10,12 +10,12 @@ public static class TimeLoop
 
     public static void Start()
     {
-        LocalEvents.Loop.Broadcast(LocalEvents.Types.Loop.StartSpanFlow);
+        LocalEvents.Loop.Broadcast(LocalEventTypes.Loop.StartSpanFlow);
     }
 
     public static void Stop()
     {
-        LocalEvents.Loop.Broadcast(LocalEvents.Types.Loop.StopSpanFlow);
+        LocalEvents.Loop.Broadcast(LocalEventTypes.Loop.StopSpanFlow);
     }
 
     public static void Relocate(int startSpan)
@@ -28,8 +28,8 @@ public static class TimeLoop
         return Tick.CurrentSpan;
     }
 
-    public static Date GetDate(int span)
+    public static Date GetDate()
     {
-        return Tick.GetDate(span);
+        return Tick.GetDate();
     }
 }

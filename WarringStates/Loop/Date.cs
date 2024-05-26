@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using WarringStates.Loop.Model;
 
 namespace WarringStates.Loop;
 
@@ -11,6 +12,11 @@ public readonly struct Date(int year, int month, int day, DateType type)
     public int Day { get; } = day;
 
     public DateType Type { get; } = type;
+
+    public Date() : this(0, 0, 0, DateType.Monday)
+    {
+
+    }
 
     public override string ToString()
     {
@@ -35,10 +41,5 @@ public readonly struct Date(int year, int month, int day, DateType type)
         if (value < 1000)
             return $"{value}";
         return $"{value}";
-    }
-
-    public Date() : this(0, 0, 0, DateType.Monday)
-    {
-
     }
 }

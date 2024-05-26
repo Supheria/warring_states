@@ -8,11 +8,24 @@ internal class DateStepper
 
     Day Day { get; set; }
 
+    DateType DateType { get; set; }
+
     internal DateStepper()
+    {
+        Year = new(1);
+        Month = new(Year.IsLeap,1);
+        Day = new(Month.DayMax, 1);
+        DateType = DateType.Monday;
+    }
+
+    internal void SetStartDate(int spanFrom15821015)
     {
         Year = new(1);
         Month = new(Year.IsLeap, 1);
         Day = new(Month.DayMax, 1);
+        DateType = DateType.Monday;
+        for (var i = 1; i < spanFrom15821015; i++)
+            StepOn();
     }
 
     internal void StepOn()
@@ -26,10 +39,14 @@ internal class DateStepper
             }
             Day = new(Month.DayMax, 1);
         }
+        if (DateType is DateType.Sunday)
+            DateType = DateType.Monday;
+        else
+            DateType++;
     }
 
-    internal Date Get(DateType dateType)
+    internal Date GetDate()
     {
-        return new(Year.Value, Month.Value, Day.Value, dateType);
+        return new(Year.Value, Month.Value, Day.Value, DateType);
     }
 }

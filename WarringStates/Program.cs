@@ -15,8 +15,10 @@ namespace WarringStates
         static void Main()
         {
             new TestForm() { TopMost = true }.Show();
-            TimeLoop.Relocate(1000000);
+            TimeLoop.Relocate(730000);
+            //TimeLoop.Relocate(11540);
             TimeLoop.Start();
+            //TimeLoop.Stop();
 
 
             //Application.Run(new GameForm());

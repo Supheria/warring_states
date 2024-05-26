@@ -34,7 +34,7 @@ public class GameForm : ResizeableForm
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Global.Broadcast(LocalEvents.Types.Global.GameFormUpdate, new GameFormUpdateCallback(ClientSize));
+        LocalEvents.Global.Broadcast(LocalEventTypes.Global.GameFormUpdate, new GameFormUpdateCallback(ClientSize));
 
         //LocalEvents.ForTest();
     }

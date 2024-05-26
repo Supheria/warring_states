@@ -13,29 +13,6 @@ public static class LocalEvents
 
     public static EventHub Loop { get; } = new();
 
-    public static class Types
-    {
-        public enum Test
-        {
-            AddInfo,
-            AddInfoList,
-        }
-
-        public enum Global
-        {
-            TimeTickOn,
-            GameFormUpdate,
-            ImageUpdate,
-            GridUpdate
-        }
-
-        public enum Loop
-        {
-            StopSpanFlow,
-            StartSpanFlow,
-        }
-    }
-
     public static void ForTest()
     {
         var testInfoList = new List<TestForm.TestInfo>();
@@ -54,6 +31,6 @@ public static class LocalEvents
                 continue;
             }
         }
-        Test.Broadcast(Types.Test.AddInfoList, testInfoList);
+        Test.Broadcast(LocalEventTypes.Test.AddInfoList, testInfoList);
     }
 }

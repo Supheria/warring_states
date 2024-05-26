@@ -2,7 +2,7 @@
 
 internal class Day(int max, int value)
 {
-    internal int Value { get; private set; } = value > 0 && value <= max ? value : throw LoopException.ValueOutRange<Day>(value);
+    internal int Value { get; private set; } = value < 1 || value > max ? throw LoopException.ValueOutRange<Day>(value) : value;
 
     int Max { get; } = max;
 
@@ -11,12 +11,5 @@ internal class Day(int max, int value)
         if (++Value > Max)
             return false;
         return true;
-    }
-
-    public override string ToString()
-    {
-        if (Value < 10)
-            return $"0{Value}";
-        return $"{Value}";
     }
 }

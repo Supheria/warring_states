@@ -6,7 +6,7 @@ namespace WarringStates.Loop.Model;
 
 internal class Tick
 {
-    Calendar Calendar { get; set; } = new();
+    DateStepper DateStepper { get; set; } = new();
 
     Timer Timer { get; } = new();
 
@@ -32,37 +32,39 @@ internal class Tick
     private void TickOn(object? sender, EventArgs e)
     {
         CurrentSpan++;
-        LocalEvents.Global.Broadcast(LocalEvents.Types.Global.TimeTickOn, CurrentSpan);
+        DateStepper.StepOn();
+        LocalEvents.Global.Broadcast(LocalEventTypes.Global.TimeTickOn, CurrentSpan);
 
-        var date = Calendar[CurrentSpan];
+        var date = DateStepper.GetDate();
         var info = new TestForm.TestInfo("time", date.ToString());
-        LocalEvents.Test.Broadcast(LocalEvents.Types.Test.AddInfo, info);
+        LocalEvents.Test.Broadcast(LocalEventTypes.Test.AddInfo, info);
     }
 
-    internal Date GetDate(int span)
+    internal Date GetDate()
     {
-        return Calendar[span];
+        return DateStepper.GetDate();
     }
 
     private void Start()
     {
-        LocalEvents.Loop.TryRemoveListener(LocalEvents.Types.Loop.StartSpanFlow, Start);
-        LocalEvents.Loop.AddListener(LocalEvents.Types.Loop.StopSpanFlow, Stop);
+        LocalEvents.Loop.TryRemoveListener(LocalEventTypes.Loop.StartSpanFlow, Start);
+        LocalEvents.Loop.AddListener(LocalEventTypes.Loop.StopSpanFlow, Stop);
         Timer.Start();
     }
 
     private void Stop()
     {
-        LocalEvents.Loop.TryRemoveListener(LocalEvents.Types.Loop.StopSpanFlow, Stop);
-        LocalEvents.Loop.AddListener(LocalEvents.Types.Loop.StartSpanFlow, Start);
+        LocalEvents.Loop.TryRemoveListener(LocalEventTypes.Loop.StopSpanFlow, Stop);
+        LocalEvents.Loop.AddListener(LocalEventTypes.Loop.StartSpanFlow, Start);
         Timer.Stop();
     }
 
     internal void Relocate(int startSpan)
     {
-        LocalEvents.Loop.ClearListener(LocalEvents.Types.Loop.StartSpanFlow);
-        LocalEvents.Loop.ClearListener(LocalEvents.Types.Loop.StopSpanFlow);
+        LocalEvents.Loop.ClearListener(LocalEventTypes.Loop.StartSpanFlow);
+        LocalEvents.Loop.ClearListener(LocalEventTypes.Loop.StopSpanFlow);
         Stop();
         CurrentSpan = startSpan;
+        DateStepper.SetStartDate(CurrentSpan);
     }
 }

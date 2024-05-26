@@ -8,17 +8,26 @@ internal class Year
 
     internal Year(int value)
     {
-        Value = value > 0 ? value : throw LoopException.ValueOutRange<Year>(value);
+        Value = value < 0 ? throw LoopException.ValueOutRange<Year>(value) : value;
         SetIsLeap();
     }
 
     private void SetIsLeap()
     {
-        if (Value % 100 is 0 && Value / 100 % 4 is 0)
-            IsLeap = true;
-        else if (Value % 4 == 0)
-            IsLeap = true;
-        IsLeap = false;
+        if (Value % 100 == 0)
+        {
+            if (Value / 100 % 4 == 0)
+                IsLeap = true;
+            else
+                IsLeap = false;
+        }
+        else
+        {
+            if (Value % 4 == 0)
+                IsLeap = true;
+            else
+                IsLeap = false;
+        }
     }
 
     public static Year operator ++(Year year)
