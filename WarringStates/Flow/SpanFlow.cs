@@ -57,10 +57,6 @@ public class SpanFlow
         };
         if (KeepFlow)
             Timer.Start();
-
-        var date = DateStepper.GetDate();
-        var info = new TestForm.TestInfo("time", date.ToString());
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddInfo, info);
     }
 
     private void Start()
