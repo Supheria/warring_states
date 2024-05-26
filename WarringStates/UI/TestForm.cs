@@ -10,12 +10,12 @@ internal class TestForm : ResizeableForm
     public TestForm()
     {
         FormClosing += OnFormClosing;
-        LocalEvents.Test.AddListener<TestInfo>(LocalEventTypes.Test.AddInfo, info =>
+        LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Test.AddInfo, info =>
         {
             InfoMap[info.Name] = info.Info;
             UpdateInfo();
         });
-        LocalEvents.Test.AddListener<List<TestInfo>>(LocalEventTypes.Test.AddInfoList, infoList =>
+        LocalEvents.Hub.AddListener<List<TestInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         {
             //infoList.ForEach(info => InfoMap.Add(new(info.Name, info.Info)));
             UpdateInfo();

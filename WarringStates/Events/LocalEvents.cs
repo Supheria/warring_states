@@ -7,16 +7,40 @@ namespace WarringStates.Events;
 
 public static class LocalEvents
 {
-    public static EventHub Test { get; } = new();
+    public static EventHub Hub { get; } = new();
 
-    public static EventHub Global { get; } = new();
+    public enum Test
+    {
+        AddInfo,
+        AddInfoList,
+    }
 
-    public static EventHub Loop { get; } = new();
+    public enum Global
+    {
+    }
+
+    public enum Graph
+    {
+        GameImageUpdate,
+        GridUpdate,
+    }
+
+    public enum UserInterface
+    {
+        GameFormUpdate,
+        GameDisplayerUpdate
+    }
+
+    public enum Flow
+    {
+        SpanFlowTickOn,
+        SwichFlowState
+    }
 
     public static void ForTest()
     {
         var testInfoList = new List<TestForm.TestInfo>();
-        foreach (var (type, callback) in Global.GetEventList())
+        foreach (var (type, callback) in Hub.GetEventList())
         {
             if (callback is null)
             {
@@ -31,6 +55,6 @@ public static class LocalEvents
                 continue;
             }
         }
-        Test.Broadcast(LocalEventTypes.Test.AddInfoList, testInfoList);
+        Hub.TryBroadcast(Test.AddInfoList, testInfoList);
     }
 }

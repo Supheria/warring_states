@@ -22,18 +22,16 @@ public class LatticeGrid
 
     Dictionary<Coordinate, Color> LastCellColor { get; set; } = [];
 
-    Rectangle LastGuideLineRectHorizon { get; set; } = new();
-
-    Rectangle LastGuideLineRectVertical { get; set; } = new();
+    Rectangle[] LastGuideLineRects { get; set; } = new Rectangle[2];
 
     Color BackColor { get; set; }
 
     public void EnableListner()
     {
-        LocalEvents.Global.AddListener<GridToUpdateCallback>(LocalEventTypes.Global.ImageUpdate, DrawLatticeGrid);
+        LocalEvents.Hub.AddListener<GameImageUpdateArgs>(LocalEvents.Graph.GameImageUpdate, DrawLatticeGrid);
     }
 
-    private void DrawLatticeGrid(GridToUpdateCallback args)
+    private void DrawLatticeGrid(GameImageUpdateArgs args)
     {
         var x = Origin.X + args.OriginOffset.X;
         var y = Origin.Y + args.OriginOffset.Y;
@@ -43,7 +41,7 @@ public class LatticeGrid
         var height = Terrain.Height * edgeLength;
         y = y < 0 ? (y % height) + height : y % height;
         Origin = new(x, y);
-        DrawRect = args.DrawRect;
+        DrawRect = new(new(0, 0), args.Source.Size);
         BackColor = args.BackColor;
         Graphics = Graphics.FromImage(args.Source);
         DrawLatticeCells();
@@ -52,27 +50,21 @@ public class LatticeGrid
         Graphics.Dispose();
         LastOrigin = Origin;
         LastDrawRect = DrawRect;
-        LocalEvents.Global.Broadcast(LocalEventTypes.Global.GridUpdate, new GridUpdatedCallback(DrawRect, Origin));
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdate, new GridUpdatedArgs(DrawRect, Origin));
     }
 
     private void DrawGuideLine()
     {
-        var brush = new SolidBrush(GridData.GuideLineColor);
-        var brushClear = new SolidBrush(BackColor);
-        var lineRectVertical = GetCrossLineRect(new(Origin.X, DrawRect.Top), new(Origin.X, DrawRect.Bottom), GridData.GuideLineWidth);
-        Graphics?.FillRectangle(brush, lineRectVertical);
-        if (lineRectVertical != LastGuideLineRectVertical)
-        {
-            Graphics?.FillRectangle(brushClear, LastGuideLineRectVertical);
-            LastGuideLineRectVertical = lineRectVertical;
-        }
-        var lineRectHorizon = GetCrossLineRect(new(DrawRect.Left, Origin.Y), new(DrawRect.Right, Origin.Y), GridData.GuideLineWidth);
-        Graphics?.FillRectangle(brush, lineRectHorizon);
-        if (lineRectHorizon != LastGuideLineRectHorizon)
-        {
-            Graphics?.FillRectangle(brushClear, LastGuideLineRectHorizon);
-            LastGuideLineRectHorizon = lineRectHorizon;
-        }
+        var brush = new SolidBrush(BackColor);
+        Graphics?.FillRectangle(brush, LastGuideLineRects[0]);
+        Graphics?.FillRectangle(brush, LastGuideLineRects[1]);
+        brush.Color = GridData.GuideLineColor;
+        var lineRect = GetCrossLineRect(new(Origin.X, DrawRect.Top), new(Origin.X, DrawRect.Bottom), GridData.GuideLineWidth);
+        Graphics?.FillRectangle(brush, lineRect);
+        LastGuideLineRects[0] = lineRect;
+        lineRect = GetCrossLineRect(new(DrawRect.Left, Origin.Y), new(DrawRect.Right, Origin.Y), GridData.GuideLineWidth);
+        LastGuideLineRects[1] = lineRect;
+        Graphics?.FillRectangle(brush, lineRect);
     }
 
     private void DrawLatticeCells()

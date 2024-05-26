@@ -3,7 +3,7 @@
 using LocalUtilities.TypeGeneral;
 using WarringStates.Graph;
 
-namespace WarringStates.UI;
+namespace WarringStates.UI.Component;
 
 partial class GameDisplayer
 {

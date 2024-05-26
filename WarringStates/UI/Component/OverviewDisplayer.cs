@@ -5,7 +5,7 @@ using WarringStates.Events;
 using WarringStates.Graph;
 using WarringStates.Map;
 
-namespace WarringStates.UI;
+namespace WarringStates.UI.Component;
 
 public class OverviewDisplayer : Displayer
 {
@@ -13,22 +13,23 @@ public class OverviewDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Global.AddListener<GameFormUpdateCallback>(LocalEventTypes.Global.GameFormUpdate, SetSize);
-        LocalEvents.Global.AddListener<GridUpdatedCallback>(LocalEventTypes.Global.GridUpdate, Relocate);
+        LocalEvents.Hub.AddListener<GameFormUpdateArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdate, Relocate);
     }
 
-    private void SetSize(GameFormUpdateCallback args)
+    private void SetBounds(GameFormUpdateArgs args)
     {
         if (Terrain.Overview is null)
-            return;
-        var range = args.ClientSize;
-        var size = FullScreen ? range : new((int)(range.Width * 0.25), (int)(range.Height * 0.25));
-        size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
-        Location = FullScreen ? new((range - size) / 2) : new(range.Width - size.Width, 0);
-        Size = size;
+            Size = new();
+        else
+        {
+            var size = FullScreen ? args.GameRect.Size : new((int)(args.GameRect.Width * 0.25), (int)(args.GameRect.Height * 0.25));
+            Size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
+            Location = FullScreen ? new((args.GameRect.Size - Size) / 2) : new(args.GameRect.Right - Width, args.GameRect.Top);
+        }
     }
 
-    private void Relocate(GridUpdatedCallback args)
+    private void Relocate(GridUpdatedArgs args)
     {
         if (Width is 0 || Height is 0 || Terrain.Overview is null)
             return;

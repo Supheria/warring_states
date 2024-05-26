@@ -1,7 +1,7 @@
-﻿using System.Text;
-using WarringStates.Loop.Model;
+﻿using LocalUtilities.TypeGeneral.Convert;
+using System.Text;
 
-namespace WarringStates.Loop;
+namespace WarringStates.Flow;
 
 public readonly struct Date(int year, int month, int day, DateType type)
 {
@@ -28,7 +28,7 @@ public readonly struct Date(int year, int month, int day, DateType type)
             .Append(ToString(Day))
             .Append(':')
             .Append(' ')
-            .Append(Type)
+            .Append(Type.GetDescription())
             .ToString();
     }
 

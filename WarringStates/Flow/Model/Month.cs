@@ -1,4 +1,4 @@
-﻿namespace WarringStates.Loop.Model;
+﻿namespace WarringStates.Flow.Model;
 
 internal class Month
 {

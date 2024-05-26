@@ -3,7 +3,6 @@
 using AtlasGenerator;
 using AtlasGenerator.Layout;
 using LocalUtilities.SimpleScript.Serialization;
-using WarringStates.Loop;
 using WarringStates.Map;
 using WarringStates.UI;
 
@@ -14,15 +13,6 @@ namespace WarringStates
         //[STAThread]
         static void Main()
         {
-            new TestForm() { TopMost = true }.Show();
-            TimeLoop.Relocate(730000);
-            //TimeLoop.Relocate(11540);
-            TimeLoop.Start();
-            //TimeLoop.Stop();
-
-
-            //Application.Run(new GameForm());
-
             var data = new AtlasData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
             //var data = new AtlasData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Type.Horizontal, 2.25, 100000, 0.66f);
             //var data = new AtlasData(new(1000, 1000), new(8, 8), new(8, 8), RiverLayout.Type.ForwardSlash, 7, 650000, 0.75f);
@@ -39,8 +29,7 @@ namespace WarringStates
 #endif
             atlas.SetTerrainMap();
 
-            //new TestForm() { TopMost = true }.Show();
-            new Form1().Show();
+            new TestForm().Show();
             Application.Run(new GameForm());
         }
     }

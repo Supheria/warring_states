@@ -1,4 +1,4 @@
-﻿namespace WarringStates.Loop.Model;
+﻿namespace WarringStates.Flow.Model;
 
 internal class DateStepper
 {
@@ -13,18 +13,18 @@ internal class DateStepper
     internal DateStepper()
     {
         Year = new(1);
-        Month = new(Year.IsLeap,1);
+        Month = new(Year.IsLeap, 1);
         Day = new(Month.DayMax, 1);
         DateType = DateType.Monday;
     }
 
-    internal void SetStartDate(int spanFrom15821015)
+    internal void SetStartSpan(int spanTo01_01_01)
     {
         Year = new(1);
         Month = new(Year.IsLeap, 1);
         Day = new(Month.DayMax, 1);
         DateType = DateType.Monday;
-        for (var i = 1; i < spanFrom15821015; i++)
+        for (var i = 1; i < spanTo01_01_01; i++)
             StepOn();
     }
 
