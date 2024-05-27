@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
+using System.Collections.Generic;
 using System.Text;
 using WarringStates.Events;
 
@@ -12,12 +13,22 @@ internal class TestForm : ResizeableForm
         FormClosing += OnFormClosing;
         LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Test.AddInfo, info =>
         {
-            InfoMap.Add(new(info.Name, info.Info));
+            InfoList.Add(new(info.Name, info.Info));
             UpdateInfo();
         });
         LocalEvents.Hub.AddListener<List<TestInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         {
-            infoList.ForEach(info => InfoMap.Add(new(info.Name, info.Info)));
+            infoList.ForEach(info => InfoList.Add(new(info.Name, info.Info)));
+            UpdateInfo();
+        });
+        LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Test.AddSingleInfo, info =>
+        {
+            InfoMap[info.Name] = info.Info;
+            UpdateInfo();
+        });
+        LocalEvents.Hub.AddListener<List<TestInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        {
+            infoList.ForEach(info => InfoMap[info.Name] = info.Info);
             UpdateInfo();
         });
     }
@@ -49,11 +60,16 @@ internal class TestForm : ResizeableForm
         public string Info { get; } = info;
     }
 
-    List<KeyValuePair<string, string>> InfoMap { get; } = [];
+    List<KeyValuePair<string, string>> InfoList { get; } = [];
+
+    Dictionary<string, string> InfoMap { get; } = [];
 
     private void UpdateInfo()
     {
-        Text.Text = new StringBuilder().AppendJoin('\0', InfoMap.ToList(), (sb, s) =>
+        var list = new List<KeyValuePair<string, string>>();
+        list.AddRange(InfoMap);
+        list.AddRange(InfoList);
+        Text.Text = new StringBuilder().AppendJoin('\0', list, (sb, s) =>
         {
             sb.Append(s.Key)
             .Append(": ")

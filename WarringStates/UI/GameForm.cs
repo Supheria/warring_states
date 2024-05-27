@@ -67,6 +67,6 @@ public partial class GameForm : ResizeableForm
         var gameRect = new Rectangle(ClientLeft, ClientTop + ToolBrand.Height, ClientWidth, ClientHeight - ToolBrand.Height);
         LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameFormUpdate, new GameFormUpdateArgs(gameRect));
 
-        LocalEvents.ForTest();
+        //LocalEvents.ForTest();
     }
 }

@@ -3,6 +3,7 @@
 using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
 using WarringStates.Graph;
+using WarringStates.Map;
 
 namespace WarringStates.UI.Component;
 
@@ -22,12 +23,17 @@ partial class GameDisplayer
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.LatticePointOnGrid, PointOnCell);
+        LocalEvents.Hub.AddListener<LatticeCell>(LocalEvents.Graph.PointOnCell, PointOnCell);
     }
 
-    private void PointOnCell(Coordinate args)
+    private void PointOnCell(LatticeCell cell)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddInfo, new TestForm.TestInfo("lattice point", args.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("lattice point", cell.LatticePoint.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", cell.OnPart.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", cell.LatticePoint.ToCoordinateWithinTerrainMap().GetTerrain().ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("real rect", cell.RealRect().ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain range", $"{new Size(Terrain.Width * LatticeCell.CellData.EdgeLength, Terrain.Height * LatticeCell.CellData.EdgeLength)}"));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("origin", cell.GridOrigin.ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)

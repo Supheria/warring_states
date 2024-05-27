@@ -13,6 +13,8 @@ public static class LocalEvents
     {
         AddInfo,
         AddInfoList,
+        AddSingleInfo,
+        AddSingleInfoList,
     }
 
     public enum Global
@@ -24,7 +26,7 @@ public static class LocalEvents
         GameImageUpdate,
         GridUpdate,
         PointOnGameImage,
-        LatticePointOnGrid,
+        PointOnCell,
     }
 
     public enum UserInterface

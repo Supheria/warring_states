@@ -74,9 +74,9 @@ public class LatticeGrid
     private void DrawLatticeCells()
     {
         var edgeLength = LatticeCell.CellData.EdgeLength;
-        var dX = DrawRect.X - Origin.X;
-        var dY = DrawRect.Y - Origin.Y;
-        var colOffset = dX / edgeLength - (dX < 0 ? 1 : 0);
+        var dX = -Origin.X;
+        var dY = -Origin.Y;
+        var colOffset = -Origin.X / edgeLength - (dX < 0 ? 1 : 0);
         var rowOffset = dY / edgeLength - (dY < 0 ? 1 : 0);
         var colNumber = DrawRect.Width / edgeLength + (dX == 0 ? 0 : 2);
         var rowNumber = DrawRect.Height / edgeLength + (dY == 0 ? 0 : 2);
@@ -122,8 +122,8 @@ public class LatticeGrid
         }
         void drawCell(Coordinate point, Color color)
         {
-            var cell = new LatticeCell(point);
-            if (cell.CenterRealRect(this).CutRectInRange(DrawRect, out var rect))
+            var cell = new LatticeCell(Origin, point);
+            if (cell.CenterRealRect().CutRectInRange(DrawRect, out var rect))
             {
                 if (!cellBrush.TryGetValue(color, out SolidBrush? brush))
                     brush = cellBrush[color] = new SolidBrush(color);
@@ -154,14 +154,14 @@ public class LatticeGrid
 
     public void RealPointToLatticePoint(Point point)
     {
-        var dX = point.X - Origin.X;
-        var dY = point.Y - Origin.Y;
-        var x = dX / LatticeCell.CellData.EdgeLength;
-        if (dX < 0)
-            x += Terrain.Width;
-        var y = dY / LatticeCell.CellData.EdgeLength;
-        if (dY < 0)
-            y += Terrain.Height;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.LatticePointOnGrid, new Coordinate(x, y));
+        //var dX = point.X - Origin.X;
+        //var dY = point.Y - Origin.Y;
+        //var x = dX / LatticeCell.CellData.EdgeLength;
+        //if (dX < 0)
+        //    x += Terrain.Width;
+        //var y = dY / LatticeCell.CellData.EdgeLength;
+        //if (dY < 0)
+        //    y += Terrain.Height;
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.PointOnCell, new LatticeCell(Origin, point));
     }
 }

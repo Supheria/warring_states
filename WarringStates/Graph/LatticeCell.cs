@@ -1,6 +1,8 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Drawing;
+using WarringStates.Map;
 
 namespace WarringStates.Graph;
 
@@ -8,65 +10,94 @@ public sealed class LatticeCell
 {
     public static CellData CellData { get; set; } = new CellData().LoadFromSimpleScript();
 
-    public Coordinate LatticedPoint { get; set; }
+    public Coordinate LatticePoint { get; }
+
+    public Direction OnPart { get; }
+
+    public Coordinate GridOrigin { get; }
+
+    public LatticeCell(Coordinate gridOrigin, Point point)
+    {
+        GridOrigin = gridOrigin;
+        LatticePoint = PointToLatticePoint(point);
+        OnPart = PointOnCellPart(point);
+    }
+
+    public LatticeCell(Coordinate gridOrigin, Coordinate latticePoint)
+    {
+        GridOrigin = gridOrigin;
+        LatticePoint = latticePoint;
+        OnPart = Direction.None;
+    }
+
+    public Coordinate PointToLatticePoint(Point point)
+    {
+        var dX = point.X - GridOrigin.X;
+        var dY = point.Y - GridOrigin.Y;
+        var x = dX / CellData.EdgeLength;
+        if (dX < 0)
+            x--;
+        var y = dY / CellData.EdgeLength;
+        if (dY < 0)
+            y--;
+        return new(x, y);
+    }
 
     public static int CenterPadding()
     {
         return (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
     }
 
-    public Rectangle RealRect(LatticeGrid grid)
+    public Rectangle RealRect()
     {
-        return new(
-        CellData.EdgeLength * LatticedPoint.X + grid.Origin.X,
-        CellData.EdgeLength * LatticedPoint.Y + grid.Origin.Y,
-        CellData.EdgeLength, CellData.EdgeLength
-        );
+        var sX = CellData.EdgeLength * LatticePoint.X;
+        var x = sX + GridOrigin.X;
+        //if (sX < GridOrigin.X)
+        //    x -= CellData.EdgeLength * Terrain.Width;
+        var sY = CellData.EdgeLength * LatticePoint.Y;
+        var y = sY + GridOrigin.Y;
+        //if (sY < GridOrigin.Y)
+        //    y -= CellData.EdgeLength * Terrain.Height;
+        return new(x, y, CellData.EdgeLength, CellData.EdgeLength);
     }
 
-    public Rectangle CenterRealRect(LatticeGrid grid)
+    public Rectangle CenterRealRect()
     {
-        var cellRect = RealRect(grid);
+        var cellRect = RealRect();
         var nodePadding = CenterPadding();
         return new(
             cellRect.Left + nodePadding, cellRect.Top + nodePadding,
             cellRect.Width - nodePadding * 2, cellRect.Height - nodePadding * 2);
     }
 
-    public LatticeCell() : this(new Coordinate())
+    private Direction PointOnCellPart(Point point)
     {
-
+        if (CellPartsRealRect(Direction.Center).Contains(point))
+            return Direction.Center;
+        if (CellPartsRealRect(Direction.Left).Contains(point))
+            return Direction.Left;
+        if (CellPartsRealRect(Direction.Top).Contains(point))
+            return Direction.Top;
+        if (CellPartsRealRect(Direction.Right).Contains(point))
+            return Direction.Right;
+        if (CellPartsRealRect(Direction.Bottom).Contains(point))
+            return Direction.Bottom;
+        if (CellPartsRealRect(Direction.LeftTop).Contains(point))
+            return Direction.LeftTop;
+        if (CellPartsRealRect(Direction.TopRight).Contains(point))
+            return Direction.TopRight;
+        if (CellPartsRealRect(Direction.BottomRight).Contains(point))
+            return Direction.BottomRight;
+        if (CellPartsRealRect(Direction.LeftBottom).Contains(point))
+            return Direction.LeftBottom;
+        return Direction.None;
     }
 
-    public LatticeCell(Coordinate latticedPoint)
+    private Rectangle CellPartsRealRect(Direction part)
     {
-        LatticedPoint = latticedPoint;
-    }
-    /// <summary>
-    /// 使用真实坐标创建格元
-    /// </summary>
-    /// <param name="realPoint"></param>
-    public LatticeCell(Point realPoint, LatticeGrid grid)
-    {
-        var widthDiff = realPoint.X - grid.Origin.X;
-        var heightDiff = realPoint.Y - grid.Origin.Y;
-        var col = widthDiff / CellData.EdgeLength;
-        var raw = heightDiff / CellData.EdgeLength;
-        if (widthDiff < 0) { col--; }
-        if (heightDiff < 0) { raw--; }
-        LatticedPoint = new(col, raw);
-    }
-
-    /// <summary>
-    /// 格元各个部分的真实坐标矩形
-    /// </summary>
-    /// <param name="part"></param>
-    /// <returns></returns>
-    public Rectangle CellPartsRealRect(Direction part, LatticeGrid grid)
-    {
-        var cellRect = RealRect(grid);
+        var cellRect = RealRect();
         var centerPadding = CenterPadding();
-        var centerRect = CenterRealRect(grid);
+        var centerRect = CenterRealRect();
         return part switch
         {
             Direction.Center => centerRect,
@@ -80,32 +111,5 @@ public sealed class LatticeCell
             Direction.LeftBottom => new(cellRect.Left, centerRect.Bottom, centerPadding, centerPadding),
             _ => Rectangle.Empty,
         };
-    }
-    /// <summary>
-    /// 获取坐标在格元上所处的部分
-    /// </summary>
-    /// <param name="point">坐标</param>
-    /// <returns></returns>
-    public Direction PointOnCellPart(Point point, LatticeGrid grid)
-    {
-        if (CellPartsRealRect(Direction.Center, grid).Contains(point))
-            return Direction.Center;
-        if (CellPartsRealRect(Direction.Left, grid).Contains(point))
-            return Direction.Left;
-        if (CellPartsRealRect(Direction.Top, grid).Contains(point))
-            return Direction.Top;
-        if (CellPartsRealRect(Direction.Right, grid).Contains(point))
-            return Direction.Right;
-        if (CellPartsRealRect(Direction.Bottom, grid).Contains(point))
-            return Direction.Bottom;
-        if (CellPartsRealRect(Direction.LeftTop, grid).Contains(point))
-            return Direction.LeftTop;
-        if (CellPartsRealRect(Direction.TopRight, grid).Contains(point))
-            return Direction.TopRight;
-        if (CellPartsRealRect(Direction.BottomRight, grid).Contains(point))
-            return Direction.BottomRight;
-        if (CellPartsRealRect(Direction.LeftBottom, grid).Contains(point))
-            return Direction.LeftBottom;
-        return Direction.None;
     }
 }
