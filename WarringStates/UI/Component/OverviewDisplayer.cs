@@ -35,23 +35,16 @@ public class OverviewDisplayer : Displayer
             return;
         Relocate();
         Image = Terrain.Overview.CopyToNewSize(Size);
-        var edgeLength = LatticeCell.CellData.EdgeLength;
-        var width = args.DrawRect.Width / edgeLength;
-        var height = args.DrawRect.Height / edgeLength;
-        var x = Terrain.Width - args.Origin.X / (double)edgeLength/* - width / 2*/;
-        var y = Terrain.Height - args.Origin.Y / (double)edgeLength/* - height / 2*/;
+        var width = args.DrawRect.Width / LatticeCell.CellData.EdgeLength;
+        var height = args.DrawRect.Height / LatticeCell.CellData.EdgeLength;
+        var x = Terrain.Width - args.Origin.X / /*(double)*/LatticeCell.CellData.EdgeLength;
+        var y = Terrain.Height - args.Origin.Y / /*(double)*/LatticeCell.CellData.EdgeLength;
         var widthRatio = Terrain.Width / (double)Width;
         var heightRatio = Terrain.Height / (double)Height;
         var rect = new Rectangle((x / widthRatio).ToInt(), (y / heightRatio).ToInt(), (width / widthRatio).ToInt(), (height / heightRatio).ToInt());
-        var g = Graphics.FromImage(Image);
-        //var edges = rect.CutRectLoopEdgesInRange(new(new(0, 0), Size));
-        //foreach (var edge in edges)
-        //    g.DrawLine(Pens.Red, edge.Starter, edge.Ender);
-        //g.DrawRectangle(Pens.Red, rect);
+        using var g = Graphics.FromImage(Image);
         var rects = rect.CutRectLoopRectsInRange(new(new(0, 0), Size));
         rects.ForEach(r => g.DrawRectangle(Pens.Red, r));
-        g.Flush();
-        g.Dispose();
         Invalidate();
     }
 }

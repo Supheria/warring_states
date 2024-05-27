@@ -28,12 +28,9 @@ partial class GameDisplayer
 
     private void PointOnCell(LatticeCell cell)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("lattice point", cell.LatticePoint.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", cell.OnPart.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", cell.LatticePoint.ToCoordinateWithinTerrainMap().GetTerrain().ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("real rect", cell.RealRect().ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain range", $"{new Size(Terrain.Width * LatticeCell.CellData.EdgeLength, Terrain.Height * LatticeCell.CellData.EdgeLength)}"));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("origin", cell.GridOrigin.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain point", cell.TerrainPoint.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", cell.TerrainPoint.GetTerrain().ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", cell.ReadPointOnPart.ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)

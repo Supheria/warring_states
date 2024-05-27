@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing;
 using WarringStates.Map;
 
 namespace WarringStates.Graph;
@@ -10,106 +9,101 @@ public sealed class LatticeCell
 {
     public static CellData CellData { get; set; } = new CellData().LoadFromSimpleScript();
 
-    public Coordinate LatticePoint { get; }
+    Coordinate GridOrigin { get; }
 
-    public Direction OnPart { get; }
+    Coordinate LatticePoint { get; }
 
-    public Coordinate GridOrigin { get; }
+    int CenterPadding { get; }
 
-    public LatticeCell(Coordinate gridOrigin, Point point)
-    {
-        GridOrigin = gridOrigin;
-        LatticePoint = PointToLatticePoint(point);
-        OnPart = PointOnCellPart(point);
-    }
+    public Coordinate TerrainPoint { get; }
+
+    public Direction ReadPointOnPart { get; } = Direction.None;
+
+    public Rectangle RealRect { get; }
+
+    public Rectangle CenterRealRect { get; }
 
     public LatticeCell(Coordinate gridOrigin, Coordinate latticePoint)
     {
         GridOrigin = gridOrigin;
         LatticePoint = latticePoint;
-        OnPart = Direction.None;
+        TerrainPoint = GetTerrainPoint(LatticePoint);
+        CenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+        RealRect = GetRealRect(GridOrigin, LatticePoint);
+        CenterRealRect = GetCenterRealRect(RealRect, CenterPadding);
     }
 
-    public Coordinate PointToLatticePoint(Point point)
+    public LatticeCell(Coordinate gridOrigin, Point realPoint)
     {
-        var dX = point.X - GridOrigin.X;
-        var dY = point.Y - GridOrigin.Y;
+        GridOrigin = gridOrigin;
+        LatticePoint = GetLatticePoint(GridOrigin, realPoint);
+        TerrainPoint = GetTerrainPoint(LatticePoint);
+        CenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+        RealRect = GetRealRect(GridOrigin, LatticePoint);
+        CenterRealRect = GetCenterRealRect(RealRect, CenterPadding);
+        ReadPointOnPart = GetRealPointOnPart(realPoint, RealRect, CenterRealRect, CenterPadding);
+    }
+
+    private static Coordinate GetLatticePoint(Coordinate gridOrigin, Point realPoint)
+    {
+        var dX = realPoint.X - gridOrigin.X;
         var x = dX / CellData.EdgeLength;
         if (dX < 0)
             x--;
+        var dY = realPoint.Y - gridOrigin.Y;
         var y = dY / CellData.EdgeLength;
         if (dY < 0)
             y--;
         return new(x, y);
     }
 
-    public static int CenterPadding()
+    private static Coordinate GetTerrainPoint(Coordinate latticePoint)
     {
-        return (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+        if (Terrain.Width is 0 || Terrain.Height is 0)
+            return new();
+        var modX = latticePoint.X % Terrain.Width;
+        var modY = latticePoint.Y % Terrain.Height;
+        var x = modX < 0 ? Terrain.Width + modX : modX;
+        var y = modY < 0 ? Terrain.Height + modY : modY;
+        return new(x, y);
     }
 
-    public Rectangle RealRect()
+    private static Rectangle GetRealRect(Coordinate gridOrigin, Coordinate latticePoint)
     {
-        var sX = CellData.EdgeLength * LatticePoint.X;
-        var x = sX + GridOrigin.X;
-        //if (sX < GridOrigin.X)
-        //    x -= CellData.EdgeLength * Terrain.Width;
-        var sY = CellData.EdgeLength * LatticePoint.Y;
-        var y = sY + GridOrigin.Y;
-        //if (sY < GridOrigin.Y)
-        //    y -= CellData.EdgeLength * Terrain.Height;
+        var sX = CellData.EdgeLength * latticePoint.X;
+        var x = sX + gridOrigin.X;
+        var sY = CellData.EdgeLength * latticePoint.Y;
+        var y = sY + gridOrigin.Y;
         return new(x, y, CellData.EdgeLength, CellData.EdgeLength);
     }
 
-    public Rectangle CenterRealRect()
+    private static Rectangle GetCenterRealRect(Rectangle realRect, int centerPadding)
     {
-        var cellRect = RealRect();
-        var nodePadding = CenterPadding();
         return new(
-            cellRect.Left + nodePadding, cellRect.Top + nodePadding,
-            cellRect.Width - nodePadding * 2, cellRect.Height - nodePadding * 2);
+            realRect.Left + centerPadding, realRect.Top + centerPadding,
+            realRect.Width - centerPadding * 2, realRect.Height - centerPadding * 2);
     }
 
-    private Direction PointOnCellPart(Point point)
+    private static Direction GetRealPointOnPart(Point realpoint, Rectangle realRect, Rectangle centerRealRect, int centerPadding)
     {
-        if (CellPartsRealRect(Direction.Center).Contains(point))
+        if (centerRealRect.Contains(realpoint))
             return Direction.Center;
-        if (CellPartsRealRect(Direction.Left).Contains(point))
+        if (new Rectangle(realRect.Left, centerRealRect.Top, centerPadding, centerRealRect.Height).Contains(realpoint))
             return Direction.Left;
-        if (CellPartsRealRect(Direction.Top).Contains(point))
+        if (new Rectangle(centerRealRect.Left, realRect.Top, centerRealRect.Width, centerPadding).Contains(realpoint))
             return Direction.Top;
-        if (CellPartsRealRect(Direction.Right).Contains(point))
+        if (new Rectangle(centerRealRect.Right, centerRealRect.Top, centerPadding, centerRealRect.Height).Contains(realpoint))
             return Direction.Right;
-        if (CellPartsRealRect(Direction.Bottom).Contains(point))
+        if (new Rectangle(centerRealRect.Left, centerRealRect.Bottom, centerRealRect.Width, centerPadding).Contains(realpoint))
             return Direction.Bottom;
-        if (CellPartsRealRect(Direction.LeftTop).Contains(point))
+        if (new Rectangle(realRect.Left, realRect.Top, centerPadding, centerPadding).Contains(realpoint))
             return Direction.LeftTop;
-        if (CellPartsRealRect(Direction.TopRight).Contains(point))
+        if (new Rectangle(centerRealRect.Right, realRect.Top, centerPadding, centerPadding).Contains(realpoint))
             return Direction.TopRight;
-        if (CellPartsRealRect(Direction.BottomRight).Contains(point))
+        if (new Rectangle(centerRealRect.Right, centerRealRect.Bottom, centerPadding, centerPadding).Contains(realpoint))
             return Direction.BottomRight;
-        if (CellPartsRealRect(Direction.LeftBottom).Contains(point))
+        if (new Rectangle(realRect.Left, centerRealRect.Bottom, centerPadding, centerPadding).Contains(realpoint))
             return Direction.LeftBottom;
         return Direction.None;
-    }
-
-    private Rectangle CellPartsRealRect(Direction part)
-    {
-        var cellRect = RealRect();
-        var centerPadding = CenterPadding();
-        var centerRect = CenterRealRect();
-        return part switch
-        {
-            Direction.Center => centerRect,
-            Direction.Left => new(cellRect.Left, centerRect.Top, centerPadding, centerRect.Height),
-            Direction.Top => new(centerRect.Left, cellRect.Top, centerRect.Width, centerPadding),
-            Direction.Right => new(centerRect.Right, centerRect.Top, centerPadding, centerRect.Height),
-            Direction.Bottom => new(centerRect.Left, centerRect.Bottom, centerRect.Width, centerPadding),
-            Direction.LeftTop => new(cellRect.Left, cellRect.Top, centerPadding, centerPadding),
-            Direction.TopRight => new(centerRect.Right, cellRect.Top, centerPadding, centerPadding),
-            Direction.BottomRight => new(centerRect.Right, centerRect.Bottom, centerPadding, centerPadding),
-            Direction.LeftBottom => new(cellRect.Left, centerRect.Bottom, centerPadding, centerPadding),
-            _ => Rectangle.Empty,
-        };
     }
 }
