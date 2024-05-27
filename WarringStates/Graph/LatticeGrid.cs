@@ -4,9 +4,13 @@ using WarringStates.Events;
 
 namespace WarringStates.Graph;
 
-public partial class LatticeGrid
+public partial class LatticeGrid : ISsSerializable
 {
-    public GridData GridData { get; set; } = new GridData().LoadFromSimpleScript();
+    public string LocalName => nameof(LatticeGrid);
+
+    public GridData GridData { get; set; } = new();
+
+    public static CellData CellData { get; set; } = new();
 
     Rectangle DrawRect { get; set; }
 
@@ -22,6 +26,33 @@ public partial class LatticeGrid
 
     public void GetLatticeCell(Point realPoint)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.PointOnCell, new LatticeCell(Origin, realPoint));
+        var latticeCell = RealPointToLatticePoint(realPoint);
+        var cell = new Cell(latticeCell);
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.PointOnCell, new PointOnCellArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint)));
+    }
+
+    public Coordinate RealPointToLatticePoint(Point realPoint)
+    {
+        var dX = realPoint.X - Origin.X;
+        var x = dX / CellData.EdgeLength;
+        if (dX < 0)
+            x--;
+        var dY = realPoint.Y - Origin.Y;
+        var y = dY / CellData.EdgeLength;
+        if (dY < 0)
+            y--;
+        return new(x, y);
+    }
+
+    public void Serialize(SsSerializer serializer)
+    {
+        serializer.WriteObject(GridData);
+        serializer.WriteObject(CellData);
+    }
+
+    public void Deserialize(SsDeserializer deserializer)
+    {
+        deserializer.ReadObject(GridData);
+        deserializer.ReadObject(CellData);
     }
 }

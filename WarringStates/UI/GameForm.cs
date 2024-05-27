@@ -47,12 +47,14 @@ public partial class GameForm : ResizeableForm
     private void SaveForm(SsSerializer serializer)
     {
         serializer.WriteTag(nameof(SpanFlow.CurrentSpan), SpanFlow.CurrentSpan.ToString());
+        serializer.WriteObject(Grid);
     }
 
     private void LoadForm(SsDeserializer deserializer)
     {
         var startSpan = deserializer.ReadTag(nameof(SpanFlow.CurrentSpan), int.Parse);
         SpanFlow.Relocate(startSpan);
+        deserializer.ReadObject(Grid);
     }
 
     private void GameForm_Shown(object? sender, EventArgs e)

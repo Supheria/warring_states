@@ -13,7 +13,7 @@ partial class GameDisplayer
 
     Point DragStartPoint { get; set; } = new();
 
-    static int DragMoveSensibility => LatticeCell.CellData.EdgeLength;
+    static int DragMoveSensibility => LatticeGrid.CellData.EdgeLength;
 
     public OnComponentRunning? OnDragImage { get; set; }
 
@@ -23,14 +23,13 @@ partial class GameDisplayer
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.Hub.AddListener<LatticeCell>(LocalEvents.Graph.PointOnCell, PointOnCell);
+        LocalEvents.Hub.AddListener<PointOnCellArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
     }
 
-    private void PointOnCell(LatticeCell cell)
+    private void PointOnCell(PointOnCellArgs args)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain point", cell.TerrainPoint.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", cell.TerrainPoint.GetTerrain().ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", cell.ReadPointOnPart.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", args.TerrainPoint.GetTerrain().ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", args.PointOnCellPart.ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)
@@ -70,9 +69,9 @@ partial class GameDisplayer
     {
         var diffInWidth = args.Location.X - Width / 2;
         var diffInHeight = args.Location.Y - Height / 2;
-        var dX = diffInWidth / LatticeCell.CellData.EdgeLength * Width / 200;
-        var dY = diffInHeight / LatticeCell.CellData.EdgeLength * Height / 200;
-        LatticeCell.CellData.EdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
+        var dX = diffInWidth / LatticeGrid.CellData.EdgeLength * Width / 200;
+        var dY = diffInHeight / LatticeGrid.CellData.EdgeLength * Height / 200;
+        LatticeGrid.CellData.EdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
         Relocate(dX, dY);
     }
 }

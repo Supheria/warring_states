@@ -35,10 +35,10 @@ public class OverviewDisplayer : Displayer
             return;
         Relocate();
         Image = Terrain.Overview.CopyToNewSize(Size);
-        var width = args.DrawRect.Width / LatticeCell.CellData.EdgeLength;
-        var height = args.DrawRect.Height / LatticeCell.CellData.EdgeLength;
-        var x = Terrain.Width - args.Origin.X / /*(double)*/LatticeCell.CellData.EdgeLength;
-        var y = Terrain.Height - args.Origin.Y / /*(double)*/LatticeCell.CellData.EdgeLength;
+        var width = args.DrawRect.Width / LatticeGrid.CellData.EdgeLength;
+        var height = args.DrawRect.Height / LatticeGrid.CellData.EdgeLength;
+        var x = Terrain.Width - args.Origin.X / /*(double)*/LatticeGrid.CellData.EdgeLength;
+        var y = Terrain.Height - args.Origin.Y / /*(double)*/LatticeGrid.CellData.EdgeLength;
         var widthRatio = Terrain.Width / (double)Width;
         var heightRatio = Terrain.Height / (double)Height;
         var rect = new Rectangle((x / widthRatio).ToInt(), (y / heightRatio).ToInt(), (width / widthRatio).ToInt(), (height / heightRatio).ToInt());
