@@ -44,6 +44,11 @@ public sealed class LatticeCell
         ReadPointOnPart = GetRealPointOnPart(realPoint, RealRect, CenterRealRect, CenterPadding);
     }
 
+    public static Coordinate ToLatticePoint(Coordinate gridOrigin, Point realPoint)
+    {
+        return GetLatticePoint(gridOrigin, realPoint);
+    }
+
     private static Coordinate GetLatticePoint(Coordinate gridOrigin, Point realPoint)
     {
         var dX = realPoint.X - gridOrigin.X;

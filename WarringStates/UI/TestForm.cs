@@ -30,6 +30,17 @@ internal class TestForm : ResizeableForm
             infoList.ForEach(info => InfoMap[info.Name] = info.Info);
             UpdateInfo();
         });
+        LocalEvents.Hub.AddListener<TestInfo>(LocalEvents.Test.AddInfoForMax, info =>
+        {
+            if (InfoMap.TryGetValue(info.Name, out var str))
+            {
+                var value = int.Parse(str);
+                InfoMap[info.Name] = Math.Max(value, int.Parse(info.Info)).ToString();
+            }
+            else
+                InfoMap[info.Name] = info.Info;
+            UpdateInfo();
+        });
     }
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)

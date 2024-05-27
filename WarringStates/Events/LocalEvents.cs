@@ -15,6 +15,7 @@ public static class LocalEvents
         AddInfoList,
         AddSingleInfo,
         AddSingleInfoList,
+        AddInfoForMax
     }
 
     public enum Global
