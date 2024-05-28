@@ -2,9 +2,9 @@
 
 namespace WarringStates.Events;
 
-public sealed class PointOnCellArgs(Coordinate terrainPoint, Direction realPointOnPart)
+public sealed class PointOnCellArgs(Coordinate terrainPoint, Directions realPointOnPart)
 {
     public Coordinate TerrainPoint { get; } = terrainPoint;
 
-    public Direction PointOnCellPart { get; } = realPointOnPart;
+    public Directions PointOnCellPart { get; } = realPointOnPart;
 }

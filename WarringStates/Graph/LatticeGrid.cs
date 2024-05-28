@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
 
 namespace WarringStates.Graph;
@@ -10,7 +11,25 @@ public partial class LatticeGrid : ISsSerializable
 
     public GridData GridData { get; set; } = new();
 
-    public static CellData CellData { get; set; } = new();
+    static CellData CellData { get; set; } = new();
+
+    public static int CellEdgeLength
+    {
+        get => CellData.EdgeLength;
+        set
+        {
+            CellData.EdgeLength = value;
+            CellCenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+            CellCenterSize = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
+            CellCenterSizeAddOnePadding = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
+        }
+    }
+
+    static int CellCenterPadding { get; set; } = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+
+    static Size CellCenterSize { get; set; } = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
+
+    static Size CellCenterSizeAddOnePadding { get; set; } = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
 
     Rectangle DrawRect { get; set; }
 

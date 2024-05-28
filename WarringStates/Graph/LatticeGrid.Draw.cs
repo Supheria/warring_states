@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
 using WarringStates.Map;
@@ -14,9 +15,11 @@ partial class LatticeGrid
 
     Rectangle[] LastGuideLineRects { get; } = new Rectangle[2];
 
-    int LastCellEdgeLength { get; set; } = CellData.EdgeLength;
+    int LastCellEdgeLength { get; set; } = CellEdgeLength;
 
     Color BackColor { get; set; }
+
+    SolidBrush BackBrush { get; } = new(Color.Transparent);
 
     Dictionary<Color, SolidBrush> CellBrush { get; } = [];
 
@@ -32,21 +35,22 @@ partial class LatticeGrid
         DrawRect = new(new(0, 0), args.Source.Size);
         Graphics = Graphics.FromImage(args.Source);
         BackColor = args.BackColor;
+        BackBrush.Color = BackColor;
         DrawGrid();
         Graphics.Flush();
         Graphics.Dispose();
         LastDrawRect = DrawRect;
-        LastCellEdgeLength = CellData.EdgeLength;
+        LastCellEdgeLength = CellEdgeLength;
         LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdate, new GridUpdatedArgs(DrawRect, Origin));
     }
 
     private void ResetOrigin(Coordinate offset)
     {
-        var width = Terrain.Width * CellData.EdgeLength;
+        var width = Atlas.Width * CellEdgeLength;
         var x = (Origin.X + offset.X) % width;
         if (x < 0)
             x += width;
-        var height = Terrain.Height * CellData.EdgeLength;
+        var height = Atlas.Height * CellEdgeLength;
         var y = (Origin.Y + offset.Y) % height;
         if (y < 0)
             y += height;
@@ -56,33 +60,53 @@ partial class LatticeGrid
     private void DrawGrid()
     {
         Cell.GridOrigin = Origin;
-        LatticeSize = new(DrawRect.Width / CellData.EdgeLength + 2, DrawRect.Height / CellData.EdgeLength + 2);
-        LatticeOffset = new(Origin.X / CellData.EdgeLength + 1, Origin.Y / CellData.EdgeLength + 1);
+        LatticeSize = new(DrawRect.Width / CellEdgeLength + 2, DrawRect.Height / CellEdgeLength + 2);
+        LatticeOffset = new(Origin.X / CellEdgeLength + 1, Origin.Y / CellEdgeLength + 1);
         var count = 0;
         //
         // redraw all
         //
         if (DrawRect != LastDrawRect ||
-            OriginOffset.X % CellData.EdgeLength != 0 || OriginOffset.Y % CellData.EdgeLength != 0 ||
-            LastCellEdgeLength != CellData.EdgeLength)
+            OriginOffset.X % CellEdgeLength != 0 || OriginOffset.Y % CellEdgeLength != 0 ||
+            LastCellEdgeLength != CellEdgeLength)
         {
             Graphics?.Clear(BackColor);
-            DrawGuideLine();
             for (var i = 0; i < LatticeSize.Width; i++)
             {
                 for (var j = 0; j < LatticeSize.Height; j++)
                 {
                     var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
-                    var color = cell.TerrainPoint.GetTerrain().GetColor();
-                    if (!cell.CenterRealRect.CutRectInRange(DrawRect, out var rect))
+                    var land = cell.TerrainPoint.GetLand();
+                    //var rect = land is SourceLand ? cell.RealRect : cell.CenterRealRect;
+                    Rectangle rect;
+                    if (land is SourceLand sourceLand)
+                    {
+                        rect = sourceLand.Points[cell.TerrainPoint] switch
+                        {
+                            Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+                            Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+                            Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+                            Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+                            Directions.Center => cell.RealRect,
+                            Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+                            Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+                            Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+                            Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+                            _ => new()
+                        };
+                    }
+                    else
+                        rect = cell.CenterRealRect;
+                    if (!rect.CutRectInRange(DrawRect, out var r))
                         continue;
-                    if (!CellBrush.TryGetValue(color, out var brush))
-                        brush = CellBrush[color] = new SolidBrush(color);
-                    Graphics?.FillRectangle(brush, rect.Value);
+                    if (!CellBrush.TryGetValue(land.Color, out var brush))
+                        brush = CellBrush[land.Color] = new SolidBrush(land.Color);
+                    Graphics?.FillRectangle(brush, r.Value);
                     count++;
                 }
             }
             LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (all)", count.ToString()));
+            DrawGuideLine();
             return;
         }
         //
@@ -91,8 +115,8 @@ partial class LatticeGrid
         GridData.GuideLineBrush.Color = BackColor;
         Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[0]);
         Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[1]);
-        DrawGuideLine();
         DrawLatticeCells();
+        DrawGuideLine();
     }
 
     private void DrawGuideLine()
@@ -124,23 +148,52 @@ partial class LatticeGrid
     private void DrawLatticeCells()
     {
         var count = 0;
-        var dX = OriginOffset.X / CellData.EdgeLength;
-        var dY = OriginOffset.Y / CellData.EdgeLength;
+        var dX = OriginOffset.X / CellEdgeLength;
+        var dY = OriginOffset.Y / CellEdgeLength;
         for (var i = 0; i < LatticeSize.Width; i++)
         {
             for (var j = 0; j < LatticeSize.Height; j++)
             {
                 var point = new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height);
                 var cell = new Cell(point);
-                var color = cell.TerrainPoint.GetTerrain().GetColor();
+                var land = cell.TerrainPoint.GetLand();
                 var lastCell = new Cell(new(point.X + dX, point.Y + dY));
-                if (lastCell.TerrainPoint.GetTerrain().GetColor() == color)
+                var lastLand = lastCell.TerrainPoint.GetLand();
+                Rectangle rect;
+                if (land is SourceLand sourceLand)
+                {
+                    Graphics?.FillRectangle(BackBrush, cell.RealRect);
+                    count++;
+                    rect = sourceLand.Points[cell.TerrainPoint] switch
+                    {
+                        Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+                        Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+                        Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+                        Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+                        Directions.Center => cell.RealRect,
+                        Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+                        Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+                        Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+                        Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+                        _ => new()
+                    };
+                }
+                else
+                {
+                    if (land.Type.Equals(lastLand.Type))
+                        continue;
+                    if (lastLand is SourceLand)
+                    {
+                        Graphics?.FillRectangle(BackBrush, cell.RealRect);
+                        count++;
+                    }
+                    rect = cell.CenterRealRect;
+                }
+                if (!rect.CutRectInRange(DrawRect, out var r))
                     continue;
-                if (!cell.CenterRealRect.CutRectInRange(DrawRect, out var rect))
-                    continue;
-                if (!CellBrush.TryGetValue(color, out var brush))
-                    brush = CellBrush[color] = new SolidBrush(color);
-                Graphics?.FillRectangle(brush, rect.Value);
+                if (!CellBrush.TryGetValue(land.Color, out var brush))
+                    brush = CellBrush[land.Color] = new SolidBrush(land.Color);
+                Graphics?.FillRectangle(brush, r.Value);
                 count++;
             }
         }

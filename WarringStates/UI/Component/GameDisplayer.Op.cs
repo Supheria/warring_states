@@ -13,7 +13,7 @@ partial class GameDisplayer
 
     Point DragStartPoint { get; set; } = new();
 
-    static int DragMoveSensibility => LatticeGrid.CellData.EdgeLength;
+    static int DragMoveSensibility => LatticeGrid.CellEdgeLength;
 
     public OnComponentRunning? OnDragImage { get; set; }
 
@@ -28,8 +28,12 @@ partial class GameDisplayer
 
     private void PointOnCell(PointOnCellArgs args)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", args.TerrainPoint.GetTerrain().ToString()));
+        var land = args.TerrainPoint.GetLand();
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("point", args.TerrainPoint.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", land.Type.ToString()));
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", args.PointOnCellPart.ToString()));
+        if (land is SourceLand sourceLand)
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("land part", sourceLand.Points[args.TerrainPoint].ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)
@@ -69,9 +73,9 @@ partial class GameDisplayer
     {
         var diffInWidth = args.Location.X - Width / 2;
         var diffInHeight = args.Location.Y - Height / 2;
-        var dX = diffInWidth / LatticeGrid.CellData.EdgeLength * Width / 200;
-        var dY = diffInHeight / LatticeGrid.CellData.EdgeLength * Height / 200;
-        LatticeGrid.CellData.EdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
+        var dX = diffInWidth / LatticeGrid.CellEdgeLength * Width / 200;
+        var dY = diffInHeight / LatticeGrid.CellEdgeLength * Height / 200;
+        LatticeGrid.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
         Relocate(dX, dY);
     }
 }

@@ -19,28 +19,28 @@ public class OverviewDisplayer : Displayer
 
     private void SetBounds(GameDisplayerUpdateArgs args)
     {
-        if (Terrain.Overview is null)
+        if (Atlas.Overview is null)
             Size = new();
         else
         {
             var size = FullScreen ? args.DisplayRect.Size : new((int)(args.DisplayRect.Width * 0.25), (int)(args.DisplayRect.Height * 0.25));
-            Size = Terrain.Overview.Size.ScaleSizeOnRatio(size);
+            Size = Atlas.Overview.Size.ScaleSizeOnRatio(size);
             Location = FullScreen ? new((args.DisplayRect.Size - Size) / 2) : new(args.DisplayRect.Right - Width, args.DisplayRect.Top);
         }
     }
 
     private void Relocate(GridUpdatedArgs args)
     {
-        if (Width is 0 || Height is 0 || Terrain.Overview is null)
+        if (Width is 0 || Height is 0 || Atlas.Overview is null)
             return;
         Relocate();
-        Image = Terrain.Overview.CopyToNewSize(Size);
-        var width = args.DrawRect.Width / LatticeGrid.CellData.EdgeLength;
-        var height = args.DrawRect.Height / LatticeGrid.CellData.EdgeLength;
-        var x = Terrain.Width - args.Origin.X / /*(double)*/LatticeGrid.CellData.EdgeLength;
-        var y = Terrain.Height - args.Origin.Y / /*(double)*/LatticeGrid.CellData.EdgeLength;
-        var widthRatio = Terrain.Width / (double)Width;
-        var heightRatio = Terrain.Height / (double)Height;
+        Image = Atlas.Overview.CopyToNewSize(Size);
+        var width = args.DrawRect.Width / LatticeGrid.CellEdgeLength;
+        var height = args.DrawRect.Height / LatticeGrid.CellEdgeLength;
+        var x = Atlas.Width - args.Origin.X / /*(double)*/LatticeGrid.CellEdgeLength;
+        var y = Atlas.Height - args.Origin.Y / /*(double)*/LatticeGrid.CellEdgeLength;
+        var widthRatio = Atlas.Width / (double)Width;
+        var heightRatio = Atlas.Height / (double)Height;
         var rect = new Rectangle((x / widthRatio).ToInt(), (y / heightRatio).ToInt(), (width / widthRatio).ToInt(), (height / heightRatio).ToInt());
         using var g = Graphics.FromImage(Image);
         var rects = rect.CutRectLoopRectsInRange(new(new(0, 0), Size));

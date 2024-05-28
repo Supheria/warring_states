@@ -19,7 +19,7 @@ public class InfoBrandDisplayer : Displayer
         Relocate();
         using var g = Graphics.FromImage(Image);
         g.Clear(Color.Gray);
-        var info = $"\n水源{Terrain.Type.Stream.GetCount()}\n平原{Terrain.Type.Plain.GetCount()}\n树林{Terrain.Type.Woodland.GetCount()}\n山地{Terrain.Type.Hill.GetCount()}";
+        var info = $"\n水源{SingleLand.Types.Stream.GetLandTypeCount()}\n平原{SingleLand.Types.Plain.GetLandTypeCount()}\n树林{SingleLand.Types.Wood.GetLandTypeCount()}\n山地{SingleLand.Types.Hill.GetLandTypeCount()}";
         g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
         Invalidate();
     }
