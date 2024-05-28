@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
 using WarringStates.Map;
@@ -77,24 +76,9 @@ partial class LatticeGrid
                 {
                     var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
                     var land = cell.TerrainPoint.GetLand();
-                    //var rect = land is SourceLand ? cell.RealRect : cell.CenterRealRect;
                     Rectangle rect;
                     if (land is SourceLand sourceLand)
-                    {
-                        rect = sourceLand.Points[cell.TerrainPoint] switch
-                        {
-                            Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-                            Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-                            Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-                            Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-                            Directions.Center => cell.RealRect,
-                            Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-                            Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-                            Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-                            Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-                            _ => new()
-                        };
-                    }
+                        rect = GetSourceLandCellRect(sourceLand[cell.TerrainPoint], cell);
                     else
                         rect = cell.CenterRealRect;
                     if (!rect.CutRectInRange(DrawRect, out var r))
@@ -117,6 +101,23 @@ partial class LatticeGrid
         Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[1]);
         DrawLatticeCells();
         DrawGuideLine();
+    }
+
+    private Rectangle GetSourceLandCellRect(Directions direction, Cell cell)
+    {
+        return direction switch
+        {
+            Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+            Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+            Directions.Center => cell.RealRect,
+            Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+            Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+            Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+            _ => new()
+        };
     }
 
     private void DrawGuideLine()
@@ -148,35 +149,23 @@ partial class LatticeGrid
     private void DrawLatticeCells()
     {
         var count = 0;
-        var dX = OriginOffset.X / CellEdgeLength;
-        var dY = OriginOffset.Y / CellEdgeLength;
+        var diff = OriginOffset / CellEdgeLength;
         for (var i = 0; i < LatticeSize.Width; i++)
         {
             for (var j = 0; j < LatticeSize.Height; j++)
             {
-                var point = new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height);
-                var cell = new Cell(point);
+                var cell = new Cell(new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height));
                 var land = cell.TerrainPoint.GetLand();
-                var lastCell = new Cell(new(point.X + dX, point.Y + dY));
-                var lastLand = lastCell.TerrainPoint.GetLand();
+                var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
                 Rectangle rect;
                 if (land is SourceLand sourceLand)
                 {
-                    Graphics?.FillRectangle(BackBrush, cell.RealRect);
-                    count++;
-                    rect = sourceLand.Points[cell.TerrainPoint] switch
+                    if (sourceLand[cell.TerrainPoint] is not Directions.Center)
                     {
-                        Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-                        Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-                        Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-                        Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-                        Directions.Center => cell.RealRect,
-                        Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-                        Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-                        Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-                        Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-                        _ => new()
-                    };
+                        Graphics?.FillRectangle(BackBrush, cell.RealRect);
+                        count++;
+                    }
+                    rect = GetSourceLandCellRect(sourceLand[cell.TerrainPoint], cell);
                 }
                 else
                 {

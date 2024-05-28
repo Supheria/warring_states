@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Map;
 
 namespace WarringStates.Graph;
@@ -10,6 +9,8 @@ partial class LatticeGrid
     {
         public static Coordinate GridOrigin { get; set; } = new();
 
+        public Coordinate LatticePoint { get; }
+
         public Rectangle RealRect { get; }
 
         public Rectangle CenterRealRect { get; }
@@ -18,7 +19,8 @@ partial class LatticeGrid
 
         public Cell(Coordinate latticePoint)
         {
-            RealRect = GetRealRect(latticePoint);
+            LatticePoint = latticePoint;
+            RealRect = GetRealRect(LatticePoint);
             CenterRealRect = GetCenterRealRect(RealRect);
             TerrainPoint = latticePoint.SetPointWithinTerrainMap();
         }

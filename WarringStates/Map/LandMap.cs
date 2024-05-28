@@ -64,7 +64,7 @@ internal class LandMap()
         LandCount[SingleLand.Types.Plain] = altitudeMap.Area - LandCount.Sum(x => x.Key is SingleLand.Types.Plain ? 0 : x.Value);
         foreach (var sourceLand in sourceLands)
         {
-            foreach(var point in sourceLand.Points.Keys)
+            foreach (var point in sourceLand.GetPoints())
             {
                 if (LandPoints.TryGetValue(point, out var land) && land is SingleLand singleLand)
                     LandCount[singleLand.Type]--;

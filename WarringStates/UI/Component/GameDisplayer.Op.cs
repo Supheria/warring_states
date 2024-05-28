@@ -33,7 +33,7 @@ partial class GameDisplayer
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", land.Type.ToString()));
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", args.PointOnCellPart.ToString()));
         if (land is SourceLand sourceLand)
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("land part", sourceLand.Points[args.TerrainPoint].ToString()));
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("land part", sourceLand[args.TerrainPoint].ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)

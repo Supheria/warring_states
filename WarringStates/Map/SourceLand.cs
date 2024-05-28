@@ -42,7 +42,7 @@ public partial class SourceLand : ILand, ISsSerializable
 
     public Color Color { get; private set; }
 
-    public Dictionary<Coordinate, Directions> Points { get; private set; }
+    Dictionary<Coordinate, Directions> Points { get; set; }
 
     private SourceLand(Dictionary<Coordinate, Directions> points, Types type, List<Product> products)
     {
@@ -55,6 +55,13 @@ public partial class SourceLand : ILand, ISsSerializable
     public SourceLand() : this([], Types.None, [])
     {
 
+    }
+
+    public Directions this[Coordinate point] => Points[point];
+
+    public List<Coordinate> GetPoints()
+    {
+        return Points.Keys.ToList();
     }
 
     public void Serialize(SsSerializer serializer)

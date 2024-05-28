@@ -23,7 +23,7 @@ partial class SourceLand
             _ => new()
         };
         return true;
-        
+
     }
 
     private static SourceLand GetSourceLand(Dictionary<Coordinate, Directions> points, Types type, int foodIncrement, int moneyIncrement)

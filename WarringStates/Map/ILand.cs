@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-
-namespace WarringStates.Map;
+﻿namespace WarringStates.Map;
 
 public interface ILand
 {

@@ -40,7 +40,7 @@ public class Product : ISsSerializable
 
     private void IncrementTickOn(SpanFlowTickOnArgs args)
     {
-        if (++CurrentTickOnTimes > IncrementTickOnTimes) 
+        if (++CurrentTickOnTimes > IncrementTickOnTimes)
         {
             Amount += Increment;
             CurrentTickOnTimes = 0;
