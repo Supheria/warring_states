@@ -2,11 +2,9 @@
 
 namespace WarringStates.Events;
 
-public class GameImageUpdateArgs(Image source, Color backColor, Coordinate originOffset)
+public class GridImageToUpdateArgs(Image source, Color backColor)
 {
     public Image Source { get; } = source;
 
     public Color BackColor { get; } = backColor;
-
-    public Coordinate OriginOffset { get; } = originOffset;
 }

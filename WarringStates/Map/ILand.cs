@@ -1,4 +1,6 @@
-﻿namespace WarringStates.Map;
+﻿using WarringStates.Graph;
+
+namespace WarringStates.Map;
 
 public interface ILand
 {
@@ -10,4 +12,6 @@ public interface ILand
     public Enum Type { get; }
 
     public Color Color { get; }
+
+    public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand);
 }

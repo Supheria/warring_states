@@ -20,19 +20,41 @@ partial class LatticeGrid
 
     SolidBrush BackBrush { get; } = new(Color.Transparent);
 
-    Dictionary<Color, SolidBrush> CellBrush { get; } = [];
+    //Dictionary<Color, SolidBrush> CellBrush { get; } = [];
 
     public Size LatticeSize { get; set; } = new();
 
     public Size LatticeOffset { get; set; } = new();
 
-    private void DrawGrid(GameImageUpdateArgs args)
+    private void OffsetOrigin(Coordinate offset)
     {
         var lastOrigin = Origin;
-        ResetOrigin(args.OriginOffset);
+        var width = Atlas.Width * CellEdgeLength;
+        var x = (Origin.X + offset.X) % width;
+        if (x < 0)
+            x += width;
+        var height = Atlas.Height * CellEdgeLength;
+        var y = (Origin.Y + offset.Y) % height;
+        if (y < 0)
+            y += height;
+        Origin = new(x, y);
         OriginOffset = Origin - lastOrigin;
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginReset);
+    }
+
+    private void SetOrigin(Coordinate origin)
+    {
+        var lastOrigin = Origin;
+        Origin = origin;
+        OriginOffset = Origin - lastOrigin;
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginReset);
+    }
+
+    private void UpdateImage(GridImageToUpdateArgs args)
+    {
         DrawRect = new(new(0, 0), args.Source.Size);
-        Graphics = Graphics.FromImage(args.Source);
+        Image = args.Source;
+        Graphics = Graphics.FromImage(Image);
         BackColor = args.BackColor;
         BackBrush.Color = BackColor;
         DrawGrid();
@@ -43,25 +65,11 @@ partial class LatticeGrid
         LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdate, new GridUpdatedArgs(DrawRect, Origin));
     }
 
-    private void ResetOrigin(Coordinate offset)
-    {
-        var width = Atlas.Width * CellEdgeLength;
-        var x = (Origin.X + offset.X) % width;
-        if (x < 0)
-            x += width;
-        var height = Atlas.Height * CellEdgeLength;
-        var y = (Origin.Y + offset.Y) % height;
-        if (y < 0)
-            y += height;
-        Origin = new(x, y);
-    }
-
     private void DrawGrid()
     {
         Cell.GridOrigin = Origin;
         LatticeSize = new(DrawRect.Width / CellEdgeLength + 2, DrawRect.Height / CellEdgeLength + 2);
         LatticeOffset = new(Origin.X / CellEdgeLength + 1, Origin.Y / CellEdgeLength + 1);
-        var count = 0;
         //
         // redraw all
         //
@@ -69,6 +77,7 @@ partial class LatticeGrid
             OriginOffset.X % CellEdgeLength != 0 || OriginOffset.Y % CellEdgeLength != 0 ||
             LastCellEdgeLength != CellEdgeLength)
         {
+            var count = 0;
             Graphics?.Clear(BackColor);
             for (var i = 0; i < LatticeSize.Width; i++)
             {
@@ -76,49 +85,37 @@ partial class LatticeGrid
                 {
                     var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
                     var land = cell.TerrainPoint.GetLand();
-                    Rectangle rect;
-                    if (land is SourceLand sourceLand)
-                        rect = GetSourceLandCellRect(sourceLand[cell.TerrainPoint], cell);
-                    else
-                        rect = cell.CenterRealRect;
-                    if (!rect.CutRectInRange(DrawRect, out var r))
-                        continue;
-                    if (!CellBrush.TryGetValue(land.Color, out var brush))
-                        brush = CellBrush[land.Color] = new SolidBrush(land.Color);
-                    Graphics?.FillRectangle(brush, r.Value);
-                    count++;
+                    count += land.DrawCell(Graphics, cell, DrawRect, BackColor, null);
                 }
             }
             LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (all)", count.ToString()));
-            DrawGuideLine();
-            return;
         }
         //
         // redraw changed only
         //
-        GridData.GuideLineBrush.Color = BackColor;
-        Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[0]);
-        Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[1]);
-        DrawLatticeCells();
+        else
+        {
+            var count = 0;
+            GridData.GuideLineBrush.Color = BackColor;
+            Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[0]);
+            Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[1]);
+            var diff = OriginOffset / CellEdgeLength;
+            for (var i = 0; i < LatticeSize.Width; i++)
+            {
+                for (var j = 0; j < LatticeSize.Height; j++)
+                {
+                    var cell = new Cell(new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height));
+                    var land = cell.TerrainPoint.GetLand();
+                    var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
+                    count += land.DrawCell(Graphics, cell, DrawRect, BackColor, lastLand);
+                }
+            }
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
+        }
         DrawGuideLine();
     }
 
-    private Rectangle GetSourceLandCellRect(Directions direction, Cell cell)
-    {
-        return direction switch
-        {
-            Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-            Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-            Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
-            Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-            Directions.Center => cell.RealRect,
-            Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-            Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-            Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-            Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
-            _ => new()
-        };
-    }
+    
 
     private void DrawGuideLine()
     {
@@ -149,43 +146,7 @@ partial class LatticeGrid
     private void DrawLatticeCells()
     {
         var count = 0;
-        var diff = OriginOffset / CellEdgeLength;
-        for (var i = 0; i < LatticeSize.Width; i++)
-        {
-            for (var j = 0; j < LatticeSize.Height; j++)
-            {
-                var cell = new Cell(new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height));
-                var land = cell.TerrainPoint.GetLand();
-                var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
-                Rectangle rect;
-                if (land is SourceLand sourceLand)
-                {
-                    if (sourceLand[cell.TerrainPoint] is not Directions.Center)
-                    {
-                        Graphics?.FillRectangle(BackBrush, cell.RealRect);
-                        count++;
-                    }
-                    rect = GetSourceLandCellRect(sourceLand[cell.TerrainPoint], cell);
-                }
-                else
-                {
-                    if (land.Type.Equals(lastLand.Type))
-                        continue;
-                    if (lastLand is SourceLand)
-                    {
-                        Graphics?.FillRectangle(BackBrush, cell.RealRect);
-                        count++;
-                    }
-                    rect = cell.CenterRealRect;
-                }
-                if (!rect.CutRectInRange(DrawRect, out var r))
-                    continue;
-                if (!CellBrush.TryGetValue(land.Color, out var brush))
-                    brush = CellBrush[land.Color] = new SolidBrush(land.Color);
-                Graphics?.FillRectangle(brush, r.Value);
-                count++;
-            }
-        }
+        
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
     }
 }

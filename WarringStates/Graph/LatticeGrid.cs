@@ -9,7 +9,7 @@ public partial class LatticeGrid : ISsSerializable
 {
     public string LocalName => nameof(LatticeGrid);
 
-    public GridData GridData { get; set; } = new();
+    static GridData GridData { get; set; } = new();
 
     static CellData CellData { get; set; } = new();
 
@@ -19,27 +19,31 @@ public partial class LatticeGrid : ISsSerializable
         set
         {
             CellData.EdgeLength = value;
-            CellCenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+            CellCenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToRoundInt();
             CellCenterSize = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
             CellCenterSizeAddOnePadding = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
         }
     }
 
-    static int CellCenterPadding { get; set; } = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToInt();
+    public static int CellCenterPadding { get; private set; } = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToRoundInt();
 
-    static Size CellCenterSize { get; set; } = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
+    public static Size CellCenterSize { get; private set; } = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
 
-    static Size CellCenterSizeAddOnePadding { get; set; } = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
+    public static Size CellCenterSizeAddOnePadding { get; private set; } = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
 
     Rectangle DrawRect { get; set; }
 
+    Image? Image { get; set; }
+
     Graphics? Graphics { get; set; }
 
-    public Coordinate Origin { get; set; } = new();
+    public Coordinate Origin { get; private set; } = new();
 
     public void EnableListner()
     {
-        LocalEvents.Hub.AddListener<GameImageUpdateArgs>(LocalEvents.Graph.GameImageUpdate, DrawGrid);
+        LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.SetGridOrigin, SetOrigin);
+        LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.OffsetGridOrigin, OffsetOrigin);
+        LocalEvents.Hub.AddListener<GridImageToUpdateArgs>(LocalEvents.Graph.GridImageToUpdate, UpdateImage);
         LocalEvents.Hub.AddListener<Point>(LocalEvents.Graph.PointOnGameImage, GetLatticeCell);
     }
 

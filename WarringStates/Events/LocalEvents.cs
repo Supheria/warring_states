@@ -24,10 +24,13 @@ public static class LocalEvents
 
     public enum Graph
     {
-        GameImageUpdate,
+        GridImageToUpdate,
         GridUpdate,
         PointOnGameImage,
         PointOnCell,
+        OffsetGridOrigin,
+        SetGridOrigin,
+        GridOriginReset,
     }
 
     public enum UserInterface

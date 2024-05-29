@@ -13,12 +13,12 @@ public class ToolBrandDisplayer : Displayer
 
     public ToolBrandDisplayer()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdateArgs>(LocalEvents.UserInterface.GameFormUpdate, SetWidth);
+        LocalEvents.Hub.AddListener<GameFormUpdatedArgs>(LocalEvents.UserInterface.GameFormUpdate, SetWidth);
         LocalEvents.Hub.AddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
         Height = 30;
     }
 
-    private void SetWidth(GameFormUpdateArgs args)
+    private void SetWidth(GameFormUpdatedArgs args)
     {
         Width = args.GameRect.Width;
         Relocate();
@@ -33,7 +33,7 @@ public class ToolBrandDisplayer : Displayer
 
     private void DrawDate()
     {
-        var dateWidth = (Width * 0.2).ToInt();
+        var dateWidth = (Width * 0.2).ToRoundInt();
         var dateRect = new Rectangle(Right - dateWidth, Top, dateWidth, Height);
         using var g = Graphics.FromImage(Image);
         g.FillRectangle(new SolidBrush(Color.LightSlateGray), dateRect);

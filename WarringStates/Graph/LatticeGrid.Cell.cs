@@ -5,7 +5,7 @@ namespace WarringStates.Graph;
 
 partial class LatticeGrid
 {
-    private class Cell
+    public sealed class Cell
     {
         public static Coordinate GridOrigin { get; set; } = new();
 

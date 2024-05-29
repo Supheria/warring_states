@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using WarringStates.Graph;
 
 namespace WarringStates.Map;
 
@@ -18,6 +19,7 @@ public partial class SourceLand : ILand, ISsSerializable
         FishLand,
         TerraceLand
     }
+
     public class SourceLandColors : ColorSelector
     {
         public override string LocalName => nameof(SourceLandColors);
@@ -36,18 +38,17 @@ public partial class SourceLand : ILand, ISsSerializable
 
     public static SourceLandColors Colors { get; set; } = new();
 
+    public Color Color => Colors[Type];
+
     public Dictionary<Product.Types, Product> Products { get; } = [];
 
     public Enum Type { get; private set; }
-
-    public Color Color { get; private set; }
 
     Dictionary<Coordinate, Directions> Points { get; set; }
 
     private SourceLand(Dictionary<Coordinate, Directions> points, Types type, List<Product> products)
     {
         Type = type;
-        Color = Colors[Type];
         Points = points;
         products.ForEach(p => Products[p.Type] = p);
     }

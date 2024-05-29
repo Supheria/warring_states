@@ -10,10 +10,10 @@ public class InfoBrandDisplayer : Displayer
 
     public InfoBrandDisplayer()
     {
-        LocalEvents.Hub.AddListener<GameDisplayerUpdateArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
     }
 
-    private void SetBounds(GameDisplayerUpdateArgs args)
+    private void SetBounds(GameDisplayerUpdatedArgs args)
     {
         Bounds = args.OtherRect;
         Relocate();

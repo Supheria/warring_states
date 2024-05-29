@@ -41,6 +41,7 @@ internal class LandMap()
     internal void Relocate(AltitudeMap altitudeMap, List<SourceLand> sourceLands)
     {
         LandPoints.Clear();
+        LandCount.Clear();
         Size = altitudeMap.Bounds.Size;
         var random = new RandomTable(altitudeMap.RandomTable);
         foreach (var point in altitudeMap.AltitudePoints)

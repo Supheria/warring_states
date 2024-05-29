@@ -1,5 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Graph;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace WarringStates.Map;
 
@@ -12,6 +14,7 @@ public class SingleLand : ILand
         Wood,
         Hill,
     }
+
     public class SingleLandColors : ColorSelector
     {
         public override string LocalName => nameof(SingleLandColors);
@@ -27,24 +30,46 @@ public class SingleLand : ILand
 
     public Enum Type { get; }
 
-    public Color Color { get; }
-
     public static SingleLandColors Colors { get; set; } = new();
+
+    public Color Color => Colors[Type];
+
+    static SolidBrush Brush { get; } = new(Color.Transparent);
 
     public Coordinate Point { get; }
 
     public SingleLand(Coordinate point, Types type) : base()
     {
         Type = type;
-        Color = Colors[Type];
         Point = point;
     }
 
     public SingleLand(Coordinate point, double altitudeRatio, double random)
     {
         Type = AltitudeFilter(altitudeRatio, random);
-        Color = Colors[Type];
         Point = point;
+    }
+
+    public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand)
+    {
+        if (g is null)
+            return 0;
+        if (Type.Equals(lastLand?.Type))
+            return 0;
+        var count = 0;
+        if (lastLand is SourceLand)
+        {
+            Brush.Color = backColor;
+            g?.FillRectangle(Brush, cell.RealRect);
+            count++;
+        }
+        if (cell.CenterRealRect.CutRectInRange(drawRect, out var rect))
+        {
+            Brush.Color = Colors[Type];
+            g?.FillRectangle(Brush, rect.Value);
+            count++;
+        }
+        return count;
     }
 
     private static Types AltitudeFilter(double altitudeRatio, double random)

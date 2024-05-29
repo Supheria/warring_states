@@ -7,11 +7,11 @@ public static class Atlas
 {
     static LandMap LandMap { get; } = new();
 
-    public static Bitmap? Overview { get; private set; }
-
     public static int Width => LandMap.Size.Width;
 
     public static int Height => LandMap.Size.Height;
+
+    public static Size Size => LandMap.Size;
 
     public static ILand GetLand(this Coordinate coordinate)
     {
@@ -26,19 +26,6 @@ public static class Atlas
     public static void SetTerrainMap(this AltitudeMap atlas, List<SourceLand> sourceLands)
     {
         LandMap.Relocate(atlas, sourceLands);
-        Overview?.Dispose();
-        Overview = new(Width, Height);
-        var pOverview = new PointBitmap(Overview);
-        pOverview.LockBits();
-        for (int i = 0; i < Overview.Width; i++)
-        {
-            for (int j = 0; j < Overview.Height; j++)
-            {
-                var land = LandMap[new(i, j)];
-                pOverview.SetPixel(i, j, land.Color);
-            }
-        }
-        pOverview.UnlockBits();
     }
 
     public static Coordinate SetPointWithinTerrainMap(this Coordinate Point)

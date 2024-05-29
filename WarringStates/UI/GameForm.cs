@@ -67,7 +67,7 @@ public partial class GameForm : ResizeableForm
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
         var gameRect = new Rectangle(ClientLeft, ClientTop + ToolBrand.Height, ClientWidth, ClientHeight - ToolBrand.Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameFormUpdate, new GameFormUpdateArgs(gameRect));
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameFormUpdate, new GameFormUpdatedArgs(gameRect));
 
         //LocalEvents.ForTest();
     }
