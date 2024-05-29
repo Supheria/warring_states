@@ -1,12 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WarringStates.Events;
-using WarringStates.Graph;
 using WarringStates.Map;
 
 namespace WarringStates.UI.Component;
@@ -29,7 +23,7 @@ partial class OverviewDisplayer
 
     private void OnMouseDoubleClick(object? sender, MouseEventArgs args)
     {
-        if(args.Button is MouseButtons.Left)
+        if (args.Button is MouseButtons.Left)
         {
             var dX = (args.X - FocusRect.Left - FocusRect.Width * 0.5) * FocusScaleRatio.Width;
             var dY = (args.Y - FocusRect.Top - FocusRect.Height * 0.5) * FocusScaleRatio.Height;

@@ -1,11 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Graph;
 using static WarringStates.Graph.LatticeGrid;
 
 namespace WarringStates.Map;
@@ -26,7 +20,7 @@ partial class SourceLand
             g?.FillRectangle(Brush, cell.RealRect);
             count++;
         }
-        if(GetSourceLandCellRect(direction, cell).CutRectInRange(drawRect, out var rect))
+        if (GetSourceLandCellRect(direction, cell).CutRectInRange(drawRect, out var rect))
         {
             Brush.Color = Colors[Type];
             g?.FillRectangle(Brush, rect.Value);

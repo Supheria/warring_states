@@ -1,13 +1,10 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using WarringStates.Events;
 using WarringStates.Graph;
 using WarringStates.Map;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace WarringStates.UI.Component;
 
@@ -95,7 +92,7 @@ public partial class OverviewDisplayer : Displayer
             }
         }
         pOverview.UnlockBits();
-        var scaled = OverviewCache.CopyToNewSize(Size, InterpolationMode.NearestNeighbor);
+        var scaled = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
         OverviewCache.Dispose();
         OverviewCache = scaled;
         Image = OverviewCache.Clone() as Image;

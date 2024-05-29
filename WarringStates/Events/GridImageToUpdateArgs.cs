@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-
-namespace WarringStates.Events;
+﻿namespace WarringStates.Events;
 
 public class GridImageToUpdateArgs(Image source, Color backColor)
 {

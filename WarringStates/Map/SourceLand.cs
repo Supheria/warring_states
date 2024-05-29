@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Graph;
 
 namespace WarringStates.Map;
 

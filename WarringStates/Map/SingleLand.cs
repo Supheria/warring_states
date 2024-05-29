@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Graph;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace WarringStates.Map;
 

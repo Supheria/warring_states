@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
 using WarringStates.Map;
 using WarringStates.UI;
@@ -115,7 +114,7 @@ partial class LatticeGrid
         DrawGuideLine();
     }
 
-    
+
 
     private void DrawGuideLine()
     {
@@ -146,7 +145,7 @@ partial class LatticeGrid
     private void DrawLatticeCells()
     {
         var count = 0;
-        
+
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
     }
 }
