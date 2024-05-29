@@ -56,8 +56,8 @@ partial class GameDisplayer
         LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.PointOnGameImage, args.Location);
         if (!DoDragGraph)
             return;
-        var dX = args.Location.X - DragStartPoint.X;
-        var dY = args.Location.Y - DragStartPoint.Y;
+        var dX = args.X - DragStartPoint.X;
+        var dY = args.Y - DragStartPoint.Y;
         if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
         {
             dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;

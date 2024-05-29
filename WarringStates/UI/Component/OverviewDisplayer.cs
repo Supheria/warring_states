@@ -2,6 +2,8 @@
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using WarringStates.Events;
 using WarringStates.Graph;
 using WarringStates.Map;
@@ -11,9 +13,13 @@ namespace WarringStates.UI.Component;
 
 public partial class OverviewDisplayer : Displayer
 {
-    bool FullScreen { get; set; } = false;
+    bool FullScreen { get; set; } = true;
 
     Bitmap? OverviewCache { get; set; }
+
+    Rectangle DisplayRect { get; set; }
+
+    GridUpdatedArgs? GridUpdatedArgs { get; set; }
 
     (double Width, double Height) FocusScaleRatio { get; set; }
 
@@ -38,13 +44,17 @@ public partial class OverviewDisplayer : Displayer
 
     private void SetBounds(GameDisplayerUpdatedArgs args)
     {
-        if (Atlas.Width is 0 || Atlas.Height is 0)
-            Size = new();
+        DisplayRect = args.DisplayRect;
+        if (FullScreen)
+        {
+            Size = Atlas.Size.ScaleSizeOnRatio(DisplayRect.Size);
+            Location = new(DisplayRect.Left + (DisplayRect.Width - Width) / 2, DisplayRect.Top + (DisplayRect.Height - Height) / 2);
+        }
         else
         {
-            var size = FullScreen ? args.DisplayRect.Size : new((int)(args.DisplayRect.Width * 0.25), (int)(args.DisplayRect.Height * 0.25));
+            var size = new Size((int)(DisplayRect.Width * 0.25), (int)(DisplayRect.Height * 0.25));
             Size = Atlas.Size.ScaleSizeOnRatio(size);
-            Location = FullScreen ? new((args.DisplayRect.Size - Size) / 2) : new(args.DisplayRect.Right - Width, args.DisplayRect.Top);
+            Location = new(DisplayRect.Right - Width, DisplayRect.Top);
         }
     }
 
@@ -52,6 +62,7 @@ public partial class OverviewDisplayer : Displayer
     {
         if (Width is 0 || Height is 0)
             return;
+        GridUpdatedArgs = args;
         Relocate();
         RelocateOverview();
         RelocateFocus(args.DrawRect, args.Origin);
@@ -84,10 +95,9 @@ public partial class OverviewDisplayer : Displayer
             }
         }
         pOverview.UnlockBits();
-        var scaled = OverviewCache.CopyToNewSize(Size);
+        var scaled = OverviewCache.CopyToNewSize(Size, InterpolationMode.NearestNeighbor);
         OverviewCache.Dispose();
         OverviewCache = scaled;
-        OverviewCache.Save("OverviewCache.bmp");
         Image = OverviewCache.Clone() as Image;
         void drawUnit(int col, int row, Color color)
         {
@@ -105,13 +115,14 @@ public partial class OverviewDisplayer : Displayer
 
     private void RelocateFocus(Rectangle drawRect, Coordinate origin)
     {
-        var width = drawRect.Width / LatticeGrid.CellEdgeLength;
-        var height = drawRect.Height / LatticeGrid.CellEdgeLength;
-        var x = Atlas.Width - origin.X / LatticeGrid.CellEdgeLength;
-        var y = Atlas.Height - origin.Y / LatticeGrid.CellEdgeLength;
+        var edgeLength = (double)LatticeGrid.CellEdgeLength;
+        var width = drawRect.Width / edgeLength;
+        var height = drawRect.Height / edgeLength;
+        var x = Atlas.Width - origin.X / edgeLength;
+        var y = Atlas.Height - origin.Y / edgeLength;
         var widthRatio = Atlas.Width / (double)Width;
         var heightRatio = Atlas.Height / (double)Height;
-        FocusScaleRatio = (widthRatio, heightRatio);
+        FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
         FocusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);
         FocusRects.Clear();
