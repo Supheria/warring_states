@@ -25,7 +25,7 @@ public static class LocalEvents
     public enum Graph
     {
         GridImageToUpdate,
-        GridUpdate,
+        GridUpdated,
         PointOnGameImage,
         PointOnCell,
         OffsetGridOrigin,

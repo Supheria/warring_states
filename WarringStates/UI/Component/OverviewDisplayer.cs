@@ -5,6 +5,8 @@ using System.Drawing.Drawing2D;
 using WarringStates.Events;
 using WarringStates.Graph;
 using WarringStates.Map;
+using OpenCvSharp.Extensions;
+using System.Diagnostics;
 
 namespace WarringStates.UI.Component;
 
@@ -36,7 +38,7 @@ public partial class OverviewDisplayer : Displayer
     public void EnableListener()
     {
         LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
-        LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdate, Relocate);
+        LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdated, Relocate);
     }
 
     private void SetBounds(GameDisplayerUpdatedArgs args)
@@ -68,9 +70,17 @@ public partial class OverviewDisplayer : Displayer
 
     private void RelocateOverview()
     {
+        var stop = new Stopwatch();
         if (OverviewCache is not null && Size == OverviewCache.Size)
         {
-            OverviewCache.TemplateDrawPartsOn((Bitmap)Image, LastFocusOnRects, true);
+            stop.Restart();
+            OverviewCache.TemplateDrawPartsOnSharp((Bitmap)Image, LastFocusOnRects, true);
+            stop.Stop();
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("point bitmap redraw", stop.ElapsedMilliseconds.ToString()));
+            stop.Start();
+            //Image = OverviewCache.TemplateDrawPartsOn((Bitmap)Image, LastFocusOnRects, true);
+            stop.Stop();
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cv2 redraw", stop.ElapsedMilliseconds.ToString()));
             return;
         }
         OverviewCache?.Dispose();
@@ -92,10 +102,24 @@ public partial class OverviewDisplayer : Displayer
             }
         }
         pOverview.UnlockBits();
-        var scaled = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
-        OverviewCache.Dispose();
-        OverviewCache = scaled;
-        Image = OverviewCache.Clone() as Image;
+        stop.Start();
+        OverviewCache = OverviewCache.CopyToNewSize(Width, Height);
+        stop.Stop();
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cv2", stop.ElapsedMilliseconds.ToString()));
+        stop.Restart();
+        OverviewCache = OverviewCache.CopyToNewSizeSharp(Width, Height, InterpolationMode.Low);
+        stop.Stop();
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("graphics", stop.ElapsedMilliseconds.ToString()));
+
+        stop.Restart();
+        Image = OverviewCache.Clone() as Bitmap;
+        stop.Stop();
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("clone", stop.ElapsedMilliseconds.ToString()));
+        stop.Restart();
+        //Image = OverviewCache.Copy();
+        stop.Stop();
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cv2 copy", stop.ElapsedMilliseconds.ToString()));
+
         void drawUnit(int col, int row, Color color)
         {
             var dx = widthUnit * col;

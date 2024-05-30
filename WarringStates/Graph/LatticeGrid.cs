@@ -34,10 +34,6 @@ public partial class LatticeGrid : ISsSerializable
 
     Rectangle DrawRect { get; set; }
 
-    Image? Image { get; set; }
-
-    Graphics? Graphics { get; set; }
-
     public Coordinate Origin { get; private set; } = new();
 
     public void EnableListner()

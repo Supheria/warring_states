@@ -13,7 +13,7 @@ namespace WarringStates
         [STAThread]
         static void Main()
         {
-            new TestCGraphics().ShowDialog();
+            //new TestCGraphics().ShowDialog();
             //var data = new AltitudeMapData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
             var data = new AltitudeMapData(new(100, 100), new(2, 2), new(2, 2), RiverLayout.Types.OneForTest, 2, 5000, 0.66f);
             //var data = new AltitudeMapData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Type.Horizontal, 2.25, 100000, 0.66f);

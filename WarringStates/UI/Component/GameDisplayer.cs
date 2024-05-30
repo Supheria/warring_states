@@ -18,6 +18,7 @@ public partial class GameDisplayer : Displayer
     {
         LocalEvents.Hub.AddListener<GameFormUpdatedArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);
         LocalEvents.Hub.AddListener(LocalEvents.Graph.GridOriginReset, UpdateImage);
+        LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdated, args => Image = args.Bitmap);
     }
 
     private void SetBounds(GameFormUpdatedArgs args)
