@@ -6,6 +6,13 @@ public class CellData : ISsSerializable
 {
     public string LocalName => nameof(CellData);
 
+    public int EdgeLength
+    {
+        get => _edgeLength;
+        set => _edgeLength = value < EdgeLengthMin || value > EdgeLengthMax ? _edgeLength : value;
+    }
+    int _edgeLength = 30;
+
     public int EdgeLengthMin { get; set; } = 25;
 
     public int EdgeLengthMax { get; set; } = 125;

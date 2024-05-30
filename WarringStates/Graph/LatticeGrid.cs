@@ -5,26 +5,30 @@ using WarringStates.Events;
 
 namespace WarringStates.Graph;
 
-public partial class LatticeGrid : ISsSerializable
+public partial class LatticeGrid
 {
-    public string LocalName => nameof(LatticeGrid);
-
     static GridData GridData { get; set; } = new();
 
     static CellData CellData { get; set; } = new();
 
+    public LatticeGrid(GridData gridData, CellData cellData)
+    {
+        GridData = gridData;
+        CellData = cellData;
+        CellEdgeLength = cellData.EdgeLength;
+    }
+
     public static int CellEdgeLength
     {
-        get => _cellEdgeLength;
+        get => CellData.EdgeLength;
         set
         {
-            _cellEdgeLength = value < CellData.EdgeLengthMin || value > CellData.EdgeLengthMax ? _cellEdgeLength : value;
-            CellCenterPadding = (_cellEdgeLength * CellData.CenterPaddingFactor).ToRoundInt();
-            CellCenterSize = new(CellEdgeLength - CellCenterPadding * 2, CellEdgeLength - CellCenterPadding * 2);
+            CellData.EdgeLength = value;
+            CellCenterPadding = (CellData.EdgeLength * CellData.CenterPaddingFactor).ToRoundInt();
+            CellCenterSize = new(CellData.EdgeLength - CellCenterPadding * 2, CellData.EdgeLength - CellCenterPadding * 2);
             CellCenterSizeAddOnePadding = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
         }
     }
-    static int _cellEdgeLength = 30;
 
     public static int CellCenterPadding { get; private set; } = (CellEdgeLength * CellData.CenterPaddingFactor).ToRoundInt();
 
@@ -64,20 +68,20 @@ public partial class LatticeGrid : ISsSerializable
         return new(x, y);
     }
 
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(Origin), Origin.ToString());
-        serializer.WriteObject(GridData);
-        serializer.WriteObject(CellData);
-        serializer.WriteTag(nameof(CellEdgeLength), CellEdgeLength.ToString());
-    }
+    //public void Serialize(SsSerializer serializer)
+    //{
+    //    serializer.WriteTag(nameof(Origin), Origin.ToString());
+    //    serializer.WriteObject(GridData);
+    //    serializer.WriteObject(CellData);
+    //    serializer.WriteTag(nameof(CellEdgeLength), CellEdgeLength.ToString());
+    //}
 
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        Origin = deserializer.ReadTag(nameof(Origin), Coordinate.Parse);
-        OriginOffset = Origin;
-        deserializer.ReadObject(GridData);
-        deserializer.ReadObject(CellData);
-        CellEdgeLength = deserializer.ReadTag(nameof(CellEdgeLength), int.Parse);
-    }
+    //public void Deserialize(SsDeserializer deserializer)
+    //{
+    //    Origin = deserializer.ReadTag(nameof(Origin), Coordinate.Parse);
+    //    OriginOffset = Origin;
+    //    deserializer.ReadObject(GridData);
+    //    deserializer.ReadObject(CellData);
+    //    CellEdgeLength = deserializer.ReadTag(nameof(CellEdgeLength), int.Parse);
+    //}
 }

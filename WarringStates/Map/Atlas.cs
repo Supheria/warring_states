@@ -2,6 +2,7 @@
 using LocalUtilities.TypeGeneral;
 using WarringStates.Map.Terrain;
 using WarringStates.Terrain;
+using WarringStates.User;
 
 namespace WarringStates.Map;
 
@@ -25,9 +26,9 @@ public static class Atlas
         return LandMap.GetLandTypeCount(type);
     }
 
-    public static void SetTerrainMap(this AltitudeMap atlas, List<SourceLand> sourceLands)
+    public static void Relocate(Archive archive)
     {
-        LandMap.Relocate(atlas, sourceLands);
+        LandMap.Relocate(archive.AltitudeMap, archive.SourceLands);
     }
 
     public static Coordinate SetPointWithinTerrainMap(this Coordinate Point)
