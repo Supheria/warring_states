@@ -2,8 +2,6 @@
 using WarringStates.Events;
 using WarringStates.Map;
 using WarringStates.UI;
-using OpenCvSharp;
-using OpenCvSharp.Extensions;
 
 namespace WarringStates.Graph;
 
@@ -12,8 +10,6 @@ partial class LatticeGrid
     Image? Image { get; set; }
 
     Graphics? Graphics { get; set; }
-
-    Mat? Mat { get; set; }
 
     Rectangle LastDrawRect { get; set; } = new();
 
@@ -62,7 +58,6 @@ partial class LatticeGrid
         DrawRect = new(new(0, 0), args.Source.Size);
         Image = args.Source;
         Graphics = Graphics.FromImage(Image);
-        Mat = ((Bitmap)Image).ToMat();
         BackColor = args.BackColor;
         BackBrush.Color = BackColor;
         DrawGrid();
@@ -70,8 +65,7 @@ partial class LatticeGrid
         Graphics.Dispose();
         LastDrawRect = DrawRect;
         LastCellEdgeLength = CellEdgeLength;
-        //LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdated, new GridUpdatedArgs(DrawRect, Origin, Mat.ToBitmap()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdated, new GridUpdatedArgs(DrawRect, Origin, (Bitmap)Image));
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdated, new GridUpdatedArgs(DrawRect, Origin));
     }
 
     private void DrawGrid()
@@ -95,7 +89,6 @@ partial class LatticeGrid
                     var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
                     var land = cell.TerrainPoint.GetLand();
                     count += land.DrawCell(Graphics, cell, DrawRect, BackColor, null);
-                    //count += land.DrawCell(Mat, cell, DrawRect, BackColor, null);
                 }
             }
             LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (all)", count.ToString()));
@@ -118,7 +111,6 @@ partial class LatticeGrid
                     var land = cell.TerrainPoint.GetLand();
                     var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
                     count += land.DrawCell(Graphics, cell, DrawRect, BackColor, lastLand);
-                    //count += land.DrawCell(Mat, cell, DrawRect, BackColor, lastLand);
                 }
             }
             LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
@@ -152,12 +144,5 @@ partial class LatticeGrid
                 return new((int)x, yMin, (int)lineWidth, Math.Abs(p1.Y - p2.Y));
             }
         }
-    }
-
-    private void DrawLatticeCells()
-    {
-        var count = 0;
-
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
     }
 }

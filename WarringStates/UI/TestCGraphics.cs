@@ -1,7 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using OpenCvSharp;
-using OpenCvSharp.Extensions;
-using System.Windows.Forms;
 
 namespace WarringStates.UI;
 
@@ -33,14 +30,6 @@ public partial class TestCGraphics : ResizeableForm
         //Displayer.Image = a.ResizeImage(Displayer.Size);
         ////Displayer.Image = CBitmap.Source;
         //Displayer.Image = new Bitmap(Displayer.Width, Displayer.Height);
-        var mat = new Mat(Displayer.Width, Displayer.Height, MatType.CV_8UC3, new Scalar(255, 0, 0));
-        Cv2.Rectangle(mat, new(20, 20, 60, 40), Scalar.Red);
-        Displayer.Image = new Bitmap(Displayer.Width, Displayer.Height);
-        var g = Graphics.FromImage(Displayer.Image);
-        g.DrawRectangle(Pens.Red, new(20, 20, 60, 40));
-        Displayer.Image = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(mat);
-        //var a = mat.ToBitmap();
-        //Displayer.Invalidate();
     }
 
     protected override void InitializeComponent()

@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using OpenCvSharp;
 using WarringStates.Graph;
 
 namespace WarringStates.Map;
@@ -70,45 +69,6 @@ public class SingleLand : ILand
         {
             Brush.Color = Colors[Type];
             g?.FillRectangle(Brush, rect.Value);
-            count++;
-        }
-        return count;
-    }
-
-    public int DrawCell(Mat? mat, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand)
-    {
-        if (mat is null)
-            return 0;
-        if (Type.Equals(lastLand?.Type))
-            return 0;
-        var count = 0;
-        if (lastLand is SourceLand)
-        {
-            if (cell.RealRect.CutRectInRange(drawRect, out var rc))
-            {
-                var color = new Scalar(backColor.B, backColor.G, backColor.R, backColor.A);
-                var r = rc.Value;
-                OpenCvSharp.Point[] vertices = [
-                new(r.Left, r.Top),
-                new(r.Right,r.Top),
-                new(r.Right, r.Bottom),
-                new(r.Left, r.Bottom),
-                ];
-                Cv2.FillPoly(mat, new List<OpenCvSharp.Point[]> { vertices }, color, LineTypes.Link8);
-                count++;
-            }
-        }
-        if (cell.CenterRealRect.CutRectInRange(drawRect, out var rect))
-        {
-            var color = new Scalar(Colors[Type].B, Colors[Type].G, Colors[Type].R, Colors[Type].A);
-            var r = rect.Value;
-            OpenCvSharp.Point[] vertices = [
-                new(r.Left, r.Top),
-                new(r.Right,r.Top),
-                new(r.Right, r.Bottom),
-                new(r.Left, r.Bottom),
-                ];
-            Cv2.FillPoly(mat, new List<OpenCvSharp.Point[]> { vertices }, color, LineTypes.Link8);
             count++;
         }
         return count;

@@ -1,5 +1,4 @@
-﻿using OpenCvSharp;
-using WarringStates.Graph;
+﻿using WarringStates.Graph;
 
 namespace WarringStates.Map;
 
@@ -15,6 +14,4 @@ public interface ILand
     public Color Color { get; }
 
     public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand);
-
-    public int DrawCell(Mat? mat, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand);
 }
