@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Graph;
+using WarringStates.Terrain;
 
-namespace WarringStates.Map;
+namespace WarringStates.Map.Terrain;
 
 public class SingleLand : ILand
 {

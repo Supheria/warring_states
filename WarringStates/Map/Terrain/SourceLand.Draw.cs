@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Map.Terrain;
 using static WarringStates.Graph.LatticeGrid;
 
-namespace WarringStates.Map;
+namespace WarringStates.Terrain;
 
 partial class SourceLand
 {

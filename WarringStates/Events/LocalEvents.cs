@@ -15,7 +15,9 @@ public static class LocalEvents
         AddInfoList,
         AddSingleInfo,
         AddSingleInfoList,
-        AddInfoForMax
+        ValueForMax,
+        AddValue,
+        ClearValue,
     }
 
     public enum Global
@@ -47,7 +49,7 @@ public static class LocalEvents
 
     public static void ForTest()
     {
-        var testInfoList = new List<TestForm.TestInfo>();
+        var testInfoList = new List<TestForm.StringInfo>();
         foreach (var (type, callback) in Hub.GetEventList())
         {
             if (callback is null)

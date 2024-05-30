@@ -1,6 +1,6 @@
 ﻿using WarringStates.Graph;
 
-namespace WarringStates.Map;
+namespace WarringStates.Map.Terrain;
 
 public interface ILand
 {

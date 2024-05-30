@@ -4,6 +4,7 @@ using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
 using LocalUtilities.SimpleScript.Serialization;
 using WarringStates.Map;
+using WarringStates.Terrain;
 using WarringStates.UI;
 
 namespace WarringStates

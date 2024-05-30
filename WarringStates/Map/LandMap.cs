@@ -2,6 +2,8 @@
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Text;
+using WarringStates.Map.Terrain;
+using WarringStates.Terrain;
 
 namespace WarringStates.Map;
 

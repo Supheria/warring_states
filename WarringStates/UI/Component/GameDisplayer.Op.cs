@@ -4,6 +4,7 @@ using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
 using WarringStates.Graph;
 using WarringStates.Map;
+using WarringStates.Terrain;
 
 namespace WarringStates.UI.Component;
 
@@ -29,11 +30,11 @@ partial class GameDisplayer
     private void PointOnCell(PointOnCellArgs args)
     {
         var land = args.TerrainPoint.GetLand();
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("point", args.TerrainPoint.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("terrain", land.Type.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("cell part", args.PointOnCellPart.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.Type.ToString()));
+        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
         if (land is SourceLand sourceLand)
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("land part", sourceLand[args.TerrainPoint].ToString()));
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)

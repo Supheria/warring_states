@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 
-namespace WarringStates.Map;
+namespace WarringStates.Map.Terrain;
 
 public abstract class ColorSelector : ISsSerializable
 {

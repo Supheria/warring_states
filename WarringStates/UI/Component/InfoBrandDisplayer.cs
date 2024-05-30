@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
 using WarringStates.Map;
+using WarringStates.Map.Terrain;
 
 namespace WarringStates.UI.Component;
 

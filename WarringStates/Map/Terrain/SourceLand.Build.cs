@@ -1,6 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Map;
+using WarringStates.Map.Terrain;
 
-namespace WarringStates.Map;
+namespace WarringStates.Terrain;
 
 partial class SourceLand
 {

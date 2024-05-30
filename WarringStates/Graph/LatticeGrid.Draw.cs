@@ -23,11 +23,9 @@ partial class LatticeGrid
 
     SolidBrush BackBrush { get; } = new(Color.Transparent);
 
-    //Dictionary<Color, SolidBrush> CellBrush { get; } = [];
+    public Size LatticeSize { get; set; } = new();
 
-    public System.Drawing.Size LatticeSize { get; set; } = new();
-
-    public System.Drawing.Size LatticeOffset { get; set; } = new();
+    public Size LatticeOffset { get; set; } = new();
 
     private void OffsetOrigin(Coordinate offset)
     {
@@ -91,7 +89,9 @@ partial class LatticeGrid
                     count += land.DrawCell(Graphics, cell, DrawRect, BackColor, null);
                 }
             }
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (all)", count.ToString()));
+#if DEBUG
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
+#endif
         }
         //
         // redraw changed only
@@ -113,7 +113,9 @@ partial class LatticeGrid
                     count += land.DrawCell(Graphics, cell, DrawRect, BackColor, lastLand);
                 }
             }
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.TestInfo("redraw cell count (part)", count.ToString()));
+#if DEBUG
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
+#endif
         }
         DrawGuideLine();
     }

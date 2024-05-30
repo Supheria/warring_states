@@ -2,7 +2,7 @@
 using LocalUtilities.TypeGeneral.Convert;
 using WarringStates.Events;
 
-namespace WarringStates.Map;
+namespace WarringStates.Map.Terrain;
 
 public class Product : ISsSerializable
 {
