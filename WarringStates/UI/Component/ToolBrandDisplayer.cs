@@ -45,4 +45,9 @@ public class ToolBrandDisplayer : Displayer
         g.DrawString(CurrentDate.ToString(), LabelFontData, DateBrush, dateRect, format);
         Invalidate();
     }
+
+    protected override void AddOperations()
+    {
+
+    }
 }

@@ -21,7 +21,7 @@ public partial class GameForm : ResizeableForm
 
     InfoBrandDisplayer InfoBrand { get; } = new();
 
-    LatticeGrid Grid { get; } = new();
+    //LatticeGrid Grid { get; } = new();
 
     SpanFlow SpanFlow { get; set; } = new();
 
@@ -38,7 +38,7 @@ public partial class GameForm : ResizeableForm
             ]);
         Controls.SetChildIndex(Overview, 0);
         Controls.SetChildIndex(GamePlane, 1);
-        Grid.EnableListner();
+        //Grid.EnableListner();
         Overview.EnableListener();
         GamePlane.EnableListener();
         Shown += GameForm_Shown;
@@ -47,14 +47,14 @@ public partial class GameForm : ResizeableForm
     private void SaveForm(SsSerializer serializer)
     {
         serializer.WriteTag(nameof(SpanFlow.CurrentSpan), SpanFlow.CurrentSpan.ToString());
-        serializer.WriteObject(Grid);
+        //serializer.WriteObject(Grid);
     }
 
     private void LoadForm(SsDeserializer deserializer)
     {
         var startSpan = deserializer.ReadTag(nameof(SpanFlow.CurrentSpan), int.Parse);
         SpanFlow.Relocate(startSpan);
-        deserializer.ReadObject(Grid);
+        //deserializer.ReadObject(Grid);
     }
 
     private void GameForm_Shown(object? sender, EventArgs e)

@@ -24,4 +24,8 @@ public class InfoBrandDisplayer : Displayer
         g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
         Invalidate();
     }
+
+    protected override void AddOperations()
+    {
+    }
 }
