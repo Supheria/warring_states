@@ -34,8 +34,6 @@ public class SingleLand : ILand
 
     public Color Color => Colors[Type];
 
-    static SolidBrush Brush { get; } = new(Color.Transparent);
-
     public Coordinate Point { get; }
 
     public SingleLand(Coordinate point, Types type) : base()
@@ -59,17 +57,15 @@ public class SingleLand : ILand
         var count = 0;
         if (lastLand is SourceLand)
         {
-            Brush.Color = backColor;
             if (cell.RealRect.CutRectInRange(drawRect, out var r))
             {
-                g?.FillRectangle(Brush, r.Value);
+                g?.FillRectangle(new SolidBrush(backColor), r.Value);
                 count++;
             }
         }
         if (cell.CenterRealRect.CutRectInRange(drawRect, out var rect))
         {
-            Brush.Color = Colors[Type];
-            g?.FillRectangle(Brush, rect.Value);
+            g?.FillRectangle(new SolidBrush(Colors[Type]), rect.Value);
             count++;
         }
         return count;

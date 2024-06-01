@@ -1,10 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using LocalUtilities.TypeToolKit.Graph;
 using WarringStates.Events;
 using WarringStates.User;
 
@@ -12,37 +7,41 @@ namespace WarringStates.UI;
 
 public partial class InitializeDisplayer : Displayer
 {
-    //int RollOffset { get; set; } = 0;
+    Rectangle OverviewRect { get; set; } = new();
 
-    //int RollOffsetMax { get; set; } = 0;
+    private class Button(string name)
+    {
+        public string Name { get; } = name;
 
-    //Rectangle RollRect { get; set; } = new();
+        public Rectangle Rect { get; set; } = new();
 
-    //Rectangle RollBarLineRect { get; set; } = new();
+        public bool Selected { get; set; } = false;
+    }
 
-    //int RollBarHeight { get; set; } = 0;
+    int ButtonHeight { get; set; } = 50;
 
-    //int RollBarHeightMin { get; set; } = 20;
+    FontData ButtonFontData { get; set; } = new(nameof(ButtonFontData))
+    {
+        Size = 25f,
+        Style = FontStyle.Bold,
 
-    //double RollBarRatio { get; set; }
+    };
 
-    //double LastRollOffsetMax { get; set; } = 0;
+    Color ButtonBackColor { get; set; } = Color.LightYellow;
 
-    //Rectangle RollBarRect { get; set; } = new();
+    Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
 
-    RollViewer Roll { get; } = new();
+    Button StartButton { get; } = new("进入");
 
-    Rectangle InfoRect { get; set; } = new();
+    Button BuildButton { get; } = new("新建");
 
-    //int ItemHeight { get; set; } = 125;
+    Button DeleteButton { get; } = new("删除");
 
     new Size Padding { get; } = new(30, 30);
 
-    //int ItemPadding { get; } = 3;
+    Color FrontColor { get; set; } = Color.White;
 
-    //int ItemCount { get; set; } = 0;
-
-    //int ItemToShowCount { get; set; }
+    Color SelectedColor { get; set; } = Color.Gold;
 
     List<Archive> Archives { get; set; } = [];
 
@@ -50,85 +49,51 @@ public partial class InitializeDisplayer : Displayer
     {
         BackColor = Color.Teal;
         SizeChanged += OnResize;
+        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.InitializeFormLoading, LoadArchives);
+    }
+
+    private void LoadArchives()
+    {
+
     }
 
     private void OnResize(object? sender, EventArgs e)
     {
         Relocate();
-        var width = Width - Padding.Width * 3;
-        var height = Height - Padding.Height * 2;
-        var colWidth = width / 3;
         using var g = Graphics.FromImage(Image);
-        Roll.ItemCount = 55;
-        Roll.ReSize(new Rectangle(Padding.Width, Padding.Height, colWidth * 2, height));
-        g.FillRectangle(new SolidBrush(Color.White), Roll.Rect);
-        Roll.ReDraw(g);
-        //RollRect = new(Padding.Width, Padding.Height, colWidth * 2 - Padding.Width, height);
-        //RollBarLineRect = new(RollRect.Right, RollRect.Top, Padding.Width, RollRect.Height);
-        InfoRect = new(Roll.Rect.Right + Padding.Width, Padding.Height, colWidth, height);
-        //ItemToShowCount = RollRect.Height / ItemHeight;
-        ////ItemCount = Archives.Count + 1;
-        //ItemCount = 200;
-        ////ItemCount = 5;
-        //RollOffsetMax = Math.Max(0, ItemCount * ItemHeight - RollRect.Height);
-        //if (LastRollOffsetMax is not 0)
-        //    RollOffset = (RollOffsetMax / (double)LastRollOffsetMax * RollOffset).ToRoundInt();
-        //LastRollOffsetMax = RollOffsetMax;
-        //RollBarRatio = (ItemCount * ItemHeight) / (double)RollRect.Height;
-        //if (RollBarRatio < 1)
-        //    RollBarRatio = 1;
-        //RollBarHeight = (RollRect.Height / RollBarRatio).ToRoundInt();
-        //RollOffset = (RollRect.Height * RollOffsetRatio).ToRoundInt();
-        //RollOffsetRatio = RollOffset / (double)RollRect.Height;
-        //using var g = Graphics.FromImage(Image);
-        //g.FillRectangle(new SolidBrush(Color.White), new(RollRect.Left, RollRect.Top, RollRect.Width + RollBarLineRect.Width, RollRect.Height));
-        g.FillRectangle(new SolidBrush(Color.White), new(InfoRect.Left, InfoRect.Top, InfoRect.Width, InfoRect.Height));
-        //RollBarRect = new();
-        //DrawArchives();
+        g.FillRectangle(new SolidBrush(BackColor), Bounds);
+        var colWidth = (Width - Padding.Width * 3) / 3;
+        var height = Height - Padding.Height * 2;
+        RollRect = new Rectangle(Padding.Width, Padding.Height, colWidth * 2, height);
+        RollReSize();
+        var left = RollRect.Right + Padding.Width;
+        height /= 2;
+        OverviewRect = new(left, Padding.Height, colWidth, height);
+        var buttonWidth = colWidth - Padding.Width * 2;
+        var buttonPadding = (height - ButtonHeight * 3) / 4;
+        StartButton.Rect = new(left, OverviewRect.Bottom + buttonPadding, buttonWidth + Padding.Width * 2, ButtonHeight);
+        ButtonRedraw(StartButton);
+        BuildButton.Rect = new(left + Padding.Width, StartButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
+        ButtonRedraw(BuildButton);
+        DeleteButton.Rect = new(left + Padding.Width * 2, BuildButton.Rect.Bottom + buttonPadding, buttonWidth - Padding.Width * 2, ButtonHeight);
+        ButtonRedraw(DeleteButton);
+        g.FillRectangle(new SolidBrush(FrontColor), new(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height));
         Invalidate();
     }
 
-    //private void DrawArchives()
-    //{
-    //    var showCount = ItemToShowCount;
-    //    if (RollRect.Height % ItemHeight is not 0)
-    //        showCount++;
-    //    if (RollOffset % ItemHeight is not 0)
-    //        showCount++;
-    //    using var g = Graphics.FromImage(Image);
-    //    var pen = new Pen(Color.White, 2f);
-    //    g.FillRectangle(new SolidBrush(Color.White), RollRect);
-    //    g.FillRectangle(new SolidBrush(Color.White), RollBarRect);
-    //    //g.DrawRectangle(pen, RollRect);
-    //    //g.FillRectangle(new SolidBrush(Color.White), new(RollRect.Right, RollRect.Top, Padding.Width, RollRect.Height));
-
-    //    var offset = RollRect.Top - (RollOffset % ItemHeight);
-    //    LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("roll offset", RollOffset.ToString()));
-    //    LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("show count", showCount.ToString()));
-    //    var left = RollRect.Left + ItemPadding;
-    //    var top = offset + ItemPadding;
-    //    var itemPaddings = ItemPadding * 2;
-    //    var width = RollRect.Width - itemPaddings;
-    //    var height = ItemHeight - itemPaddings;
-    //    for (var i = 0; i < showCount; i++)
-    //    {
-    //        var y = top + i * ItemHeight;
-    //        //g.DrawLine(new Pen(Color.White, 2.5f), new(RollRect.Left, y), new(RollRect.Right, y));
-    //        var rect = new Rectangle(left, y, width, height);
-    //        if (rect.CutRectInRange(new(RollRect.Left, RollRect.Top + ItemPadding, RollRect.Width, RollRect.Height - itemPaddings), out var r))
-    //            g.FillRectangle(new SolidBrush(BackColor), r.Value);
-    //    }
-    //    var rollbarHeight = RollBarHeight;
-    //    var rollBarRatio = RollBarRatio;
-    //    if (RollBarHeight < RollBarHeightMin)
-    //    {
-    //        rollBarRatio = (ItemCount * ItemHeight) / (double)(RollRect.Height - (RollBarHeightMin - RollBarHeight));
-    //        rollbarHeight = RollBarHeightMin;
-    //    }
-    //    var rollBarOffset = (RollOffset / rollBarRatio);
-    //    RollBarRect = new Rectangle(RollRect.Right, (RollRect.Top + rollBarOffset).ToRoundInt(), Padding.Width - ItemPadding, rollbarHeight);
-    //    g.FillRectangle(new SolidBrush(BackColor), RollBarRect);
-
-    //    Invalidate();
-    //}
+    private void ButtonRedraw(Button button)
+    {
+        using var g = Graphics.FromImage(Image);
+        if (button.Selected)
+        {
+            g.FillRectangle(new SolidBrush(ButtonFrontColor), button.Rect);
+            g.DrawUniformString(button.Rect, button.Name, ButtonHeight * 0.618f, ButtonBackColor, ButtonFontData);
+        }
+        else
+        {
+            g.FillRectangle(new SolidBrush(ButtonBackColor), button.Rect);
+            g.DrawUniformString(button.Rect, button.Name, ButtonHeight * 0.618f, ButtonFrontColor, ButtonFontData);
+        }
+        Invalidate();
+    }
 }

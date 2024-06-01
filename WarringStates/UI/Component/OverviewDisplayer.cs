@@ -24,9 +24,9 @@ public partial class OverviewDisplayer : Displayer
 
     List<Rectangle> LastFocusOnRects { get; } = [];
 
-    Pen FocusPen { get; set; } = new(Color.Red);
-
     List<Rectangle> FocusRects { get; } = [];
+
+    Color FocusColor { get; set; } = Color.Red;
 
     public OverviewDisplayer()
     {
@@ -122,14 +122,14 @@ public partial class OverviewDisplayer : Displayer
         using var g = Graphics.FromImage(Image);
         FocusRects.Clear();
         FocusRects.AddRange(FocusRect.CutRectLoopRectsInRange(new(new(0, 0), Size)));
-        FocusPen.Width = Math.Min(Width, Height) * 0.01f;
+        using var pen = new Pen(Color.Red, Math.Min(Width, Height) * 0.01f);
         LastFocusOnRects.Clear();
         foreach (var rect in FocusRects)
         {
-            g.DrawRectangle(FocusPen, rect);
+            g.DrawRectangle(pen, rect);
             foreach (var edge in rect.GetRectEdges())
             {
-                if (edge.GetCrossLineRect(FocusPen.Width).CutRectInRange(new(new(0, 0), Size), out var r))
+                if (edge.GetCrossLineRect(pen.Width).CutRectInRange(new(new(0, 0), Size), out var r))
                     LastFocusOnRects.Add(r.Value);
             }
         }

@@ -1,9 +1,6 @@
-﻿using LocalUtilities.TypeGeneral;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.TypeGeneral;
+using WarringStates.Events;
 
 namespace WarringStates.UI;
 
@@ -19,6 +16,12 @@ internal class InitializeForm : ResizeableForm
             Displayer,
             ]);
         OnDrawingClient += DrawClient;
+        OnLoadForm += LoadForm;
+    }
+
+    private void LoadForm(SsDeserializer deserializer)
+    {
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.InitializeFormLoading);
     }
 
     private void DrawClient()

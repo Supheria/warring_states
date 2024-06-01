@@ -38,7 +38,9 @@ public static class LocalEvents
     public enum UserInterface
     {
         GameFormUpdate,
-        GameDisplayerUpdate
+        GameDisplayerUpdate,
+        InitializeFormLoading,
+        InitializeFormClosing,
     }
 
     public enum Flow

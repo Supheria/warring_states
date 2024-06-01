@@ -2,8 +2,6 @@
 
 using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using LocalUtilities.SimpleScript.Serialization;
-using WarringStates.Map;
 using WarringStates.Terrain;
 using WarringStates.UI;
 
@@ -43,6 +41,7 @@ namespace WarringStates
             //new TestForm().Show();
             new TestForm() { TopMost = true }.Show();
             Application.Run(new InitializeForm());
+            //Application.Run(new GameForm());
         }
     }
 }

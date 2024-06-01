@@ -1,40 +1,49 @@
 ﻿using LocalUtilities.TypeGeneral;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 
 namespace WarringStates.UI;
 
 partial class InitializeDisplayer
 {
-    bool DoDrawBar { get; set; } = false;
-
-    bool DoDrawRoll { get; set; } = false;
-
     protected override void AddOperations()
     {
         MouseDown += OnMouseDown;
         MouseUp += OnMouseUp;
         MouseMove += OnMouseMove;
+        MouseDoubleClick += OnDoubleClick;
+    }
+
+    private void OnDoubleClick(object? sender, MouseEventArgs e)
+    {
+        if (RollItemsRect.Contains(e.Location))
+            SelectedItemIndex = (e.Y - RollItemsRect.Top - RollPadding + RollOffset) / RollItemHeight;
+        else
+            SelectedItemIndex = -1;
+        RollReDraw();
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs e)
     {
-        if (Roll.ItemsRect.Contains(e.Location))
-            DoDrawRoll = true;
-        else if (Roll.BarRect.Contains(e.Location))
-            DoDrawBar = true;
+        if (RollItemsRect.Contains(e.Location))
+            RollDragger = RollDragPart.Item;
+        else if (BarRect.Contains(e.Location))
+            RollDragger = RollDragPart.Bar;
+        else if (StartButton.Rect.Contains(e.Location))
+        {
+
+        }
+        else if (BuildButton.Rect.Contains(e.Location))
+        {
+
+        }
+        else if (DeleteButton.Rect.Contains(e.Location) && SelectedItemIndex is not -1)
+        {
+
+        }
     }
 
     private void OnMouseUp(object? sender, MouseEventArgs e)
     {
-        if (DoDrawRoll)
-            DoDrawRoll = false;
-        if (DoDrawBar)
-            DoDrawBar = false;
+        RollDragger = RollDragPart.None;
     }
 
     private void OnMouseMove(object? sender, MouseEventArgs e)
@@ -42,27 +51,27 @@ partial class InitializeDisplayer
         switch (DragFlag)
         {
             case Directions.Left:
-                if (DoDrawRoll)
-                {
-                    Roll.Relocate(DragStartPoint.Y - e.Y);
-                    using var g = Graphics.FromImage(Image);
-                    Roll.ReDraw(g);
-                    //RollOffset += (DragStartPoint.Y - e.Y);
-                    //RollOffset = RollOffset < 0 ? 0 : RollOffset > RollOffsetMax ? RollOffsetMax : RollOffset;
-                    //DrawArchives();
-                    Invalidate();
-                }
-                else if (DoDrawBar)
-                {
-                    Roll.Relocate((e.Y - DragStartPoint.Y) * Roll.ItemHeight * Roll.ItemToShowCount / Roll.BarRect.Height);
-                    using var g = Graphics.FromImage(Image);
-                    Roll.ReDraw(g);
-                    //RollOffset -= (DragStartPoint.Y - e.Y) * ItemHeight * ItemToShowCount / (RollBarRect.Height);
-                    //RollOffset = RollOffset < 0 ? 0 : RollOffset > RollOffsetMax ? RollOffsetMax : RollOffset;
-                    //DrawArchives();
-                    Invalidate();
-                }
+                RollChangeOffset(e.Y - DragStartPoint.Y);
                 break;
+        }
+        if (RollDragger is RollDragPart.None)
+        {
+            testButton(StartButton);
+            testButton(BuildButton);
+            testButton(DeleteButton);
+        }
+        void testButton(Button button)
+        {
+            if (button.Rect.Contains(e.Location))
+            {
+                button.Selected = true;
+                ButtonRedraw(button);
+            }
+            else if (button.Selected)
+            {
+                button.Selected = false;
+                ButtonRedraw(button);
+            }
         }
     }
 }

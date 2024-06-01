@@ -7,8 +7,6 @@ namespace WarringStates.Terrain;
 
 partial class SourceLand
 {
-    static SolidBrush Brush { get; } = new(Color.Transparent);
-
     public int DrawCell(Graphics? g, Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand)
     {
         if (g is null)
@@ -17,17 +15,15 @@ partial class SourceLand
         var direction = Points[cell.TerrainPoint];
         if (direction is not Directions.Center)
         {
-            Brush.Color = backColor;
             if (cell.RealRect.CutRectInRange(drawRect, out var r))
             {
-                g?.FillRectangle(Brush, r.Value);
+                g?.FillRectangle(new SolidBrush(backColor), r.Value);
                 count++;
             }
         }
         if (GetSourceLandCellRect(direction, cell).CutRectInRange(drawRect, out var rect))
         {
-            Brush.Color = Colors[Type];
-            g?.FillRectangle(Brush, rect.Value);
+            g?.FillRectangle(new SolidBrush(Colors[Type]), rect.Value);
             count++;
         }
         return count;

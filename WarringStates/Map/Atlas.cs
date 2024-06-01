@@ -1,7 +1,5 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Map.Terrain;
-using WarringStates.Terrain;
 using WarringStates.User;
 
 namespace WarringStates.Map;

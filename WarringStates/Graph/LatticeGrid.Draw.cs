@@ -21,8 +21,6 @@ partial class LatticeGrid
 
     Color BackColor { get; set; }
 
-    SolidBrush BackBrush { get; } = new(Color.Transparent);
-
     public Size LatticeSize { get; set; } = new();
 
     public Size LatticeOffset { get; set; } = new();
@@ -57,7 +55,6 @@ partial class LatticeGrid
         Image = args.Source;
         Graphics = Graphics.FromImage(Image);
         BackColor = args.BackColor;
-        BackBrush.Color = BackColor;
         DrawGrid();
         Graphics.Flush();
         Graphics.Dispose();
