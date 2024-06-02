@@ -1,4 +1,5 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.FileHelper;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using WarringStates.Events;
 using WarringStates.User;
@@ -31,9 +32,9 @@ public partial class InitializeDisplayer : Displayer
 
     Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
 
-    Button StartButton { get; } = new("进入");
-
     Button BuildButton { get; } = new("新建");
+
+    Button LoadButton { get; } = new("加载");
 
     Button DeleteButton { get; } = new("删除");
 
@@ -43,18 +44,10 @@ public partial class InitializeDisplayer : Displayer
 
     Color SelectedColor { get; set; } = Color.Gold;
 
-    List<Archive> Archives { get; set; } = [];
-
     public InitializeDisplayer()
     {
         BackColor = Color.Teal;
         SizeChanged += OnResize;
-        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.InitializeFormLoading, LoadArchives);
-    }
-
-    private void LoadArchives()
-    {
-
     }
 
     private void OnResize(object? sender, EventArgs e)
@@ -71,11 +64,11 @@ public partial class InitializeDisplayer : Displayer
         OverviewRect = new(left, Padding.Height, colWidth, height);
         var buttonWidth = colWidth - Padding.Width * 2;
         var buttonPadding = (height - ButtonHeight * 3) / 4;
-        StartButton.Rect = new(left, OverviewRect.Bottom + buttonPadding, buttonWidth + Padding.Width * 2, ButtonHeight);
-        ButtonRedraw(StartButton);
-        BuildButton.Rect = new(left + Padding.Width, StartButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
+        BuildButton.Rect = new(left, OverviewRect.Bottom + buttonPadding, colWidth, ButtonHeight);
         ButtonRedraw(BuildButton);
-        DeleteButton.Rect = new(left + Padding.Width * 2, BuildButton.Rect.Bottom + buttonPadding, buttonWidth - Padding.Width * 2, ButtonHeight);
+        LoadButton.Rect = new(left, BuildButton.Rect.Bottom + buttonPadding, colWidth, ButtonHeight);
+        ButtonRedraw(LoadButton);
+        DeleteButton.Rect = new(left + Padding.Width, LoadButton.Rect.Bottom + buttonPadding, buttonWidth - Padding.Width, ButtonHeight);
         ButtonRedraw(DeleteButton);
         g.FillRectangle(new SolidBrush(FrontColor), new(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height));
         Invalidate();
@@ -83,8 +76,13 @@ public partial class InitializeDisplayer : Displayer
 
     private void ButtonRedraw(Button button)
     {
+        ButtonRedraw(button, button.Selected);
+    }
+
+    private void ButtonRedraw(Button button, bool selected)
+    {
         using var g = Graphics.FromImage(Image);
-        if (button.Selected)
+        if (selected)
         {
             g.FillRectangle(new SolidBrush(ButtonFrontColor), button.Rect);
             g.DrawUniformString(button.Rect, button.Name, ButtonHeight * 0.618f, ButtonBackColor, ButtonFontData);

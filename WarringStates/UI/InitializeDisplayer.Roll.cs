@@ -1,5 +1,8 @@
-﻿using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Graph;
+using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
+using WarringStates.User;
 
 namespace WarringStates.UI;
 
@@ -45,6 +48,12 @@ partial class InitializeDisplayer
 
     Rectangle SelectedItemRect { get; set; } = new();
 
+    FontData ItemFontData = new(nameof(ItemFontData))
+    {
+        Size = 35f,
+        Style = FontStyle.Bold,
+    };
+
     private void RollReSize()
     {
         var top = RollRect.Top;
@@ -52,22 +61,6 @@ partial class InitializeDisplayer
         RollItemsRect = new(RollRect.Left + RollPadding, top, RollRect.Width - BarWidth - RollPadding * 3, height);
         BarLineRect = new(RollRect.Right - BarWidth - RollPadding, top + RollPadding, BarWidth, height - RollPadding);
         RollItemToShowCount = RollItemsRect.Height / RollItemHeight;
-        //var itemCount = Archives.Count + 1;
-        var itemCount = 10;
-        //SelectedItemIndex = 5;
-        RollOffsetMax = Math.Max(0, itemCount * RollItemHeight - RollItemsRect.Height);
-        if (LastRollOffsetMax is not 0)
-            RollOffset = (RollOffsetMax / (double)LastRollOffsetMax * RollOffset).ToRoundInt();
-        LastRollOffsetMax = RollOffsetMax;
-        BarRatio = (itemCount * RollItemHeight) / (double)BarLineRect.Height;
-        if (BarRatio < 1)
-            BarRatio = 1;
-        BarHeight = (BarLineRect.Height / BarRatio).ToRoundInt();
-        if (BarHeight < BarHeightMin)
-        {
-            BarRatio = (itemCount * RollItemHeight) / (double)(BarLineRect.Height - (BarHeightMin - BarHeight));
-            BarHeight = BarHeightMin;
-        }
         RollReDraw();
     }
 
@@ -83,8 +76,29 @@ partial class InitializeDisplayer
         RollReDraw();
     }
 
+    private void UpdateItemCount()
+    {
+        var itemCount = LocalSaves.Saves.Count;
+        if (itemCount is 0)
+            itemCount = 1;
+        RollOffsetMax = Math.Max(0, itemCount * RollItemHeight - RollItemsRect.Height);
+        if (LastRollOffsetMax is not 0)
+            RollOffset = (RollOffsetMax / (double)LastRollOffsetMax * RollOffset).ToRoundInt();
+        LastRollOffsetMax = RollOffsetMax;
+        BarRatio = (itemCount * RollItemHeight) / (double)BarLineRect.Height;
+        if (BarRatio < 1)
+            BarRatio = 1;
+        BarHeight = (BarLineRect.Height / BarRatio).ToRoundInt();
+        if (BarHeight < BarHeightMin)
+        {
+            BarRatio = (itemCount * RollItemHeight) / (double)(BarLineRect.Height - (BarHeightMin - BarHeight));
+            BarHeight = BarHeightMin;
+        }
+    }
+
     private void RollReDraw()
     {
+        UpdateItemCount();
         using var g = Graphics.FromImage(Image);
         using var brush = new SolidBrush(FrontColor);
         g.FillRectangle(brush, RollRect);
@@ -100,11 +114,19 @@ partial class InitializeDisplayer
         {
             var y = top + i * RollItemHeight;
             var rect = new Rectangle(RollItemsRect.Left, y, RollItemsRect.Width, RollItemHeight - RollPadding);
-            if (showStartItemIndex + i == SelectedItemIndex)
+            var index = showStartItemIndex + i;
+            if (index >= LocalSaves.Saves.Count)
+                continue;
+            var info = LocalSaves.Saves[index];
+            var text = $"{info.WorldName}";
+
+            if (index == SelectedItemIndex)
                 brush.Color = Color.Gold;
             else
                 brush.Color = BackColor;
             g.FillRectangle(brush, rect);
+            brush.Color = FrontColor;
+            g.DrawString(text, ItemFontData, brush, rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
         }
         brush.Color = FrontColor;
         g.FillRectangle(brush, new(RollItemsRect.Left, RollItemsRect.Top, RollItemsRect.Width, RollPadding));

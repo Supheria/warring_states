@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.User;
 
 namespace WarringStates.UI;
 
@@ -27,17 +28,23 @@ partial class InitializeDisplayer
             RollDragger = RollDragPart.Item;
         else if (BarRect.Contains(e.Location))
             RollDragger = RollDragPart.Bar;
-        else if (StartButton.Rect.Contains(e.Location))
-        {
-
-        }
         else if (BuildButton.Rect.Contains(e.Location))
         {
 
         }
+        else if (LoadButton.Rect.Contains(e.Location) && SelectedItemIndex is not -1)
+        {
+            if (LocalSaves.LoadArchive(LocalSaves.Saves[SelectedItemIndex], out var archive))
+            {
+
+            }
+        }
         else if (DeleteButton.Rect.Contains(e.Location) && SelectedItemIndex is not -1)
         {
-
+            LocalSaves.Delete(LocalSaves.Saves[SelectedItemIndex]);
+            SelectedItemIndex = -1;
+            RollReDraw();
+            ButtonRedraw(DeleteButton, false);
         }
     }
 
@@ -56,13 +63,13 @@ partial class InitializeDisplayer
         }
         if (RollDragger is RollDragPart.None)
         {
-            testButton(StartButton);
-            testButton(BuildButton);
-            testButton(DeleteButton);
+            testButton(BuildButton, () => true);
+            testButton(LoadButton, () => SelectedItemIndex is not -1);
+            testButton(DeleteButton, () => SelectedItemIndex is not -1);
         }
-        void testButton(Button button)
+        void testButton(Button button, Func<bool> condition)
         {
-            if (button.Rect.Contains(e.Location))
+            if (button.Rect.Contains(e.Location) && condition())
             {
                 button.Selected = true;
                 ButtonRedraw(button);

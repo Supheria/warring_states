@@ -9,11 +9,7 @@ public class Archive : ISsSerializable
 {
     public string LocalName => nameof(Archive);
 
-    public string Id { get; private set; } = "";
-
-    public string WorldName { get; private set; } = "";
-
-    public string CreateTime { get; private set; } = "";
+    public ArchiveInfo ArchiveInfo { get; private set; } = new();
 
     public int CurrentSpan { get; private set; } = 0;
 
@@ -21,12 +17,10 @@ public class Archive : ISsSerializable
 
     public List<SourceLand> SourceLands { get; private set; } = [];
 
-    private Archive(string worldName, AltitudeMap altitudeMap, string createTime)
+    private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
     {
-        WorldName = worldName;
+        ArchiveInfo = info;
         AltitudeMap = altitudeMap;
-        CreateTime = createTime;
-        SetId();
     }
 
     public Archive()
@@ -34,32 +28,28 @@ public class Archive : ISsSerializable
 
     }
 
-    private void SetId()
-    {
-        Id = $"{WorldName}{CreateTime}".ToMd5HashString();
-    }
-
     public static Archive Create(string worldName, AltitudeMapData mapData)
     {
         var map = new AltitudeMap(mapData);
-        var date = $"{DateTime.Now:yyyyMMddHHmmss}";
-        return new(worldName, map, date);
+        return new(new(worldName), map);
+    }
+
+    public void UpdateSaveTime()
+    {
+
     }
 
     public void Serialize(SsSerializer serializer)
     {
-        serializer.WriteTag(nameof(WorldName), WorldName);
-        serializer.WriteTag(nameof(CreateTime), CreateTime);
+        serializer.WriteObject(ArchiveInfo);
         serializer.WriteObject(AltitudeMap);
         serializer.WriteObjects(nameof(SourceLands), SourceLands);
     }
 
     public void Deserialize(SsDeserializer deserializer)
     {
-        WorldName = deserializer.ReadTag(nameof(WorldName), s => s);
-        CreateTime = deserializer.ReadTag(nameof(CreateTime), s => s);
+        deserializer.ReadObject(ArchiveInfo);
         deserializer.ReadObject(AltitudeMap);
         SourceLands = deserializer.ReadObjects<SourceLand>(nameof(SourceLands));
-        SetId();
     }
 }
