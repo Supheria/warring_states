@@ -8,84 +8,131 @@ public static class LocalSaves
 {
     public static string Folder { get; set; } = Directory.CreateDirectory(nameof(Archive)).FullName;
 
-    public static string ArchivesDir { get; } = Path.Combine(Folder, nameof(Saves));
+    public static string RegisterDir { get; } = Path.Combine(Folder, nameof(Saves));
 
-    public static List<ArchiveInfo> Saves { get; set; } =
-        //[
-        //new("测试存档中文版1"),
-        //];
-        //[];
-        [
-        new("测试存档中文版1"),
-        new("测试存档中文版2"),
-        new("测试存档中文版3"),
-        new("测试存档中文版4"),
-        new("测试存档中文版5"),
-        new("测试存档中文版6"),
-        new("测试存档中文版7"),
-        new("测试存档中文版8"),
-        new("测试存档中文版9"),
-        ];
+    static List<ArchiveInfo> Saves { get; set; } = [];
+    //[
+    //new("测试存档中文1"),
+    //];
+    //[];
+    //[
+    //new("测试存档中文1"),
+    //new("测试存档中文20A"),
+    //new("测试存档中文300B"),
+    //new("测试存档中文4"),
+    //new("测试存档中文5"),
+    //new("测试存档中文6"),
+    //new("测试存档中文7"),
+    //new("测试存档中文8"),
+    //new("测试存档中文9"),
+    //];
 
-    //public static void ReLocate()
-    //{
-    //    try
-    //    {
-    //        Saves = SerializeTool.LoadFromSimpleScript<ArchiveInfo>(nameof(Saves), ArchivesDir).ToList();
-    //    }
-    //    catch
-    //    {
-    //        Save();
-    //    }
-    //}
+    public static List<ArchiveInfo> ReLocate()
+    {
+        try
+        {
+            Saves = SerializeTool.LoadFromSimpleScript<ArchiveInfo>(nameof(Saves), RegisterDir).ToList();
+        }
+        catch
+        {
+            Save();
+        }
+        return Saves;
+    }
 
-    public static bool LoadArchive(this ArchiveInfo info, [NotNullWhen(true)]out Archive? archive)
+    public static int Count => Saves.Count;
+
+    public static bool TryGetArchiveInfo(int index, [NotNullWhen(true)] out ArchiveInfo? info)
+    {
+        info = null;
+        if (index < 0 || index >= Count)
+            return false;
+        info = Saves[index];
+        return true;
+    }
+
+    public static bool TryGetArchive(int index, [NotNullWhen(true)] out Archive? archive)
     {
         archive = null;
-        var dir = GetArchiveDir(info);
-        if (!File.Exists(dir))
+        if (!TryGetArchiveInfo(index, out var info))
+            return false;
+        try
         {
-            MessageBox.Show($"找不到存档文件 - {info.WorldName}@{info.CreateTime}");
+            archive = new Archive().LoadFromSimpleScript(GetArchiveDir(info));
+            return true;
+        }
+        catch
+        {
             return false;
         }
+    }
+
+    public static bool LoadArchive(int index, [NotNullWhen(true)] out Archive? archive)
+    {
+        archive = null;
+        if (!TryGetArchiveInfo(index, out var info))
+            return false;
+        var dir = GetArchiveDir(info);
+        var exMessage = "数据缺失";
         try
         {
             archive = new Archive().LoadFromSimpleScript(dir);
-            return true;
+            if (archive.Useable())
+                return true;
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"存档文件 - {info.WorldName}@{info.CreateTime} 或已损坏: {ex.Message}");
-            return false;
+            exMessage = ex.Message;
         }
+        MessageBox.Show($"{exMessage}", $"无法加载 - {info.WorldName}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
+        //return true;
     }
 
     public static ArchiveInfo CreateArchive(this AltitudeMapData mapData, string worldName)
     {
-        var archive = Archive.Create(worldName, mapData);
-        archive.SaveToSimpleScript(false, GetArchiveDir(archive.ArchiveInfo));
-        Saves.Add(archive.ArchiveInfo);
+        var info = new ArchiveInfo(worldName);
+        Archive.Create(info, mapData).SaveToSimpleScript(false, GetArchiveDir(info));
+        Saves.Add(info);
         Save();
-        return archive.ArchiveInfo;
+        return info;
     }
 
     public static void Update(this Archive archive)
     {
-        Saves.Remove(archive.ArchiveInfo);
-        archive.ArchiveInfo.UpdateLastSaveTime();
-        archive.SaveToSimpleScript(false, GetArchiveDir(archive.ArchiveInfo));
-        var saves = new List<ArchiveInfo>() { archive.ArchiveInfo };
+        Saves.Remove(archive.Info);
+        archive.Info.UpdateLastSaveTime();
+        archive.SaveToSimpleScript(false, GetArchiveDir(archive.Info));
+        var saves = new List<ArchiveInfo>() { archive.Info };
         saves.AddRange(Saves);
         Saves = saves;
     }
 
-    public static void Delete(this ArchiveInfo info)
+#if DEBUG
+    public static void Update(int index)
     {
+        if (!TryGetArchiveInfo(index, out var info))
+            return;
+        Saves.Remove(info);
+        info.UpdateLastSaveTime();
+        var saves = new List<ArchiveInfo>() { info };
+        saves.AddRange(Saves);
+        Saves = saves;
+    }
+#endif
+
+    public static bool Delete(int index)
+    {
+        if (!TryGetArchiveInfo(index, out var info))
+            return false;
+        if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            return false;
         var dir = GetArchiveDir(info);
         if (File.Exists(dir))
             File.Delete(dir);
         Saves.Remove(info);
         Save();
+        return true;
     }
 
     private static string GetArchiveDir(ArchiveInfo info)
@@ -95,6 +142,6 @@ public static class LocalSaves
 
     private static void Save()
     {
-        Saves.SaveToSimpleScript(nameof(Saves), true, ArchivesDir);
+        Saves.SaveToSimpleScript(nameof(Saves), true, RegisterDir);
     }
 }

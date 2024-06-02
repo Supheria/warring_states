@@ -9,7 +9,7 @@ public class Archive : ISsSerializable
 {
     public string LocalName => nameof(Archive);
 
-    public ArchiveInfo ArchiveInfo { get; private set; } = new();
+    public ArchiveInfo Info { get; private set; } = new();
 
     public int CurrentSpan { get; private set; } = 0;
 
@@ -19,7 +19,7 @@ public class Archive : ISsSerializable
 
     private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
     {
-        ArchiveInfo = info;
+        Info = info;
         AltitudeMap = altitudeMap;
     }
 
@@ -28,27 +28,29 @@ public class Archive : ISsSerializable
 
     }
 
-    public static Archive Create(string worldName, AltitudeMapData mapData)
+    public static Archive Create(ArchiveInfo info, AltitudeMapData mapData)
     {
         var map = new AltitudeMap(mapData);
-        return new(new(worldName), map);
+        return new(info, map);
     }
 
-    public void UpdateSaveTime()
+    public bool Useable()
     {
-
+        return Info != new ArchiveInfo() && AltitudeMap.OriginPoints.Count > 0;
     }
 
     public void Serialize(SsSerializer serializer)
     {
-        serializer.WriteObject(ArchiveInfo);
+        serializer.WriteObject(Info);
+        serializer.WriteTag(nameof(CurrentSpan), CurrentSpan.ToString());
         serializer.WriteObject(AltitudeMap);
         serializer.WriteObjects(nameof(SourceLands), SourceLands);
     }
 
     public void Deserialize(SsDeserializer deserializer)
     {
-        deserializer.ReadObject(ArchiveInfo);
+        deserializer.ReadObject(Info);
+        CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), int.Parse);
         deserializer.ReadObject(AltitudeMap);
         SourceLands = deserializer.ReadObjects<SourceLand>(nameof(SourceLands));
     }

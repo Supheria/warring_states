@@ -1,7 +1,10 @@
 ﻿using LocalUtilities.FileHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
+using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Events;
+using WarringStates.Flow.Model;
+using WarringStates.Map;
 using WarringStates.User;
 
 namespace WarringStates.UI;
@@ -58,19 +61,58 @@ public partial class InitializeDisplayer : Displayer
         var colWidth = (Width - Padding.Width * 3) / 3;
         var height = Height - Padding.Height * 2;
         RollRect = new Rectangle(Padding.Width, Padding.Height, colWidth * 2, height);
-        RollReSize();
+        RollReDraw();
         var left = RollRect.Right + Padding.Width;
         height /= 2;
         OverviewRect = new(left, Padding.Height, colWidth, height);
+        g.FillRectangle(new SolidBrush(FrontColor), OverviewRect);
+        var overViewPadding = Padding / 4;
+        OverviewRect = new(OverviewRect.Left + overViewPadding.Width, OverviewRect.Top + overViewPadding.Height, OverviewRect.Width - overViewPadding.Width * 2, OverviewRect.Height - overViewPadding.Height * 2);
+        OverviewRedraw();
         var buttonWidth = colWidth - Padding.Width * 2;
         var buttonPadding = (height - ButtonHeight * 3) / 4;
         BuildButton.Rect = new(left, OverviewRect.Bottom + buttonPadding, colWidth, ButtonHeight);
         ButtonRedraw(BuildButton);
         LoadButton.Rect = new(left, BuildButton.Rect.Bottom + buttonPadding, colWidth, ButtonHeight);
         ButtonRedraw(LoadButton);
-        DeleteButton.Rect = new(left + Padding.Width, LoadButton.Rect.Bottom + buttonPadding, buttonWidth - Padding.Width, ButtonHeight);
+        DeleteButton.Rect = new(left + Padding.Width, LoadButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
         ButtonRedraw(DeleteButton);
-        g.FillRectangle(new SolidBrush(FrontColor), new(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height));
+        Invalidate();
+    }
+
+    private void OverviewRedraw()
+    {
+        if (!LocalSaves.TryGetArchive(SelectedItemIndex, out var archive))
+        {
+            var random = new Random();
+            var pImage = new PointBitmap((Bitmap)Image);
+            pImage.LockBits();
+            for (var i = 0; i < OverviewRect.Width; i++)
+            {
+                for (var j = 0; j < OverviewRect.Height; j++)
+                {
+                    var color = Color.FromArgb(255, random.Next(255), random.Next(255), random.Next(255));
+                    pImage.SetPixel(i + OverviewRect.Left, j + OverviewRect.Top, color);
+                }
+            }
+            pImage.UnlockBits();
+        }
+        else
+        {
+            using var g = Graphics.FromImage(Image);
+            g.FillRectangle(new SolidBrush(FrontColor), OverviewRect);
+            Atlas.Relocate(archive);
+            var rect = new Rectangle(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height - Padding.Height);
+            var size = Atlas.Size.ScaleSizeOnRatio(rect.Size);
+            var overview = Atlas.GetOverview(size);
+            overview = overview.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
+            rect = new(rect.Left, rect.Top, size.Width, size.Height);
+            overview.TemplateDrawOntoPart((Bitmap)Image, rect, true);
+            rect = new(rect.Left, rect.Bottom, rect.Width, OverviewRect.Height - rect.Height);
+            var stepper = new DateStepper();
+            stepper.SetStartSpan(archive.CurrentSpan);
+            g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+        }
         Invalidate();
     }
 

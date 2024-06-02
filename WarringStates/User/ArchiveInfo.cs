@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
@@ -35,6 +36,25 @@ public class ArchiveInfo : ISsSerializable
     public void UpdateLastSaveTime()
     {
         LastSaveTime = $"{DateTime.Now:yyyyMMddHHmmss}"; ;
+    }
+
+    public static bool operator ==(ArchiveInfo info, object? obj)
+    {
+        if (info is null)
+        {
+            if (obj is null)
+                return true;
+            else
+                return false;
+        }
+        if (obj is not ArchiveInfo other)
+            return false;
+        return info.Id == other.Id && info.WorldName == other.WorldName && info.CreateTime == other.CreateTime && info.LastSaveTime == other.LastSaveTime;
+    }
+
+    public static bool operator !=(ArchiveInfo info, object? obj)
+    {
+        return !(info == obj);
     }
 
     public void Serialize(SsSerializer serializer)

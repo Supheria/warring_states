@@ -2,8 +2,10 @@
 
 using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
+using WarringStates.Map;
 using WarringStates.Terrain;
 using WarringStates.UI;
+using WarringStates.User;
 
 namespace WarringStates
 {
@@ -12,6 +14,7 @@ namespace WarringStates
         [STAThread]
         static void Main()
         {
+            LocalSaves.ReLocate();
             //new TestCGraphics().ShowDialog();
             //var data = new AltitudeMapData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
             var data = new AltitudeMapData(new(100, 100), new(2, 2), new(2, 2), RiverLayout.Types.OneForTest, 2, 5000, 0.66f);
@@ -36,12 +39,13 @@ namespace WarringStates
             //atlas.Relocate([land1, land2, land3]);
             //var suc1 = SourceLand.TryBuild(new(-1, -1), SourceLand.Types.FarmLand, out var land1);
             //var suc2 = SourceLand.TryBuild(new(10, 264), SourceLand.Types.FishLand, out var land2);
-            //atlas.SetTerrainMap([land1, land2]);
+            if (LocalSaves.TryGetArchive(0, out var r))
+            Atlas.Relocate(r);
 
             //new TestForm().Show();
             new TestForm() { TopMost = true }.Show();
-            Application.Run(new InitializeForm());
-            //Application.Run(new GameForm());
+            //Application.Run(new InitializeForm());
+            Application.Run(new GameForm());
         }
     }
 }

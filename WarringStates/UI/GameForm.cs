@@ -2,6 +2,7 @@
 using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
 using WarringStates.Flow;
+using WarringStates.Graph;
 using WarringStates.UI.Component;
 
 namespace WarringStates.UI;
@@ -20,7 +21,7 @@ public partial class GameForm : ResizeableForm
 
     InfoBrandDisplayer InfoBrand { get; } = new();
 
-    //LatticeGrid Grid { get; } = new();
+    LatticeGrid Grid { get; } = new(new(), new());
 
     SpanFlow SpanFlow { get; set; } = new();
 
@@ -37,7 +38,7 @@ public partial class GameForm : ResizeableForm
             ]);
         Controls.SetChildIndex(Overview, 0);
         Controls.SetChildIndex(GamePlane, 1);
-        //Grid.EnableListner();
+        Grid.EnableListner();
         Overview.EnableListener();
         GamePlane.EnableListener();
         Shown += GameForm_Shown;

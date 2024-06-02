@@ -12,6 +12,7 @@ internal class InitializeForm : ResizeableForm
 
     protected override void InitializeComponent()
     {
+        MinimumSize = new(860, 530);
         Controls.AddRange([
             Displayer,
             ]);

@@ -1,4 +1,6 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using AltitudeMapGenerator;
+using AltitudeMapGenerator.Layout;
+using LocalUtilities.TypeGeneral;
 using WarringStates.User;
 
 namespace WarringStates.UI;
@@ -20,6 +22,7 @@ partial class InitializeDisplayer
         else
             SelectedItemIndex = -1;
         RollReDraw();
+        OverviewRedraw();
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs e)
@@ -27,40 +30,43 @@ partial class InitializeDisplayer
         if (RollItemsRect.Contains(e.Location))
             RollDragger = RollDragPart.Item;
         else if (BarRect.Contains(e.Location))
+        {
             RollDragger = RollDragPart.Bar;
+            RollBarRedraw();
+        }
         else if (BuildButton.Rect.Contains(e.Location))
         {
-
+            var data = new AltitudeMapData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Types.Horizontal, 2.25, 100000, 0.66f);
+            data.CreateArchive("new world");
         }
-        else if (LoadButton.Rect.Contains(e.Location) && SelectedItemIndex is not -1)
+        else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
         {
-            if (LocalSaves.LoadArchive(LocalSaves.Saves[SelectedItemIndex], out var archive))
-            {
-
-            }
+            new GameForm().ShowDialog();
+            LocalSaves.Update(SelectedItemIndex);
+            SelectedItemIndex = 0;
+            RollReDraw();
         }
-        else if (DeleteButton.Rect.Contains(e.Location) && SelectedItemIndex is not -1)
+        else if (DeleteButton.Rect.Contains(e.Location) && LocalSaves.Delete(SelectedItemIndex))
         {
-            LocalSaves.Delete(LocalSaves.Saves[SelectedItemIndex]);
-            SelectedItemIndex = -1;
+            if (LocalSaves.Count is 0)
+                SelectedItemIndex = -1;
+            else if (SelectedItemIndex >= LocalSaves.Count)
+                SelectedItemIndex--;
             RollReDraw();
             ButtonRedraw(DeleteButton, false);
+            OverviewRedraw();
         }
     }
 
     private void OnMouseUp(object? sender, MouseEventArgs e)
     {
         RollDragger = RollDragPart.None;
+        RollBarRedraw();
     }
 
     private void OnMouseMove(object? sender, MouseEventArgs e)
     {
-        switch (DragFlag)
-        {
-            case Directions.Left:
-                RollChangeOffset(e.Y - DragStartPoint.Y);
-                break;
-        }
+        RollChangeOffset(e.Y - DragStartPoint.Y);
         if (RollDragger is RollDragPart.None)
         {
             testButton(BuildButton, () => true);
