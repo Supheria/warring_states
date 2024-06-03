@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing;
 using System.Drawing.Drawing2D;
 using WarringStates.Events;
 using WarringStates.Graph;
@@ -11,7 +10,7 @@ namespace WarringStates.UI.Component;
 
 public partial class OverviewDisplayer : Displayer
 {
-    bool FullScreen { get; set; } = false;
+    bool FullScreen { get; set; } = true;
 
     Bitmap? OverviewCache { get; set; }
 
@@ -76,8 +75,38 @@ public partial class OverviewDisplayer : Displayer
         }
         OverviewCache?.Dispose();
         Image?.Dispose();
-        OverviewCache = Atlas.GetOverview(Size).CopyToNewSize(Size, InterpolationMode.Low); ;
+        var widthUnit = (Height / (double)Atlas.Height).ToRoundInt();
+        if (widthUnit is 0)
+            widthUnit = 1;
+        var heightUnit = (Width / (double)Atlas.Width).ToRoundInt();
+        if (heightUnit is 0)
+            heightUnit = 1;
+        OverviewCache = new(Atlas.Width * widthUnit, Atlas.Height * heightUnit);
+        var pOverview = new PointBitmap(OverviewCache);
+        pOverview.LockBits();
+        for (int i = 0; i < Atlas.Width; i++)
+        {
+            for (int j = 0; j < Atlas.Height; j++)
+            {
+                var color = Atlas.GetLand(new(i, j)).Color;
+                drawUnit(i, j, color);
+            }
+        }
+        pOverview.UnlockBits();
+        OverviewCache = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
         Image = OverviewCache.Clone() as Bitmap;
+        void drawUnit(int col, int row, Color color)
+        {
+            var dx = widthUnit * col;
+            var dy = heightUnit * row;
+            for (var x = 0; x < widthUnit; x++)
+            {
+                for (var y = 0; y < heightUnit; y++)
+                {
+                    pOverview.SetPixel(x + dx, y + dy, color);
+                }
+            }
+        }
     }
 
     private void RelocateFocus(Rectangle drawRect, Coordinate origin)

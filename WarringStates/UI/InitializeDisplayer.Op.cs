@@ -7,7 +7,9 @@ namespace WarringStates.UI;
 
 partial class InitializeDisplayer
 {
-    protected override void AddOperations()
+    Point DragStartPoint { get; set; } = new();
+
+    private void AddOperations()
     {
         MouseDown += OnMouseDown;
         MouseUp += OnMouseUp;

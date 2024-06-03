@@ -9,6 +9,11 @@ public partial class GameDisplayer : Displayer
 
     int InfoBrandHeight { get; set; } = 100;
 
+    public GameDisplayer()
+    {
+        AddOperations();
+    }
+
     public void EnableListener()
     {
         LocalEvents.Hub.AddListener<GameFormUpdatedArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);

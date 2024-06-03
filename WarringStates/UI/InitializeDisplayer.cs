@@ -51,6 +51,7 @@ public partial class InitializeDisplayer : Displayer
     {
         BackColor = Color.Teal;
         SizeChanged += OnResize;
+        AddOperations();
     }
 
     private void OnResize(object? sender, EventArgs e)
