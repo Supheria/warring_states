@@ -43,9 +43,9 @@ public class SpanFlow
 
     private void TickOn()
     {
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, new SpanFlowTickOnArgs(CurrentSpan, CurrentDate));
         CurrentSpan++;
         DateStepper.StepOn();
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, new SpanFlowTickOnArgs(CurrentSpan, CurrentDate));
         Timer.Stop();
         Timer.Interval = Speed switch
         {

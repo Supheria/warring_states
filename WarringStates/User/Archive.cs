@@ -13,8 +13,6 @@ public class Archive : ISsSerializable
 
     public ArchiveInfo Info { get; private set; } = new();
 
-    public int CurrentSpan { get; private set; } = 0;
-
     public AltitudeMap AltitudeMap { get; private set; } = new();
 
     public List<SourceLand> SourceLands { get; private set; } = [];
@@ -59,7 +57,6 @@ public class Archive : ISsSerializable
     public void Serialize(SsSerializer serializer)
     {
         serializer.WriteObject(Info);
-        serializer.WriteTag(nameof(CurrentSpan), CurrentSpan.ToString());
         serializer.WriteObject(AltitudeMap);
         serializer.WriteObjects(nameof(SourceLands), SourceLands);
     }
@@ -67,7 +64,6 @@ public class Archive : ISsSerializable
     public void Deserialize(SsDeserializer deserializer)
     {
         deserializer.ReadObject(Info);
-        CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), int.Parse);
         deserializer.ReadObject(AltitudeMap);
         SourceLands = deserializer.ReadObjects<SourceLand>(nameof(SourceLands));
     }

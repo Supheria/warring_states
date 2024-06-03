@@ -5,30 +5,31 @@ using WarringStates.Flow;
 
 namespace WarringStates.UI.Component;
 
-public class ToolBrandDisplayer : Displayer
+public class ToolBar : Displayer
 {
-    Date CurrentDate { get; set; }
+    bool DoSetting { get; set; } = false;
+
+    Rectangle Range { get; set; } = new();
+
+    Date CurrentDate { get; set; } = new();
 
     SolidBrush DateBrush { get; } = new(Color.White);
 
-    public ToolBrandDisplayer()
+    public ToolBar()
     {
         Height = 30;
-    }
-
-    public void EnableListener()
-    {
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnResize, SetWidth);
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.SettingsOnSetBounds, SetBounds);
         LocalEvents.Hub.AddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
-    private void SetWidth(Rectangle rect)
+    private void SetBounds(Rectangle rect)
     {
+        Range = rect;
         Width = rect.Width;
         Relocate();
         DrawDate();
         rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.ToolBrandDisplayerOnResize, rect);
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
     }
 
     private void SetDate(SpanFlowTickOnArgs args)

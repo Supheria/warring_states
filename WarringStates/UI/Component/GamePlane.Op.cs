@@ -8,7 +8,7 @@ using WarringStates.Terrain;
 
 namespace WarringStates.UI.Component;
 
-partial class GameDisplayer
+partial class GamePlane
 {
     bool DoDragGraph { get; set; } = false;
 

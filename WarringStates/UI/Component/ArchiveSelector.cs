@@ -7,9 +7,9 @@ using WarringStates.Flow.Model;
 using WarringStates.Map;
 using WarringStates.User;
 
-namespace WarringStates.UI;
+namespace WarringStates.UI.Component;
 
-public partial class ArchiveDisplayer : Displayer
+public partial class ArchiveSelector : Displayer
 {
     Rectangle OverviewRect { get; set; } = new();
 
@@ -47,7 +47,7 @@ public partial class ArchiveDisplayer : Displayer
 
     Color SelectedColor { get; set; } = Color.Gold;
 
-    public ArchiveDisplayer()
+    public ArchiveSelector()
     {
         BackColor = Color.Teal;
         AddOperations();
@@ -55,7 +55,21 @@ public partial class ArchiveDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnResize, SetBounds);
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.AddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+    }
+
+    public void DisableListener()
+    {
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+    }
+
+    private new void KeyPress(Keys key)
+    {
+        if (key is not Keys.Escape)
+            return;
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormToClose);
     }
 
     private void SetBounds(Rectangle rect)
@@ -88,7 +102,7 @@ public partial class ArchiveDisplayer : Displayer
 
     private void OverviewRedraw()
     {
-        if (!LocalSaves.TryGetArchive(SelectedItemIndex, out var archive) || !archive.Useable())
+        if (!LocalSaves.TryGetArchiveInfo(SelectedItemIndex, out var info) || !info.Useable())
         {
             var random = new Random();
             var pImage = new PointBitmap((Bitmap)Image);
@@ -97,7 +111,7 @@ public partial class ArchiveDisplayer : Displayer
             {
                 for (var j = 0; j < OverviewRect.Height; j++)
                 {
-                    var color = Color.FromArgb(255, random.Next(255), random.Next(255), random.Next(255));
+                    var color = Color.FromArgb(random.Next(255), 255, 255, 255);
                     pImage.SetPixel(i + OverviewRect.Left, j + OverviewRect.Top, color);
                 }
             }
@@ -110,17 +124,17 @@ public partial class ArchiveDisplayer : Displayer
             var rect = new Rectangle(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height - Padding.Height);
             try
             {
-                var overview = (Bitmap)Image.FromFile(archive.Info.GetOverviewPath());
+                var overview = (Bitmap)Image.FromFile(info.GetOverviewPath());
                 var size = overview.Size.ScaleSizeOnRatio(rect.Size);
                 overview = overview.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
-                rect = new(rect.Left, rect.Top, size.Width, size.Height);
+                rect = new(rect.Left + (rect.Width - overview.Width) / 2, rect.Top + (rect.Height - overview.Height) / 2, size.Width, size.Height);
                 overview.TemplateDrawOntoPart((Bitmap)Image, rect, true);
-                rect = new(rect.Left, rect.Bottom, rect.Width, OverviewRect.Height - rect.Height);
                 overview.Dispose();
+                rect = new(rect.Left, rect.Bottom, rect.Width, OverviewRect.Height - rect.Height);
             }
             catch { }
             var stepper = new DateStepper();
-            stepper.SetStartSpan(archive.CurrentSpan);
+            stepper.SetStartSpan(info.CurrentSpan);
             g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
         }
         Invalidate();

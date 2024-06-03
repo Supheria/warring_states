@@ -22,6 +22,8 @@ public class ArchiveInfo : ISsSerializable
 
     public string LastSaveTime { get; private set; } = "";
 
+    public int CurrentSpan { get; private set; } = 0;
+
     public ArchiveInfo(string worldName)
     {
         WorldName = worldName;
@@ -64,6 +66,7 @@ public class ArchiveInfo : ISsSerializable
         serializer.WriteTag(nameof(WorldName), WorldName);
         serializer.WriteTag(nameof(CreateTime), CreateTime);
         serializer.WriteTag(nameof(LastSaveTime), LastSaveTime);
+        serializer.WriteTag(nameof(CurrentSpan), CurrentSpan.ToString());
     }
 
     public void Deserialize(SsDeserializer deserializer)
@@ -71,6 +74,7 @@ public class ArchiveInfo : ISsSerializable
         WorldName = deserializer.ReadTag(nameof(WorldName), s => s);
         CreateTime = deserializer.ReadTag(nameof(CreateTime), s => s);
         LastSaveTime = deserializer.ReadTag(nameof(LastSaveTime), s => s);
+        CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), int.Parse);
         SetId();
     }
 }

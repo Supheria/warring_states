@@ -5,7 +5,7 @@ using WarringStates.Map;
 
 namespace WarringStates.UI.Component;
 
-partial class OverviewDisplayer
+partial class Overview
 {
     bool DoDragFocus { get; set; } = false;
 
@@ -34,10 +34,10 @@ partial class OverviewDisplayer
             if (GridUpdatedArgs is null)
                 return;
             FullScreen = !FullScreen;
-            var size = FullScreen ? Atlas.Size.ScaleSizeOnRatio(DisplayRect.Size) : new((DisplayRect.Width * 0.25).ToRoundInt(), (DisplayRect.Height * 0.25).ToRoundInt());
+            var size = FullScreen ? Atlas.Size.ScaleSizeOnRatio(Range.Size) : new((Range.Width * 0.25).ToRoundInt(), (Range.Height * 0.25).ToRoundInt());
             Size = Atlas.Size.ScaleSizeOnRatio(size);
             Relocate(GridUpdatedArgs);
-            Location = FullScreen ? new(DisplayRect.Left + (DisplayRect.Width - Width) / 2, DisplayRect.Top + (DisplayRect.Height - Height) / 2) : new(DisplayRect.Right - Width, DisplayRect.Top);
+            Location = FullScreen ? new(Range.Left + (Range.Width - Width) / 2, Range.Top + (Range.Height - Height) / 2) : new(Range.Right - Width, Range.Top);
         }
     }
 

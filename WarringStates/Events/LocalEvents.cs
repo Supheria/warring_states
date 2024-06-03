@@ -37,10 +37,14 @@ public static class LocalEvents
 
     public enum UserInterface
     {
-        MainFormOnResize,
-        ToolBrandDisplayerOnResize,
-        GameDisplayerOnResize,
-        MainFormSwitchState,
+        MainFormOnDraw,
+        SettingsOnSetBounds,
+        ToolBarOnSetBounds,
+        InfoBarOnSetBounds,
+        ArchiveSelected,
+        FinishGamePlay,
+        KeyPressed,
+        MainFormToClose,
     }
 
     public enum Flow
@@ -60,11 +64,12 @@ public static class LocalEvents
                 continue;
             }
             var callBackNames = new StringBuilder();
+            var i = 0;
             foreach (var c in callback.GetInvocationList())
             {
                 var info = $"{c.Target?.ToString()} + {c}";
-                testInfoList.Add(new(type.ToWholeString(), info));
-                continue;
+                testInfoList.Add(new($"{type.ToWholeString()}: {i} => {c.Target}", ""));
+                i++;
             }
         }
         Hub.TryBroadcast(Test.AddInfoList, testInfoList);

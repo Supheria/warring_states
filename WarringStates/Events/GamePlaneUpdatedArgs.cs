@@ -1,6 +1,6 @@
 ﻿namespace WarringStates.Events;
 
-internal class GameDisplayerUpdatedArgs(Rectangle displayRect, Rectangle otherRect)
+internal class GamePlaneUpdatedArgs(Rectangle displayRect, Rectangle otherRect)
 {
 
     public Rectangle DisplayRect { get; } = displayRect;

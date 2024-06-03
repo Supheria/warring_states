@@ -8,13 +8,13 @@ using WarringStates.Map;
 
 namespace WarringStates.UI.Component;
 
-public partial class OverviewDisplayer : Displayer
+public partial class Overview : Displayer
 {
     bool FullScreen { get; set; } = false;
 
     Bitmap? OverviewCache { get; set; }
 
-    Rectangle DisplayRect { get; set; }
+    Rectangle Range { get; set; }
 
     GridUpdatedArgs? GridUpdatedArgs { get; set; }
 
@@ -28,30 +28,26 @@ public partial class OverviewDisplayer : Displayer
 
     Color FocusColor { get; set; } = Color.Red;
 
-    public OverviewDisplayer()
+    public Overview()
     {
         AddOperations();
-    }
-
-    public void EnableListener()
-    {
-        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerOnResize, SetBounds);
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
         LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdated, Relocate);
     }
 
-    private void SetBounds(GameDisplayerUpdatedArgs args)
+    private void SetBounds(Rectangle rect)
     {
-        DisplayRect = args.DisplayRect;
+        Range = rect;
         if (FullScreen)
         {
-            Size = Atlas.Size.ScaleSizeOnRatio(DisplayRect.Size);
-            Location = new(DisplayRect.Left + (DisplayRect.Width - Width) / 2, DisplayRect.Top + (DisplayRect.Height - Height) / 2);
+            Size = Atlas.Size.ScaleSizeOnRatio(Range.Size);
+            Location = new(Range.Left + (Range.Width - Width) / 2, Range.Top + (Range.Height - Height) / 2);
         }
         else
         {
-            var size = new Size((int)(DisplayRect.Width * 0.25), (int)(DisplayRect.Height * 0.25));
+            var size = new Size((int)(Range.Width * 0.25), (int)(Range.Height * 0.25));
             Size = Atlas.Size.ScaleSizeOnRatio(size);
-            Location = new(DisplayRect.Right - Width, DisplayRect.Top);
+            Location = new(Range.Right - Width, Range.Top);
         }
     }
 
@@ -123,7 +119,7 @@ public partial class OverviewDisplayer : Displayer
         using var g = Graphics.FromImage(Image);
         FocusRects.Clear();
         FocusRects.AddRange(FocusRect.CutRectLoopRectsInRange(new(new(0, 0), Size)));
-        using var pen = new Pen(Color.Red, Math.Min(Width, Height) * 0.01f);
+        using var pen = new Pen(FocusColor, Math.Min(Width, Height) * 0.01f);
         LastFocusOnRects.Clear();
         foreach (var rect in FocusRects)
         {

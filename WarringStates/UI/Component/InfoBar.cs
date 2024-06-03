@@ -5,23 +5,26 @@ using WarringStates.Map.Terrain;
 
 namespace WarringStates.UI.Component;
 
-public class InfoBrandDisplayer : Displayer
+public class InfoBar : Displayer
 {
     SolidBrush InfoBrush { get; } = new(Color.White);
 
-    public InfoBrandDisplayer()
+    public InfoBar()
     {
-        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerOnResize, SetBounds);
+        Height = 100;
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
     }
 
-    private void SetBounds(GameDisplayerUpdatedArgs args)
+    private void SetBounds(Rectangle rect)
     {
-        Bounds = args.OtherRect;
+        Bounds = new(rect.Left, rect.Bottom - Height, rect.Width, Height);
         Relocate();
         using var g = Graphics.FromImage(Image);
         g.Clear(Color.Gray);
         var info = $"\n水源{SingleLand.Types.Stream.GetLandTypeCount()}\n平原{SingleLand.Types.Plain.GetLandTypeCount()}\n树林{SingleLand.Types.Wood.GetLandTypeCount()}\n山地{SingleLand.Types.Hill.GetLandTypeCount()}";
         g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
         Invalidate();
+        rect = new(rect.Left, rect.Top, rect.Width, rect.Height - Height);
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.InfoBarOnSetBounds, rect);
     }
 }

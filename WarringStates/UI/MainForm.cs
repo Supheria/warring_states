@@ -3,35 +3,31 @@ using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
 using WarringStates.Flow;
 using WarringStates.Graph;
+using WarringStates.Map;
 using WarringStates.UI.Component;
+using WarringStates.User;
 
 namespace WarringStates.UI;
 
 public partial class MainForm : ResizeableForm
 {
-    public enum States
-    {
-        SelectArchive,
-        PlayGame
-    }
-
-    States CurrentSatate { get; set; } = States.SelectArchive;
-
     public override string LocalName => nameof(MainForm);
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
-    ArchiveDisplayer ArchiveSelector { get; } = new();
+    ArchiveSelector ArchiveSelector { get; } = new();
 
-    ToolBrandDisplayer ToolBrand { get; } = new();
+    Settings Settings { get; } = new();
 
-    GameDisplayer GamePlane { get; } = new();
+    ToolBar ToolBar { get; } = new();
 
-    OverviewDisplayer Overview { get; } = new();
+    GamePlane GamePlane { get; } = new();
 
-    InfoBrandDisplayer InfoBrand { get; } = new();
+    Overview Overview { get; } = new();
 
-    LatticeGrid Grid { get; } = new(new(), new());
+    InfoBar InfoBar { get; } = new();
+
+    LatticeGrid Grid { get; } = new();
 
     SpanFlow SpanFlow { get; set; } = new();
 
@@ -41,41 +37,46 @@ public partial class MainForm : ResizeableForm
         OnDrawingClient += DrawClient;
         OnLoadForm += LoadForm;
         OnSaveForm += SaveForm;
-        Shown += GameForm_Shown;
+        KeyDown += KeyPressed;
         Controls.Add(ArchiveSelector);
         ArchiveSelector.EnableListener();
-        LocalEvents.Hub.AddListener<States>(LocalEvents.UserInterface.MainFormSwitchState, SwitchState);
+        LocalEvents.Hub.AddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, RelodeArchive);
+        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
+        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.MainFormToClose, Close);
+        LocalSaves.ReLocate();
     }
 
-    private void SwitchState(States state)
+    private void KeyPressed(object? sender, KeyEventArgs e)
     {
-        if (state == CurrentSatate)
-            return;
-        SuspendLayout();
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.KeyPressed, e.KeyCode);
+    }
+
+    private void RelodeArchive(Archive archive)
+    {
+        Atlas.Relocate(archive);
+        SpanFlow.Relocate(archive.Info.CurrentSpan);
+        LocalEvents.Hub.Broadcast(LocalEvents.Flow.SwichFlowState);
         Controls.Clear();
-        CurrentSatate = state;
-        switch (CurrentSatate)
-        {
-            case States.SelectArchive:
-                Controls.Add(ArchiveSelector);
-                break;
-            case States.PlayGame:
-                Controls.AddRange([
-                    ToolBrand,
-                    GamePlane,
-                    Overview,
-                    InfoBrand,
-                ]);
-                Grid.EnableListner();
-                ToolBrand.EnableListener();
-                Overview.EnableListener();
-                GamePlane.EnableListener();
-                break;
-            default:
-                break;
-        }
+        Controls.AddRange([
+            Settings,
+            ToolBar,
+            Overview,
+            GamePlane,
+            InfoBar,
+        ]);
+        ArchiveSelector.DisableListener();
+        Settings.EnableListener();
         DrawClient();
-        ResumeLayout();
+    }
+
+    private void FinishGame()
+    {
+
+        Controls.Clear();
+        Controls.Add(ArchiveSelector);
+        Settings.DisableListener();
+        ArchiveSelector.EnableListener();
+        DrawClient();
     }
 
     private void SaveForm(SsSerializer serializer)
@@ -91,15 +92,12 @@ public partial class MainForm : ResizeableForm
         //deserializer.ReadObject(Grid);
     }
 
-    private void GameForm_Shown(object? sender, EventArgs e)
-    {
-        LocalEvents.Hub.Broadcast(LocalEvents.Flow.SwichFlowState);
-    }
-
     private void DrawClient()
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormOnResize, ClientRectangle);
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormOnDraw, ClientRectangle);
+
+        LocalEvents.ForTest();
     }
 }

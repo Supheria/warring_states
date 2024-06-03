@@ -15,11 +15,11 @@ internal class TestForm : ResizeableForm
             InfoList.Add(new(info.Name, info.Info));
             UpdateInfo();
         });
-        LocalEvents.Hub.AddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
-        {
-            infoList.ForEach(info => InfoList.Add(new(info.Name, info.Info)));
-            UpdateInfo();
-        });
+        //LocalEvents.Hub.AddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        //{
+        //    infoList.ForEach(info => InfoList.Add(new(info.Name, info.Info)));
+        //    UpdateInfo();
+        //});
         LocalEvents.Hub.AddListener<StringInfo>(LocalEvents.Test.AddSingleInfo, info =>
         {
             InfoMap[info.Name] = info.Info;

@@ -15,6 +15,12 @@ public partial class LatticeGrid
         GridData = gridData;
         CellData = cellData;
         CellEdgeLength = cellData.EdgeLength;
+        EnableListner();
+    }
+
+    public LatticeGrid()
+    {
+        EnableListner();
     }
 
     public static int CellEdgeLength
@@ -39,7 +45,7 @@ public partial class LatticeGrid
 
     public Coordinate Origin { get; private set; } = new();
 
-    public void EnableListner()
+    private void EnableListner()
     {
         LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.SetGridOrigin, SetOrigin);
         LocalEvents.Hub.AddListener<Coordinate>(LocalEvents.Graph.OffsetGridOrigin, OffsetOrigin);

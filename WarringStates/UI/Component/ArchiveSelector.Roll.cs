@@ -5,9 +5,9 @@ using System.Drawing;
 using WarringStates.Events;
 using WarringStates.User;
 
-namespace WarringStates.UI;
+namespace WarringStates.UI.Component;
 
-partial class ArchiveDisplayer
+partial class ArchiveSelector
 {
     enum RollDragPart
     {

@@ -5,9 +5,9 @@ using WarringStates.Events;
 using WarringStates.Map;
 using WarringStates.User;
 
-namespace WarringStates.UI;
+namespace WarringStates.UI.Component;
 
-partial class ArchiveDisplayer
+partial class ArchiveSelector
 {
     Point DragStartPoint { get; set; } = new();
 
@@ -48,8 +48,7 @@ partial class ArchiveDisplayer
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
         {
-            Atlas.Relocate(archive);
-            new MainForm().ShowDialog();
+            LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
             LocalSaves.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();

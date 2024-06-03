@@ -8,22 +8,22 @@ public static class LocalSaves
 {
     static string RegisterPath => ArchiveInfo.RegisterPath;
 
-    static List<ArchiveInfo> Saves { get; set; } = /*[];*/
+    static List<ArchiveInfo> Saves { get; set; } = [];
     //[
     //new("测试存档中文1"),
     //];
     //[];
-    [
-    new ("测试存档中文1"),
-    new ("测试存档中文20A"),
-    new ("测试存档中文300B"),
-    new ("测试存档中文4"),
-    new ("测试存档中文5"),
-    new ("测试存档中文6"),
-    new ("测试存档中文7"),
-    new ("测试存档中文8"),
-    new ("测试存档中文9"),
-    ];
+    //[
+    //new ("测试存档中文1"),
+    //new ("测试存档中文20A"),
+    //new ("测试存档中文300B"),
+    //new ("测试存档中文4"),
+    //new ("测试存档中文5"),
+    //new ("测试存档中文6"),
+    //new ("测试存档中文7"),
+    //new ("测试存档中文8"),
+    //new ("测试存档中文9"),
+    //];
 
     public static List<ArchiveInfo> ReLocate()
     {
@@ -128,6 +128,9 @@ public static class LocalSaves
         if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
             return false;
         var path = info.GetArchivePath();
+        if (File.Exists(path))
+            File.Delete(path);
+        path = info.GetOverviewPath();
         if (File.Exists(path))
             File.Delete(path);
         Saves.Remove(info);
