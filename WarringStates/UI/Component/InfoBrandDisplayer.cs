@@ -11,7 +11,7 @@ public class InfoBrandDisplayer : Displayer
 
     public InfoBrandDisplayer()
     {
-        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerOnResize, SetBounds);
     }
 
     private void SetBounds(GameDisplayerUpdatedArgs args)

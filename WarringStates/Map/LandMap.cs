@@ -11,6 +11,10 @@ internal class LandMap()
 {
     internal Size Size { get; set; }
 
+    internal int Width => Size.Width;
+
+    internal int Height => Size.Height;
+
     Dictionary<Coordinate, ILand> LandPoints { get; set; } = [];
 
     Dictionary<Enum, int> LandCount { get; } = [];
@@ -42,6 +46,24 @@ internal class LandMap()
 
     internal void Relocate(AltitudeMap altitudeMap, List<SourceLand> sourceLands)
     {
+        Relocate(altitudeMap);
+        foreach (var sourceLand in sourceLands)
+        {
+            foreach (var point in sourceLand.GetPoints())
+            {
+                if (LandPoints.TryGetValue(point, out var land) && land is SingleLand singleLand)
+                    LandCount[singleLand.Type]--;
+                LandPoints[point] = sourceLand;
+            }
+            if (LandCount.ContainsKey(sourceLand.Type))
+                LandCount[sourceLand.Type]++;
+            else
+                LandCount[sourceLand.Type] = 1;
+        }
+    }
+
+    internal void Relocate(AltitudeMap altitudeMap)
+    {
         LandPoints.Clear();
         LandCount.Clear();
         Size = altitudeMap.Bounds.Size;
@@ -65,18 +87,5 @@ internal class LandMap()
             LandCount[SingleLand.Types.Stream]++;
         }
         LandCount[SingleLand.Types.Plain] = altitudeMap.Area - LandCount.Sum(x => x.Key is SingleLand.Types.Plain ? 0 : x.Value);
-        foreach (var sourceLand in sourceLands)
-        {
-            foreach (var point in sourceLand.GetPoints())
-            {
-                if (LandPoints.TryGetValue(point, out var land) && land is SingleLand singleLand)
-                    LandCount[singleLand.Type]--;
-                LandPoints[point] = sourceLand;
-            }
-            if (LandCount.ContainsKey(sourceLand.Type))
-                LandCount[sourceLand.Type]++;
-            else
-                LandCount[sourceLand.Type] = 1;
-        }
     }
 }

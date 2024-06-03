@@ -37,10 +37,10 @@ public static class LocalEvents
 
     public enum UserInterface
     {
-        GameFormUpdate,
-        GameDisplayerUpdate,
-        InitializeFormLoading,
-        InitializeFormClosing,
+        MainFormOnResize,
+        ToolBrandDisplayerOnResize,
+        GameDisplayerOnResize,
+        MainFormSwitchState,
     }
 
     public enum Flow

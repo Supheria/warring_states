@@ -44,8 +44,8 @@ namespace WarringStates
 
             //new TestForm().Show();
             new TestForm() { TopMost = true }.Show();
-            Application.Run(new InitializeForm());
-            //Application.Run(new GameForm());
+            //Application.Run(new InitializeForm());
+            Application.Run(new MainForm());
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
+using WarringStates.Map;
 using WarringStates.Terrain;
 
 namespace WarringStates.User;
@@ -30,13 +32,28 @@ public class Archive : ISsSerializable
 
     public static Archive Create(ArchiveInfo info, AltitudeMapData mapData)
     {
-        var map = new AltitudeMap(mapData);
-        return new(info, map);
+        var altitudeMap = new AltitudeMap(mapData);
+        var landMap = new LandMap();
+        landMap.Relocate(altitudeMap);
+        using var thumbnail = new Bitmap(landMap.Width, landMap.Height);
+        var pThumbnail = new PointBitmap(thumbnail);
+        pThumbnail.LockBits();
+        for (int i = 0; i < landMap.Width; i++)
+        {
+            for (int j = 0; j < landMap.Height; j++)
+            {
+                var color = landMap[new(i, j)].Color;
+                pThumbnail.SetPixel(i, j, color);
+            }
+        }
+        pThumbnail.UnlockBits();
+        thumbnail.Save(info.GetOverviewPath());
+        return new(info, altitudeMap);
     }
 
     public bool Useable()
     {
-        return Info != new ArchiveInfo() && AltitudeMap.OriginPoints.Count > 0;
+        return Info.Useable() && AltitudeMap.OriginPoints.Count > 0;
     }
 
     public void Serialize(SsSerializer serializer)

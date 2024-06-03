@@ -16,17 +16,17 @@ public partial class GameDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameFormUpdatedArgs>(LocalEvents.UserInterface.GameFormUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.ToolBrandDisplayerOnResize, SetBounds);
         LocalEvents.Hub.AddListener(LocalEvents.Graph.GridOriginReset, UpdateImage);
     }
 
-    private void SetBounds(GameFormUpdatedArgs args)
+    private void SetBounds(Rectangle rect)
     {
-        Location = args.GameRect.Location;
-        Size = new(args.GameRect.Width, args.GameRect.Height - InfoBrandHeight);
+        Location = rect.Location;
+        Size = new( Width, rect.Height - InfoBrandHeight);
         Relocate();
-        var otherRect = new Rectangle(Left, Bottom, Width, args.GameRect.Height - Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameDisplayerUpdate, new GameDisplayerUpdatedArgs(Bounds, otherRect));
+        rect = new Rectangle(Left, Bottom, Width, rect.Height - Height);
+        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.GameDisplayerOnResize, new GameDisplayerUpdatedArgs(Bounds, rect));
         LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridImageToUpdate, new GridImageToUpdateArgs(Image, BackColor));
         Invalidate();
     }

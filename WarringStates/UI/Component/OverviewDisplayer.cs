@@ -10,7 +10,7 @@ namespace WarringStates.UI.Component;
 
 public partial class OverviewDisplayer : Displayer
 {
-    bool FullScreen { get; set; } = true;
+    bool FullScreen { get; set; } = false;
 
     Bitmap? OverviewCache { get; set; }
 
@@ -35,7 +35,7 @@ public partial class OverviewDisplayer : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerUpdate, SetBounds);
+        LocalEvents.Hub.AddListener<GameDisplayerUpdatedArgs>(LocalEvents.UserInterface.GameDisplayerOnResize, SetBounds);
         LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdated, Relocate);
     }
 

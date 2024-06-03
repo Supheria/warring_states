@@ -1,11 +1,13 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
 using LocalUtilities.TypeGeneral;
+using WarringStates.Events;
+using WarringStates.Map;
 using WarringStates.User;
 
 namespace WarringStates.UI;
 
-partial class InitializeDisplayer
+partial class ArchiveDisplayer
 {
     Point DragStartPoint { get; set; } = new();
 
@@ -40,13 +42,18 @@ partial class InitializeDisplayer
         {
             var data = new AltitudeMapData(new(500, 300), new(5, 3), new(6, 3), RiverLayout.Types.Horizontal, 2.25, 100000, 0.66f);
             data.CreateArchive("new world");
+            SelectedItemIndex = 0;
+            RollReDraw();
+            OverviewRedraw();
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
         {
-            new GameForm().ShowDialog();
+            Atlas.Relocate(archive);
+            new MainForm().ShowDialog();
             LocalSaves.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();
+            OverviewRedraw();
         }
         else if (DeleteButton.Rect.Contains(e.Location) && LocalSaves.Delete(SelectedItemIndex))
         {
@@ -74,6 +81,7 @@ partial class InitializeDisplayer
             testButton(BuildButton, () => true);
             testButton(LoadButton, () => SelectedItemIndex is not -1);
             testButton(DeleteButton, () => SelectedItemIndex is not -1);
+            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("SelectedItemIndex", SelectedItemIndex.ToString()));
         }
         void testButton(Button button, Func<bool> condition)
         {
@@ -88,5 +96,6 @@ partial class InitializeDisplayer
                 ButtonRedraw(button);
             }
         }
+        DragStartPoint = e.Location;
     }
 }

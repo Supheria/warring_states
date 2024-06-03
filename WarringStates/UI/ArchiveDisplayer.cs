@@ -9,7 +9,7 @@ using WarringStates.User;
 
 namespace WarringStates.UI;
 
-public partial class InitializeDisplayer : Displayer
+public partial class ArchiveDisplayer : Displayer
 {
     Rectangle OverviewRect { get; set; } = new();
 
@@ -47,15 +47,20 @@ public partial class InitializeDisplayer : Displayer
 
     Color SelectedColor { get; set; } = Color.Gold;
 
-    public InitializeDisplayer()
+    public ArchiveDisplayer()
     {
         BackColor = Color.Teal;
-        SizeChanged += OnResize;
         AddOperations();
     }
 
-    private void OnResize(object? sender, EventArgs e)
+    public void EnableListener()
     {
+        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnResize, SetBounds);
+    }
+
+    private void SetBounds(Rectangle rect)
+    {
+        Bounds = rect;
         Relocate();
         using var g = Graphics.FromImage(Image);
         g.FillRectangle(new SolidBrush(BackColor), Bounds);
@@ -83,7 +88,7 @@ public partial class InitializeDisplayer : Displayer
 
     private void OverviewRedraw()
     {
-        if (!LocalSaves.TryGetArchive(SelectedItemIndex, out var archive))
+        if (!LocalSaves.TryGetArchive(SelectedItemIndex, out var archive) || !archive.Useable())
         {
             var random = new Random();
             var pImage = new PointBitmap((Bitmap)Image);
@@ -102,14 +107,18 @@ public partial class InitializeDisplayer : Displayer
         {
             using var g = Graphics.FromImage(Image);
             g.FillRectangle(new SolidBrush(FrontColor), OverviewRect);
-            Atlas.Relocate(archive);
             var rect = new Rectangle(OverviewRect.Left, OverviewRect.Top, OverviewRect.Width, OverviewRect.Height - Padding.Height);
-            var size = Atlas.Size.ScaleSizeOnRatio(rect.Size);
-            var overview = Atlas.GetOverview(size);
-            overview = overview.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
-            rect = new(rect.Left, rect.Top, size.Width, size.Height);
-            overview.TemplateDrawOntoPart((Bitmap)Image, rect, true);
-            rect = new(rect.Left, rect.Bottom, rect.Width, OverviewRect.Height - rect.Height);
+            try
+            {
+                var overview = (Bitmap)Image.FromFile(archive.Info.GetOverviewPath());
+                var size = overview.Size.ScaleSizeOnRatio(rect.Size);
+                overview = overview.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
+                rect = new(rect.Left, rect.Top, size.Width, size.Height);
+                overview.TemplateDrawOntoPart((Bitmap)Image, rect, true);
+                rect = new(rect.Left, rect.Bottom, rect.Width, OverviewRect.Height - rect.Height);
+                overview.Dispose();
+            }
+            catch { }
             var stepper = new DateStepper();
             stepper.SetStartSpan(archive.CurrentSpan);
             g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });

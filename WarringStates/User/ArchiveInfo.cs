@@ -6,6 +6,12 @@ namespace WarringStates.User;
 
 public class ArchiveInfo : ISsSerializable
 {
+    public static string RootPath { get; set; } = Directory.CreateDirectory(nameof(Archive)).FullName;
+
+    public static string ThumbnailPath { get; set; } = Directory.CreateDirectory(Path.Combine(RootPath, "thumbnail")).FullName;
+
+    public static string RegisterPath { get; } = Path.Combine(RootPath, "saves");
+
     public string LocalName => nameof(ArchiveInfo);
 
     public string Id { get; private set; } = "";
@@ -38,23 +44,19 @@ public class ArchiveInfo : ISsSerializable
         LastSaveTime = $"{DateTime.Now:yyyyMMddHHmmss}"; ;
     }
 
-    public static bool operator ==(ArchiveInfo info, object? obj)
+    public bool Useable()
     {
-        if (info is null)
-        {
-            if (obj is null)
-                return true;
-            else
-                return false;
-        }
-        if (obj is not ArchiveInfo other)
-            return false;
-        return info.Id == other.Id && info.WorldName == other.WorldName && info.CreateTime == other.CreateTime && info.LastSaveTime == other.LastSaveTime;
+        return WorldName != "" && CreateTime != "" && LastSaveTime != "";
     }
 
-    public static bool operator !=(ArchiveInfo info, object? obj)
+    public string GetArchivePath()
     {
-        return !(info == obj);
+        return Path.Combine(RootPath, Id);
+    }
+
+    public string GetOverviewPath()
+    {
+        return Path.Combine(ThumbnailPath, Id);
     }
 
     public void Serialize(SsSerializer serializer)
