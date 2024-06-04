@@ -38,7 +38,7 @@ partial class LatticeGrid
             y += height;
         Origin = new(x, y);
         OriginOffset = Origin - lastOrigin;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginReset);
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginSet);
     }
 
     private void SetOrigin(Coordinate origin)
@@ -46,10 +46,10 @@ partial class LatticeGrid
         var lastOrigin = Origin;
         Origin = origin;
         OriginOffset = Origin - lastOrigin;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginReset);
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginSet);
     }
 
-    private void UpdateImage(GridImageToUpdateArgs args)
+    private void Relocate(GridToRelocateArgs args)
     {
         DrawRect = new(new(0, 0), args.Source.Size);
         Image = args.Source;
@@ -60,7 +60,7 @@ partial class LatticeGrid
         Graphics.Dispose();
         LastDrawRect = DrawRect;
         LastCellEdgeLength = CellEdgeLength;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridUpdated, new GridUpdatedArgs(DrawRect, Origin));
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridRelocated, new GridRelocatedArgs(DrawRect, Origin));
     }
 
     private void DrawGrid()

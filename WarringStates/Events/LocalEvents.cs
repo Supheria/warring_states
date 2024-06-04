@@ -26,13 +26,13 @@ public static class LocalEvents
 
     public enum Graph
     {
-        GridImageToUpdate,
-        GridUpdated,
-        PointOnGameImage,
-        PointOnCell,
-        OffsetGridOrigin,
-        SetGridOrigin,
-        GridOriginReset,
+        GridToRelocate,
+        GridRelocated,
+        GridCellToPointOn,
+        GridCellPointedOn,
+        GridOriginToOffset,
+        GridOriginToReset,
+        GridOriginSet,
     }
 
     public enum UserInterface
@@ -50,7 +50,8 @@ public static class LocalEvents
     public enum Flow
     {
         SpanFlowTickOn,
-        SwichFlowState
+        SwichFlowState,
+        AnimateFlowTickOn
     }
 
     public static void ForTest()

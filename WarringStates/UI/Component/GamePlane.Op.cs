@@ -24,10 +24,10 @@ partial class GamePlane
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.Hub.AddListener<PointOnCellArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
+        LocalEvents.Hub.AddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellPointedOn, PointOnCell);
     }
 
-    private void PointOnCell(PointOnCellArgs args)
+    private void PointOnCell(GridCellPointedOnArgs args)
     {
         var land = args.TerrainPoint.GetLand();
         LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
@@ -54,7 +54,7 @@ partial class GamePlane
 
     private void OnMouseMove(object? sender, MouseEventArgs args)
     {
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.PointOnGameImage, args.Location);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridCellToPointOn, args.Location);
         if (!DoDragGraph)
             return;
         var dX = args.X - DragStartPoint.X;
@@ -65,8 +65,8 @@ partial class GamePlane
             dX *= DragMoveSensibility;
             dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
             dY *= DragMoveSensibility;
-            Relocate(dX, dY);
             DragStartPoint = args.Location;
+            LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
         }
     }
 
@@ -77,6 +77,6 @@ partial class GamePlane
         var dX = diffInWidth / LatticeGrid.CellEdgeLength * Width / 200;
         var dY = diffInHeight / LatticeGrid.CellEdgeLength * Height / 200;
         LatticeGrid.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
-        Relocate(dX, dY);
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
     }
 }

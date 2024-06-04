@@ -11,26 +11,19 @@ public partial class GamePlane : Displayer
     {
         AddOperations();
         LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.Hub.AddListener(LocalEvents.Graph.GridOriginReset, UpdateImage);
+        LocalEvents.Hub.AddListener(LocalEvents.Graph.GridOriginSet, Relocate);
     }
 
     private void SetBounds(Rectangle rect)
     {
         Bounds = rect;
+        base.Relocate();
         Relocate();
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridImageToUpdate, new GridImageToUpdateArgs(Image, BackColor));
-        Invalidate();
     }
 
-    private void Relocate(int dX, int dY)
+    private new void Relocate()
     {
-        Relocate();
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.OffsetGridOrigin, new Coordinate(dX, dY));
-    }
-
-    private void UpdateImage()
-    {
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridImageToUpdate, new GridImageToUpdateArgs(Image, BackColor));
+        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
         Invalidate();
     }
 }

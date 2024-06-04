@@ -16,7 +16,7 @@ public partial class Overview : Displayer
 
     Rectangle Range { get; set; }
 
-    GridUpdatedArgs? GridUpdatedArgs { get; set; }
+    GridRelocatedArgs? GridUpdatedArgs { get; set; }
 
     (double Width, double Height) FocusScaleRatio { get; set; }
 
@@ -32,7 +32,7 @@ public partial class Overview : Displayer
     {
         AddOperations();
         LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
-        LocalEvents.Hub.AddListener<GridUpdatedArgs>(LocalEvents.Graph.GridUpdated, Relocate);
+        LocalEvents.Hub.AddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
     }
 
     private void SetBounds(Rectangle rect)
@@ -49,14 +49,14 @@ public partial class Overview : Displayer
             Size = Atlas.Size.ScaleSizeOnRatio(size);
             Location = new(Range.Right - Width, Range.Top);
         }
+        Relocate();
     }
 
-    private void Relocate(GridUpdatedArgs args)
+    private void Relocate(GridRelocatedArgs args)
     {
         if (Width is 0 || Height is 0)
             return;
         GridUpdatedArgs = args;
-        Relocate();
         RelocateOverview();
         RelocateFocus(args.DrawRect, args.Origin);
         Invalidate();
@@ -71,10 +71,10 @@ public partial class Overview : Displayer
         }
         OverviewCache?.Dispose();
         Image?.Dispose();
-        var widthUnit = (Height / (double)Atlas.Height).ToRoundInt();
+        var widthUnit = (Width / (double)Atlas.Width).ToRoundInt();
         if (widthUnit is 0)
             widthUnit = 1;
-        var heightUnit = (Width / (double)Atlas.Width).ToRoundInt();
+        var heightUnit = (Height / (double)Atlas.Height).ToRoundInt();
         if (heightUnit is 0)
             heightUnit = 1;
         OverviewCache = new(Atlas.Width * widthUnit, Atlas.Height * heightUnit);

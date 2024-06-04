@@ -48,7 +48,7 @@ public class ArchiveInfo : ISsSerializable
 
     public bool Useable()
     {
-        return WorldName != "" && CreateTime != "" && LastSaveTime != "";
+        return WorldName != "" && CreateTime != "" && LastSaveTime != "" && File.Exists(GetArchivePath());
     }
 
     public string GetArchivePath()

@@ -71,7 +71,7 @@ partial class ArchiveSelector
         g.FillRectangle(brush, RollRect);
         var showStartItemIndex = RollOffset / RollItemHeight;
         var top = RollItemsRect.Top - (RollOffset % RollItemHeight) + RollPadding;
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("showStartItemIndex", showStartItemIndex.ToString()));
+        //LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("showStartItemIndex", showStartItemIndex.ToString()));
         for (var i = 0; i < RollItemToShowCount; i++)
         {
             var y = top + i * RollItemHeight;

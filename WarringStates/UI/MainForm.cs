@@ -31,6 +31,8 @@ public partial class MainForm : ResizeableForm
 
     SpanFlow SpanFlow { get; set; } = new();
 
+    AnimateFlow AnimateFlow { get; set; } = new();
+
     protected override void InitializeComponent()
     {
         MinimumSize = new(860, 530);
@@ -98,6 +100,6 @@ public partial class MainForm : ResizeableForm
             return;
         LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormOnDraw, ClientRectangle);
 
-        LocalEvents.ForTest();
+        //LocalEvents.ForTest();
     }
 }

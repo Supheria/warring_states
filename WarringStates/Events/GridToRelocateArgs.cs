@@ -1,6 +1,6 @@
 ﻿namespace WarringStates.Events;
 
-public class GridImageToUpdateArgs(Image source, Color backColor)
+public class GridToRelocateArgs(Image source, Color backColor)
 {
     public Image Source { get; } = source;
 

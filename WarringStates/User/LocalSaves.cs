@@ -1,6 +1,7 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript.Serialization;
 using System.Diagnostics.CodeAnalysis;
+using System.Windows.Forms;
 
 namespace WarringStates.User;
 
@@ -71,20 +72,17 @@ public static class LocalSaves
         if (!TryGetArchiveInfo(index, out var info))
             return false;
         var dir = info.GetArchivePath();
-        var exMessage = "数据缺失";
         try
         {
             archive = new Archive().LoadFromSimpleScript(dir);
-            if (archive.Useable())
-                return true;
+            UserException.ThrowIfNotUseable(archive);
+            return true;
         }
         catch (Exception ex)
         {
-            exMessage = ex.Message;
+            MessageBox.Show($"{ex.Message}", $"无法加载 - {info.WorldName}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return false;
         }
-        MessageBox.Show($"{exMessage}", $"无法加载 - {info.WorldName}", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        return false;
-        //return true;
     }
 
     public static ArchiveInfo CreateArchive(this AltitudeMapData mapData, string worldName)

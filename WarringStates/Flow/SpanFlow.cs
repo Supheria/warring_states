@@ -1,23 +1,11 @@
 ﻿using WarringStates.Events;
 using WarringStates.Flow.Model;
-using Timer = System.Windows.Forms.Timer;
 
 namespace WarringStates.Flow;
 
-public enum Speed
-{
-    Normal,
-    Half,
-    X2,
-    X3,
-    ForTest
-}
-
-public class SpanFlow
+public class SpanFlow : Flower
 {
     DateStepper DateStepper { get; set; } = new();
-
-    Timer Timer { get; } = new();
 
     bool KeepFlow { get; set; } = false;
 
@@ -25,9 +13,7 @@ public class SpanFlow
 
     public Date CurrentDate => DateStepper.GetDate();
 
-    public Speed Speed { get; set; } = Speed.Normal;
-
-    public SpanFlow()
+    public SpanFlow() : base(1000)
     {
         Timer.Tick += (sender, e) => TickOn();
         Relocate(0);
@@ -47,14 +33,7 @@ public class SpanFlow
         CurrentSpan++;
         DateStepper.StepOn();
         Timer.Stop();
-        Timer.Interval = Speed switch
-        {
-            Speed.Half => 2000,
-            Speed.X2 => 500,
-            Speed.X3 => 333,
-            Speed.ForTest => 1,
-            _ => 1000,
-        };
+        Timer.Interval = GetInterval();
         if (KeepFlow)
             Timer.Start();
     }

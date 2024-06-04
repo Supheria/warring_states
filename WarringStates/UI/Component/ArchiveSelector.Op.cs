@@ -26,7 +26,7 @@ partial class ArchiveSelector
         else
             SelectedItemIndex = -1;
         RollReDraw();
-        OverviewRedraw();
+        ThumbnailRedraw();
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs e)
@@ -44,7 +44,7 @@ partial class ArchiveSelector
             data.CreateArchive("new world");
             SelectedItemIndex = 0;
             RollReDraw();
-            OverviewRedraw();
+            ThumbnailRedraw();
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
         {
@@ -52,7 +52,7 @@ partial class ArchiveSelector
             LocalSaves.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();
-            OverviewRedraw();
+            ThumbnailRedraw();
         }
         else if (DeleteButton.Rect.Contains(e.Location) && LocalSaves.Delete(SelectedItemIndex))
         {
@@ -62,7 +62,7 @@ partial class ArchiveSelector
                 SelectedItemIndex--;
             RollReDraw();
             ButtonRedraw(DeleteButton, false);
-            OverviewRedraw();
+            ThumbnailRedraw();
         }
     }
 
@@ -74,18 +74,21 @@ partial class ArchiveSelector
 
     private void OnMouseMove(object? sender, MouseEventArgs e)
     {
-        RollChangeOffset(e.Y - DragStartPoint.Y);
         if (RollDragger is RollDragPart.None)
         {
             testButton(BuildButton, () => true);
             testButton(LoadButton, () => SelectedItemIndex is not -1);
             testButton(DeleteButton, () => SelectedItemIndex is not -1);
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("SelectedItemIndex", SelectedItemIndex.ToString()));
+            //LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("SelectedItemIndex", SelectedItemIndex.ToString()));
         }
+        else
+            RollChangeOffset(e.Y - DragStartPoint.Y);
         void testButton(Button button, Func<bool> condition)
         {
             if (button.Rect.Contains(e.Location) && condition())
             {
+                if (button.Selected)
+                    return;
                 button.Selected = true;
                 ButtonRedraw(button);
             }

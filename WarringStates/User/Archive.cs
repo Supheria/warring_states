@@ -49,11 +49,6 @@ public class Archive : ISsSerializable
         return new(info, altitudeMap);
     }
 
-    public bool Useable()
-    {
-        return Info.Useable() && AltitudeMap.OriginPoints.Count > 0;
-    }
-
     public void Serialize(SsSerializer serializer)
     {
         serializer.WriteObject(Info);
