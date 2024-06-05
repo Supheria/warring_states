@@ -46,7 +46,7 @@ public partial class ArchiveSelector : Displayer
 
     Color SelectedColor { get; set; } = Color.Gold;
 
-    Bitmap? Thumbnail { get; set; } = null;
+    //Bitmap? Thumbnail { get; set; } = null;
 
     Rectangle OverviewRect { get; set; } = new();
 
@@ -62,14 +62,12 @@ public partial class ArchiveSelector : Displayer
     {
         LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
         LocalEvents.Hub.AddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
-        LocalEvents.Hub.AddListener(LocalEvents.Flow.AnimateFlowTickOn, DrawAnimate);
     }
 
     public void DisableListener()
     {
         LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
         LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
-        LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.AnimateFlowTickOn, DrawAnimate);
     }
 
     private new void KeyPress(Keys key)
@@ -107,56 +105,50 @@ public partial class ArchiveSelector : Displayer
 
     private void ThumbnailRedraw()
     {
-        Thumbnail?.Dispose();
-        Thumbnail = null;
+        //Thumbnail?.Dispose();
+        //Thumbnail = null;
         if (!LocalSaves.TryGetArchiveInfo(SelectedItemIndex, out var info) || !info.Useable())
-            return;
-        var rect = OverviewRect;
-        using var g = Graphics.FromImage(Image);
-        g.FillRectangle(new SolidBrush(FrontColor), rect);
-        ThumbnailRect = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - Padding.Height);
-        try
         {
-            Thumbnail = (Bitmap)Image.FromFile(info.GetOverviewPath());
-            var size = Thumbnail.Size.ScaleSizeOnRatio(OverviewRect.Size);
-            Thumbnail = Thumbnail.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
-            ThumbnailRect = new Rectangle(ThumbnailRect.Left + (ThumbnailRect.Width - Thumbnail.Width) / 2, ThumbnailRect.Top + (ThumbnailRect.Height - Thumbnail.Height) / 2, Thumbnail.Width, Thumbnail.Height);
-            Thumbnail.TemplateDrawOntoPart((Bitmap)Image, ThumbnailRect, true);
-            rect = new(rect.Left, rect.Bottom - Padding.Height, rect.Width, Padding.Height);
-        }
-        catch
-        {
-            Thumbnail = new(ThumbnailRect.Width, ThumbnailRect.Height);
-        }
-        var stepper = new DateStepper();
-        stepper.SetStartSpan(info.CurrentSpan);
-        g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-
-        Invalidate();
-    }
-
-    private void DrawAnimate()
-    {
-        if (Thumbnail is not null)
-            return;
-        using var g = Graphics.FromImage(Image);
-        //g.FillRectangle(new SolidBrush(FrontColor), OverviewRect);
-        var random = new Random();
-        var pImage = new PointBitmap((Bitmap)Image);
-        pImage.LockBits();
-        for (var i = 0; i < OverviewRect.Width; i++)
-        {
-            for (var j = 0; j < OverviewRect.Height; j++)
+            using var g = Graphics.FromImage(Image);
+            var random = new Random();
+            var pImage = new PointBitmap((Bitmap)Image);
+            pImage.LockBits();
+            for (var i = 0; i < OverviewRect.Width; i++)
             {
-                Color color;
-                if (random.Next() < random.Next())
-                    color = BackColor;
-                else
-                    color = FrontColor;
-                pImage.SetPixel(i + OverviewRect.Left, j + OverviewRect.Top, color);
+                for (var j = 0; j < OverviewRect.Height; j++)
+                {
+                    Color color;
+                    if (random.Next() < random.Next())
+                        color = BackColor;
+                    else
+                        color = FrontColor;
+                    pImage.SetPixel(i + OverviewRect.Left, j + OverviewRect.Top, color);
+                }
             }
+            pImage.UnlockBits();
         }
-        pImage.UnlockBits();
+        else
+        {
+            var rect = OverviewRect;
+            using var g = Graphics.FromImage(Image);
+            g.FillRectangle(new SolidBrush(FrontColor), rect);
+            ThumbnailRect = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - Padding.Height);
+            try
+            {
+                var thumbnail = (Bitmap)Image.FromFile(info.GetOverviewPath());
+                var size = thumbnail.Size.ScaleSizeOnRatio(ThumbnailRect.Size);
+                thumbnail = thumbnail.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
+                ThumbnailRect = new Rectangle(ThumbnailRect.Left + (ThumbnailRect.Width - thumbnail.Width) / 2, ThumbnailRect.Top + (ThumbnailRect.Height - thumbnail.Height) / 2, thumbnail.Width, thumbnail.Height);
+                thumbnail.TemplateDrawOntoPart((Bitmap)Image, ThumbnailRect, true);
+                thumbnail.Dispose();
+                rect = new(rect.Left, rect.Bottom - Padding.Height, rect.Width, Padding.Height);
+            }
+            catch { }
+            var stepper = new DateStepper();
+            stepper.SetStartSpan(info.CurrentSpan);
+            g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+        }
+
         Invalidate();
     }
 
