@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarringStates", "WarringSta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltitudeMapGenerator", "_lib\AltitudeMapGenerator\AltitudeMapGenerator.csproj", "{8E811798-20E9-4F74-81DF-01E394F0653D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalUtilities.Net", "_lib\LocalUtilities.Net\LocalUtilities.Net\LocalUtilities.Net.csproj", "{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{8E811798-20E9-4F74-81DF-01E394F0653D}.Release|x64.Build.0 = Release|Any CPU
 		{8E811798-20E9-4F74-81DF-01E394F0653D}.Release|x86.ActiveCfg = Release|Any CPU
 		{8E811798-20E9-4F74-81DF-01E394F0653D}.Release|x86.Build.0 = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|x64.Build.0 = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Debug|x86.Build.0 = Debug|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|x64.ActiveCfg = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|x64.Build.0 = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|x86.ActiveCfg = Release|Any CPU
+		{B25F6B6D-29D4-4A5E-9C62-D70871605EB7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
