@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.Net;
 using LocalUtilities.TypeGeneral;
+using System.Text;
 
 namespace WarringStates.UI;
 
@@ -32,11 +33,17 @@ internal class ServerForm : ResizeableForm
         OnDrawingClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
         Server.ClientNumberChange += Server_ClientNumberChange;
+        Server.ReceiveClientData += Server_ReceiveClientData;
     }
 
-    private void Server_ClientNumberChange(bool connect, AsyncClientProfile client)
+    private void Server_ReceiveClientData(AsyncClientProfile client, byte[] buff)
     {
-        if (connect)
+        UpdateMessage($"{client.RemoteEndPoint}: {Encoding.UTF8.GetString(buff)}");
+    }
+
+    private void Server_ClientNumberChange(bool add, AsyncClientProfile client)
+    {
+        if (add)
         {
             UpdateMessage($"{client.RemoteEndPoint} connect");
         }

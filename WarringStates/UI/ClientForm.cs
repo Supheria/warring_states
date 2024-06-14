@@ -52,7 +52,16 @@ public class ClientForm : ResizeableForm
             ]);
         OnDrawingClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
+        SendButton.Click += SendButton_Click;
         Client.ServerStopEvent += Client_ServerStopEvent;
+    }
+
+    private void SendButton_Click(object? sender, EventArgs e)
+    {
+        byte[] buff = Encoding.UTF8.GetBytes(SendBox.Text);
+        //加密,根据自己的需要可以考虑把消息加密
+        //buff = AESEncrypt.Encrypt(buff, m_aesKey);
+        Client.Send(buff);
     }
 
     private void Client_ServerStopEvent()
@@ -70,6 +79,7 @@ public class ClientForm : ResizeableForm
                 UpdateSwitchButtonText(true);
             else
                 System.Windows.Forms.MessageBox.Show($"disconnect to server failed: {message}");
+            //System.Windows.Forms.MessageBox.Show($"disconnect to server failed");
         }
         else
         {
@@ -78,6 +88,7 @@ public class ClientForm : ResizeableForm
                 UpdateSwitchButtonText(false);
             else
                 System.Windows.Forms.MessageBox.Show($"connect to server failed: {message}");
+            //System.Windows.Forms.MessageBox.Show($"connect to server failed");
         }
     }
 
