@@ -36,7 +36,7 @@ public partial class MainForm : ResizeableForm
     protected override void InitializeComponent()
     {
         MinimumSize = new(860, 530);
-        OnDrawingClient += DrawClient;
+        OnDrawClient += DrawClient;
         OnLoadForm += LoadForm;
         OnSaveForm += SaveForm;
         KeyDown += KeyPressed;

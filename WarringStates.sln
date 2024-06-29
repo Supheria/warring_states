@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltitudeMapGenerator", "_li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalUtilities", "_lib\LocalUtilities\LocalUtilities.csproj", "{6C10235C-EEEA-4359-A8AF-03FBC3C48236}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalUtilities.Net", "_lib\LocalUtilities.Net\LocalUtilities.Net\LocalUtilities.Net.csproj", "{A6C79E1A-948C-4325-9A0D-4FAB3AB970FB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A6C79E1A-948C-4325-9A0D-4FAB3AB970FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6C79E1A-948C-4325-9A0D-4FAB3AB970FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A6C79E1A-948C-4325-9A0D-4FAB3AB970FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A6C79E1A-948C-4325-9A0D-4FAB3AB970FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

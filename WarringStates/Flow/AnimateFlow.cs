@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Events;
-using WarringStates.Flow.Model;
+﻿using WarringStates.Events;
 using Timer = System.Windows.Forms.Timer;
 
 namespace WarringStates.Flow;
@@ -13,7 +7,7 @@ public class AnimateFlow : Flower
 {
     public AnimateFlow() : base(20)
     {
-        Timer.Tick += (sender, e) => TickOn();
+        Timer.Elapsed += (_, _) => TickOn();
         Timer.Start();
     }
 

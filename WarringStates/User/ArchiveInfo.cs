@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
@@ -71,9 +70,9 @@ public class ArchiveInfo : ISsSerializable
 
     public void Deserialize(SsDeserializer deserializer)
     {
-        WorldName = deserializer.ReadTag(nameof(WorldName), s => s);
-        CreateTime = deserializer.ReadTag(nameof(CreateTime), s => s);
-        LastSaveTime = deserializer.ReadTag(nameof(LastSaveTime), s => s);
+        WorldName = deserializer.ReadTag(nameof(WorldName));
+        CreateTime = deserializer.ReadTag(nameof(CreateTime));
+        LastSaveTime = deserializer.ReadTag(nameof(LastSaveTime));
         CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), int.Parse);
         SetId();
     }

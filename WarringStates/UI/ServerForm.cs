@@ -1,6 +1,5 @@
-﻿using LocalUtilities.Net;
+﻿using LocalUtilities.IocpNet.Serve;
 using LocalUtilities.TypeGeneral;
-using System.Text;
 
 namespace WarringStates.UI;
 
@@ -8,7 +7,7 @@ internal class ServerForm : ResizeableForm
 {
     public override string LocalName => nameof(ServerForm);
 
-    TcpServer Server { get; } = new(10, 1024);
+    IocpHost Host { get; } = new(1000);
 
     Button SwitchButton { get; } = new()
     {
@@ -30,28 +29,28 @@ internal class ServerForm : ResizeableForm
             Port,
             MessageBox,
             ]);
-        OnDrawingClient += DrawClient;
+        OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
-        Server.ClientNumberChange += Server_ClientNumberChange;
-        Server.ReceiveClientData += Server_ReceiveClientData;
+        //Host.ClientNumberChange += Server_ClientNumberChange;
+        //Host.ReceiveClientData += Server_ReceiveClientData;
     }
 
-    private void Server_ReceiveClientData(AsyncClientProfile client, byte[] buff)
-    {
-        UpdateMessage($"{client.RemoteEndPoint}: {Encoding.UTF8.GetString(buff)}");
-    }
+    //private void Server_ReceiveClientData(AsyncClientProfile client, byte[] buff)
+    //{
+    //    UpdateMessage($"{client.RemoteEndPoint}: {Encoding.UTF8.GetString(buff)}");
+    //}
 
-    private void Server_ClientNumberChange(bool add, AsyncClientProfile client)
-    {
-        if (add)
-        {
-            UpdateMessage($"{client.RemoteEndPoint} connect");
-        }
-        else
-        {
-            UpdateMessage($"{client.RemoteEndPoint} disconnect");
-        }
-    }
+    //private void Server_ClientNumberChange(bool add, AsyncClientProfile client)
+    //{
+    //    if (add)
+    //    {
+    //        UpdateMessage($"{client.RemoteEndPoint} connect");
+    //    }
+    //    else
+    //    {
+    //        UpdateMessage($"{client.RemoteEndPoint} disconnect");
+    //    }
+    //}
 
     private void UpdateMessage(string message)
     {
@@ -67,18 +66,18 @@ internal class ServerForm : ResizeableForm
 
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
-        if (Server.IsStart)
+        if (Host.IsStart)
         {
-            Server.Stop();
-            if (!Server.IsStart)
+            Host.Stop();
+            if (!Host.IsStart)
                 SwitchButton.Text = "Start";
             else
                 System.Windows.Forms.MessageBox.Show($"close server failed");
         }
         else
         {
-            Server.Start((int)Port.Value, out var message);
-            if (Server.IsStart)
+            Host.Start((int)Port.Value);
+            if (Host.IsStart)
                 SwitchButton.Text = "Close";
             else
                 System.Windows.Forms.MessageBox.Show($"start server failed");

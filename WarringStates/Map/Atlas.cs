@@ -1,7 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
-using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing.Drawing2D;
 using WarringStates.Map.Terrain;
 using WarringStates.User;
 

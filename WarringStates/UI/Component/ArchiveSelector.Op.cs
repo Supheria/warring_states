@@ -1,8 +1,6 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using LocalUtilities.TypeGeneral;
 using WarringStates.Events;
-using WarringStates.Map;
 using WarringStates.User;
 
 namespace WarringStates.UI.Component;

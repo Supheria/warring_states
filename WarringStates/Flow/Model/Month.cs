@@ -10,7 +10,7 @@ internal class Month
 
     internal Month(bool isLeap, int value)
     {
-        Value = value < 1 || value > 12 ? throw LoopException.ValueOutRange<Month>(value) : value;
+        Value = value < 1 || value > 12 ? throw FlowException.ValueOutRange<Month>(value) : value;
         FebruaryDayMax = isLeap ? 29 : 28;
         SetDayMax();
     }

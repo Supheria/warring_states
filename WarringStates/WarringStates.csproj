@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\_lib\AltitudeMapGenerator\AltitudeMapGenerator.csproj" />
-    <ProjectReference Include="..\_lib\LocalUtilities.Net\LocalUtilities.Net\LocalUtilities.Net.csproj" />
     <ProjectReference Include="..\_lib\LocalUtilities\LocalUtilities.csproj" />
   </ItemGroup>
 

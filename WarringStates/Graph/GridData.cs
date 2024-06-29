@@ -21,6 +21,6 @@ public class GridData : ISsSerializable
     public void Deserialize(SsDeserializer deserializer)
     {
         GuideLineWidth = deserializer.ReadTag(nameof(GuideLineWidth), double.Parse);
-        GuideLineColor = Color.FromName(deserializer.ReadTag(nameof(GuideLineColor), s => s));
+        GuideLineColor = Color.FromName(deserializer.ReadTag(nameof(GuideLineColor)));
     }
 }

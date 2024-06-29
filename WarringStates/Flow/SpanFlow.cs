@@ -15,7 +15,7 @@ public class SpanFlow : Flower
 
     public SpanFlow() : base(1000)
     {
-        Timer.Tick += (sender, e) => TickOn();
+        Timer.Elapsed += (_, _) => TickOn();
         Relocate(0);
     }
 
