@@ -64,7 +64,7 @@ public class ClientForm : ResizeableForm
         Text = "Download"
     };
 
-    protected override void InitializeComponent()
+    public ClientForm()
     {
         Text = "client";
         Controls.AddRange([
@@ -84,13 +84,13 @@ public class ClientForm : ResizeableForm
             ]);
         OnDrawClient += ClientForm_OnDrawClient;
         SwitchButton.Click += SwitchButton_Click;
-        SendButton.Click += SendButton_Click;
+        SendButton.Click += (_, _) => Client.SendMessage(SendBox.Text);
         FilePathButton.Click += FilePathButton_Click;
-        UploadButton.Click += UploadButton_Click;
-        DownloadButton.Click += DownloadButton_Click;
-        Client.OnLog += Client_OnLog;
-        Client.OnConnected += Client_OnConnected;
-        Client.OnClosed += Client_OnClosed;
+        UploadButton.Click += (_, _) => Client.Upload(DirName.Text, FilePath.Text);
+        DownloadButton.Click += (_, _) => Client.Download(DirName.Text, FilePath.Text);
+        Client.OnLog += UpdateMessage;
+        Client.OnConnected += () => UpdateSwitchButtonText(false);
+        Client.OnDisconnected += () => UpdateSwitchButtonText(true);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
     }
@@ -115,47 +115,12 @@ public class ClientForm : ResizeableForm
         FilePath.Text = deserializer.ReadTag(nameof(FilePath));
     }
 
-    private void DownloadButton_Click(object? sender, EventArgs e)
-    {
-        Client.Download(DirName.Text, FilePath.Text);
-    }
-
-    private void UploadButton_Click(object? sender, EventArgs e)
-    {
-        Client.Upload(DirName.Text, FilePath.Text);
-    }
-
     private void FilePathButton_Click(object? sender, EventArgs e)
     {
         var file = new OpenFileDialog();
         if (file.ShowDialog() is DialogResult.Cancel)
             return;
         FilePath.Text = file.FileName;
-    }
-
-    private void Client_OnLog(string log)
-    {
-        UpdateMessage(log);
-    }
-
-    private void Client_OnConnected()
-    {
-        UpdateSwitchButtonText(false);
-    }
-
-    private void Client_OnClosed()
-    {
-        UpdateSwitchButtonText(true);
-    }
-
-    private void SendButton_Click(object? sender, EventArgs e)
-    {
-        Client.SendMessage(SendBox.Text);
-    }
-
-    private void Client_ServerStopEvent()
-    {
-
     }
 
     private void SwitchButton_Click(object? sender, EventArgs e)

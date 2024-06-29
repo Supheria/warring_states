@@ -9,6 +9,9 @@ internal class TestForm : ResizeableForm
 {
     public TestForm()
     {
+        Controls.AddRange([
+            Text
+            ]);
         FormClosing += OnFormClosing;
         LocalEvents.Hub.AddListener<StringInfo>(LocalEvents.Test.AddInfo, info =>
         {
@@ -69,13 +72,6 @@ internal class TestForm : ResizeableForm
     {
         Dock = DockStyle.Fill,
     };
-
-    protected override void InitializeComponent()
-    {
-        Controls.AddRange([
-            Text
-            ]);
-    }
 
     public class StringInfo(string name, string info)
     {

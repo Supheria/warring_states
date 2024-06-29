@@ -33,7 +33,7 @@ public partial class MainForm : ResizeableForm
 
     AnimateFlow AnimateFlow { get; set; } = new();
 
-    protected override void InitializeComponent()
+    public MainForm()
     {
         MinimumSize = new(860, 530);
         OnDrawClient += DrawClient;
