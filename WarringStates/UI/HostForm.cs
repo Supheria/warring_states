@@ -9,7 +9,7 @@ internal class HostForm : ResizeableForm
 {
     public override string LocalName => nameof(HostForm);
 
-    IocpHost Host { get; set; } = new(1000);
+    IocpHost Host { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -50,7 +50,7 @@ internal class HostForm : ResizeableForm
         OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
         Host.OnLog += UpdateMessage;
-        Host.OnParallelRemainChange += Host_OnParallelRemainChange;
+        //Host.OnParallelRemainChange += Host_OnParallelRemainChange;
     }
 
     private void Host_OnParallelRemainChange(int args)
@@ -81,7 +81,7 @@ internal class HostForm : ResizeableForm
     {
         if (Host.IsStart)
         {
-            Host.Stop();
+            Host.Close();
             if (!Host.IsStart)
                 SwitchButton.Text = "Start";
             else

@@ -13,7 +13,7 @@ internal static class Program
     {
         //new ClientForm().Show();
         //Application.Run(new HostForm());
-        Application.Run(new ClientForm());
+        //Application.Run(new ClientForm());
         //new TestCGraphics().ShowDialog();
         //var data = new AltitudeMapData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Type.ForwardSlash, 2.25, 55000, 0.66f);
         var data = new AltitudeMapData(new(100, 100), new(2, 2), new(2, 2), RiverLayout.Types.OneForTest, 2, 5000, 0.66f);
@@ -44,6 +44,6 @@ internal static class Program
         //new TestForm().Show();
         //new TestForm() { TopMost = true }.Show();
         //Application.Run(new InitializeForm());
-        //Application.Run(new MainForm());
+        Application.Run(new MainForm());
     }
 }
