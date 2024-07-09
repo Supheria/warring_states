@@ -27,7 +27,7 @@ partial class Overview
         {
             var dX = (args.X - FocusRect.Left - FocusRect.Width * 0.5) * FocusScaleRatio.Width;
             var dY = (args.Y - FocusRect.Top - FocusRect.Height * 0.5) * FocusScaleRatio.Height;
-            LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(-dX.ToRoundInt(), -dY.ToRoundInt()));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(-dX.ToRoundInt(), -dY.ToRoundInt()));
         }
         else if (args.Button is MouseButtons.Right)
         {
@@ -63,7 +63,7 @@ partial class Overview
         {
             var dX = (args.X - DragStartPoint.X) * FocusScaleRatio.Width;
             var dY = (args.Y - DragStartPoint.Y) * FocusScaleRatio.Height;
-            LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(-dX.ToRoundInt(), -dY.ToRoundInt()));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(-dX.ToRoundInt(), -dY.ToRoundInt()));
             DragStartPoint = args.Location;
         }
     }

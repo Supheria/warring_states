@@ -13,7 +13,7 @@ internal class TestForm : ResizeableForm
             Text
             ]);
         FormClosing += OnFormClosing;
-        LocalEvents.Hub.AddListener<StringInfo>(LocalEvents.Test.AddInfo, info =>
+        LocalEvents.Hub.TryAddListener<StringInfo>(LocalEvents.Test.AddInfo, info =>
         {
             InfoList.Add(new(info.Name, info.Info));
             UpdateInfo();
@@ -23,17 +23,17 @@ internal class TestForm : ResizeableForm
         //    infoList.ForEach(info => InfoList.Add(new(info.Name, info.Info)));
         //    UpdateInfo();
         //});
-        LocalEvents.Hub.AddListener<StringInfo>(LocalEvents.Test.AddSingleInfo, info =>
+        LocalEvents.Hub.TryAddListener<StringInfo>(LocalEvents.Test.AddSingleInfo, info =>
         {
             InfoMap[info.Name] = info.Info;
             UpdateInfo();
         });
-        LocalEvents.Hub.AddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        LocalEvents.Hub.TryAddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         {
             infoList.ForEach(info => InfoMap[info.Name] = info.Info);
             UpdateInfo();
         });
-        LocalEvents.Hub.AddListener<ValueInfo>(LocalEvents.Test.ValueForMax, info =>
+        LocalEvents.Hub.TryAddListener<ValueInfo>(LocalEvents.Test.ValueForMax, info =>
         {
             if (ValueMap.TryGetValue(info.Name, out var value))
             {
@@ -43,7 +43,7 @@ internal class TestForm : ResizeableForm
                 ValueMap[info.Name] = info.Value;
             UpdateInfo();
         });
-        LocalEvents.Hub.AddListener<ValueInfo>(LocalEvents.Test.AddValue, info =>
+        LocalEvents.Hub.TryAddListener<ValueInfo>(LocalEvents.Test.AddValue, info =>
         {
             if (ValueMap.TryGetValue(info.Name, out var value))
             {
@@ -53,7 +53,7 @@ internal class TestForm : ResizeableForm
                 ValueMap[info.Name] = value;
             UpdateInfo();
         });
-        LocalEvents.Hub.AddListener<string>(LocalEvents.Test.ClearValue, name =>
+        LocalEvents.Hub.TryAddListener<string>(LocalEvents.Test.ClearValue, name =>
         {
             ValueMap[name] = 0;
             UpdateInfo();

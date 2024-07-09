@@ -38,8 +38,9 @@ partial class ArchiveSelector
         }
         else if (BuildButton.Rect.Contains(e.Location))
         {
-            var data = new AltitudeMapData(new(1000, 1000), new(8, 8), new(8, 8), RiverLayout.Types.ForwardSlash, 7, 650000, 0.75f);
+            //var data = new AltitudeMapData(new(1000, 1000), new(8, 8), new(8, 8), RiverLayout.Types.ForwardSlash, 7, 650000, 0.75f);
             //var data = new AltitudeMapData(new(500, 500), new(5, 5), new(8, 8), RiverLayout.Types.Horizontal, 2.25, 180000, 0.66f);
+            var data = new AltitudeMapData(new(300, 300), new(3, 3), new(8, 8), RiverLayout.Types.Horizontal, 2.25, 60000, 0.66f);
             data.CreateArchive("new world");
             SelectedItemIndex = 0;
             RollReDraw();
@@ -47,7 +48,7 @@ partial class ArchiveSelector
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
         {
-            LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
+            LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
             LocalSaves.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();

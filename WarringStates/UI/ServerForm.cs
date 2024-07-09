@@ -1,15 +1,13 @@
-﻿using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Serve;
+﻿using LocalUtilities.IocpNet.Serve;
 using LocalUtilities.TypeGeneral;
-using System.Windows.Forms;
 
 namespace WarringStates.UI;
 
-internal class HostForm : ResizeableForm
+internal class ServerForm : ResizeableForm
 {
-    public override string LocalName => nameof(HostForm);
+    public override string LocalName => nameof(ServerForm);
 
-    IocpHost Host { get; set; } = new();
+    Server Host { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -29,16 +27,19 @@ internal class HostForm : ResizeableForm
 
     RichTextBox MessageBox { get; } = new();
 
-    TextBox SendBox { get; } = new();
+    TextBox SendBox { get; } = new()
+    {
+        Multiline = true,
+    };
 
     Button SendButton { get; } = new()
     {
         Text = "Send",
     };
 
-    public HostForm()
+    public ServerForm()
     {
-        Text = "tcp server";
+        Text = "Server";
         Controls.AddRange([
             Port,
             SwitchButton,
@@ -49,32 +50,33 @@ internal class HostForm : ResizeableForm
             ]);
         OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
+        SendButton.Click += SendButton_Click;
         Host.OnLog += UpdateMessage;
-        //Host.OnParallelRemainChange += Host_OnParallelRemainChange;
+        Host.OnConnectionCountChange += Host_OnParallelRemainChange;
+        //Host.Start((int)Port.Value);
+    }
+
+    private void SendButton_Click(object? sender, EventArgs e)
+    {
+        Host.BroadcastMessage(SendBox.Text);
     }
 
     private void Host_OnParallelRemainChange(int args)
     {
-        lock (ParallelCount)
+        BeginInvoke(() =>
         {
-            Invoke(() =>
-            {
-                ParallelCount.Text = args.ToString();
-                Update();
-            });
-        }
+            ParallelCount.Text = args.ToString();
+            Update();
+        });
     }
 
     private void UpdateMessage(string message)
     {
-        lock (MessageBox)
+        BeginInvoke(new Action(() =>
         {
-            Invoke(new Action(() =>
-            {
-                MessageBox.Text += $"{message}\n";
-                Update();
-            }));
-        }
+            MessageBox.Text += $"{message}\n";
+            Update();
+        }));
     }
 
     private void SwitchButton_Click(object? sender, EventArgs e)
@@ -121,7 +123,7 @@ internal class HostForm : ResizeableForm
         //
         top = MessageBox.Bottom + Padding;
         //
-        SendBox.Left= ClientLeft + Padding;
+        SendBox.Left = ClientLeft + Padding;
         SendBox.Top = top;
         SendBox.Width = width * 2 + Padding;
         //

@@ -57,8 +57,8 @@ public partial class ArchiveSelector : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        LocalEvents.Hub.AddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
@@ -71,7 +71,7 @@ public partial class ArchiveSelector : Displayer
     {
         if (key is not Keys.Escape)
             return;
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormToClose);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
     }
 
     private void SetBounds(Rectangle rect)
@@ -132,7 +132,7 @@ public partial class ArchiveSelector : Displayer
             ThumbnailRect = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - Padding.Height);
             try
             {
-                var thumbnail = (Bitmap)Image.FromFile(info.GetOverviewPath());
+                var thumbnail = (Bitmap)Image.FromFile(info.GetThumbnailPath());
                 var size = thumbnail.Size.ScaleSizeOnRatio(ThumbnailRect.Size);
                 thumbnail = thumbnail.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
                 ThumbnailRect = new Rectangle(ThumbnailRect.Left + (ThumbnailRect.Width - thumbnail.Width) / 2, ThumbnailRect.Top + (ThumbnailRect.Height - thumbnail.Height) / 2, thumbnail.Width, thumbnail.Height);

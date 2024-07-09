@@ -24,17 +24,17 @@ partial class GamePlane
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.Hub.AddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellPointedOn, PointOnCell);
+        LocalEvents.Hub.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellPointedOn, PointOnCell);
     }
 
     private void PointOnCell(GridCellPointedOnArgs args)
     {
         var land = args.TerrainPoint.GetLand();
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.Type.ToString()));
-        LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.Type.ToString()));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
         if (land is SourceLand sourceLand)
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
     }
 
     private void OnMouseDown(object? sender, MouseEventArgs args)
@@ -66,7 +66,7 @@ partial class GamePlane
             dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
             dY *= DragMoveSensibility;
             DragStartPoint = args.Location;
-            LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
         }
     }
 
@@ -77,6 +77,6 @@ partial class GamePlane
         var dX = diffInWidth / LatticeGrid.CellEdgeLength * Width / 200;
         var dY = diffInHeight / LatticeGrid.CellEdgeLength * Height / 200;
         LatticeGrid.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
     }
 }

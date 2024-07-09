@@ -127,7 +127,7 @@ public static class LocalSaves
         var path = info.GetArchivePath();
         if (File.Exists(path))
             File.Delete(path);
-        path = info.GetOverviewPath();
+        path = info.GetThumbnailPath();
         if (File.Exists(path))
             File.Delete(path);
         Saves.Remove(info);

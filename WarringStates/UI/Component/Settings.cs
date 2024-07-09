@@ -11,8 +11,8 @@ public class Settings : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        LocalEvents.Hub.AddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
@@ -30,7 +30,7 @@ public class Settings : Displayer
         else
             Bounds = new(0, 0, 0, 0);
         Range = rect;
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.SettingsOnSetBounds, rect);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.SettingsOnSetBounds, rect);
     }
 
     private new void KeyPress(Keys key)

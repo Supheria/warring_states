@@ -12,7 +12,7 @@ public class InfoBar : Displayer
     public InfoBar()
     {
         Height = 100;
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
     }
 
     private void SetBounds(Rectangle rect)
@@ -25,6 +25,6 @@ public class InfoBar : Displayer
         g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
         Invalidate();
         rect = new(rect.Left, rect.Top, rect.Width, rect.Height - Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.InfoBarOnSetBounds, rect);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.InfoBarOnSetBounds, rect);
     }
 }

@@ -1,7 +1,9 @@
-﻿using LocalUtilities.IocpNet.Serve;
+﻿using LocalUtilities.IocpNet.Common;
+using LocalUtilities.IocpNet.Serve;
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System;
+using System.Diagnostics;
 
 namespace WarringStates.UI;
 
@@ -9,7 +11,9 @@ public class ClientForm : ResizeableForm
 {
     public override string LocalName => nameof(ClientForm);
 
-    IocpClient Client { get; } = new();
+    private object FormLocker { get; } = new();
+
+    ClientHost Client { get; } = new();
 
     TextBox HostAddress { get; } = new()
     {
@@ -38,7 +42,10 @@ public class ClientForm : ResizeableForm
 
     RichTextBox MessageBox { get; } = new();
 
-    TextBox SendBox { get; } = new();
+    TextBox SendBox { get; } = new()
+    {
+        Multiline = true,
+    };
 
     Button SendButton { get; } = new()
     {
@@ -64,9 +71,14 @@ public class ClientForm : ResizeableForm
         Text = "Download"
     };
 
+    ListBox UserList { get; } = new()
+    {
+        SelectionMode = SelectionMode.MultiExtended
+    };
+
     public ClientForm()
     {
-        Text = "client";
+        Text = "Client";
         Controls.AddRange([
             HostAddress,
             HostPort,
@@ -74,6 +86,7 @@ public class ClientForm : ResizeableForm
             Password,
             SwitchButton,
             MessageBox,
+            UserList,
             SendBox,
             SendButton,
             DirName,
@@ -82,17 +95,72 @@ public class ClientForm : ResizeableForm
             UploadButton,
             DownloadButton,
             ]);
-        OnDrawClient += ClientForm_OnDrawClient;
-        SwitchButton.Click += SwitchButton_Click;
-        SendButton.Click += (_, _) => Client.SendMessage(SendBox.Text);
-        FilePathButton.Click += FilePathButton_Click;
-        UploadButton.Click += (_, _) => Client.Upload(DirName.Text, FilePath.Text);
-        DownloadButton.Click += (_, _) => Client.Download(DirName.Text, FilePath.Text);
-        Client.OnLog += UpdateMessage;
-        Client.OnConnected += () => UpdateSwitchButtonText(false);
-        Client.OnDisconnected += () => UpdateSwitchButtonText(true);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
+        FormClosing += (_, _) => Client.Close();
+        OnDrawClient += ClientForm_OnDrawClient;
+        SwitchButton.Click += SwitchButton_Click;
+        SendButton.Click += SendButton_Click;
+        FilePathButton.Click += FilePathButton_Click;
+        UploadButton.Click += (_, _) => Client.UploadFile(DirName.Text, FilePath.Text);
+        DownloadButton.Click += (_, _) => Client.DownloadFile(DirName.Text, FilePath.Text);
+        Client.OnLog += UpdateMessage;
+        Client.OnConnected += Client_OnConnected;
+        Client.OnDisconnected += Client_OnDisconnected;
+        Client.OnProcessing += UpdateFormText;
+        Client.OnUpdateUserList += Client_OnUpdateUserList;
+    }
+
+    private void SendButton_Click(object? sender, EventArgs e)
+    {
+        var index = UserList.SelectedIndex;
+        if (index is -1)
+        {
+            UpdateMessage("no selected user to send message");
+            return;
+        }
+        foreach (var item in UserList.SelectedItems)
+            Client.SendMessage(SendBox.Text, (string)item);
+    }
+
+    private void Client_OnUpdateUserList(string[] userList)
+    {
+        BeginInvoke(() =>
+        {
+            UserList.Items.Clear();
+            foreach (var user in userList)
+            {
+                if (user != UserName.Text)
+                    UserList.Items.Add(user);
+            }
+            Update();
+        });
+    }
+
+    private void Client_OnDisconnected()
+    {
+        BeginInvoke(() =>
+        {
+            SwitchButton.Text = "Connect";
+            HostAddress.Enabled = true;
+            HostPort.Enabled = true;
+            UserName.Enabled = true;
+            Password.Enabled = true;
+            Update();
+        });
+    }
+
+    private void Client_OnConnected()
+    {
+        BeginInvoke(() =>
+        {
+            SwitchButton.Text = "Disconnect";
+            HostAddress.Enabled = false;
+            HostPort.Enabled = false;
+            UserName.Enabled = false;
+            Password.Enabled = false;
+            Update();
+        });
     }
 
     private void ClientForm_OnSaveForm(SsSerializer serializer)
@@ -126,33 +194,27 @@ public class ClientForm : ResizeableForm
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
         if (Client.IsConnect)
-            Client.Disconnect();
+            Client.Close();
         else
             Client.Connect(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
     }
 
-    private void UpdateSwitchButtonText(bool connect)
-    {
-        lock (SwitchButton)
-        {
-            Invoke(new Action(() =>
-            {
-                SwitchButton.Text = connect ? "Connect" : "Disconnect";
-                Update();
-            }));
-        }
-    }
-
     private void UpdateMessage(string message)
     {
-        lock (MessageBox)
+        BeginInvoke(() =>
         {
-            Invoke(() =>
-            {
-                MessageBox.Text += $"{message}\n";
-                Update();
-            });
-        }
+            MessageBox.Text += $"{message}\n";
+            Update();
+        });
+    }
+
+    private void UpdateFormText(string text)
+    {
+        BeginInvoke(() =>
+        {
+            Text = $"client - {text}";
+            Update();
+        });
     }
 
     private void ClientForm_OnDrawClient()
@@ -180,12 +242,19 @@ public class ClientForm : ResizeableForm
         SwitchButton.Top = top;
         SwitchButton.Width = width;
         //
+        width = (ClientWidth - Padding * 3) / 4;
         top = Password.Bottom + Padding;
+        var height = ClientHeight - HostAddress.Height - SendBox.Height - FilePath.Height - Padding * 6;
         //
         MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
-        MessageBox.Width = ClientWidth - Padding * 2;
-        MessageBox.Height = ClientHeight - HostAddress.Height - SendBox.Height - FilePath.Height - Padding * 6;
+        MessageBox.Width = width * 3;
+        MessageBox.Height = height;
+        //
+        UserList.Left = MessageBox.Right + Padding;
+        UserList.Top = top;
+        UserList.Width = width;
+        UserList.Height = height;
         //
         width = (ClientWidth - Padding * 3) / 4;
         //
@@ -207,7 +276,7 @@ public class ClientForm : ResizeableForm
         //
         FilePath.Left = DirName.Right + Padding;
         FilePath.Top = top;
-        FilePath.Width = width2x +  Padding;
+        FilePath.Width = width2x + Padding;
         //
         FilePathButton.Left = FilePath.Right + Padding;
         FilePathButton.Top = top;

@@ -44,7 +44,7 @@ public class Archive : ISsSerializable
             }
         }
         pThumbnail.UnlockBits();
-        thumbnail.Save(info.GetOverviewPath());
+        thumbnail.Save(info.GetThumbnailPath());
         return new(info, altitudeMap);
     }
 

@@ -10,9 +10,9 @@ public class UserException(string message) : Exception(message)
         var sb = new StringBuilder();
         if (info.WorldName is "")
             sb.Append(nameof(info.WorldName)).Append(' ');
-        if (info.CreateTime is "")
+        if (info.CreateTime is 0)
             sb.Append(nameof(info.CreateTime)).Append(' ');
-        if (info.LastSaveTime is "")
+        if (info.LastSaveTime is 0)
             sb.Append(nameof(info.LastSaveTime)).Append(' ');
         var map = archive.AltitudeMap;
         if (map.OriginPoints.Count < 1 || map.Width is 0 || map.Height is 0)

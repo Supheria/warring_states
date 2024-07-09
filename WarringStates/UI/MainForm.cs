@@ -42,22 +42,22 @@ public partial class MainForm : ResizeableForm
         KeyDown += KeyPressed;
         Controls.Add(ArchiveSelector);
         ArchiveSelector.EnableListener();
-        LocalEvents.Hub.AddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, RelodeArchive);
-        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
-        LocalEvents.Hub.AddListener(LocalEvents.UserInterface.MainFormToClose, Close);
+        LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, RelodeArchive);
+        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
+        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
         LocalSaves.ReLocate();
     }
 
     private void KeyPressed(object? sender, KeyEventArgs e)
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.KeyPressed, e.KeyCode);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.KeyPressed, e.KeyCode);
     }
 
     private void RelodeArchive(Archive archive)
     {
         Atlas.Relocate(archive);
         SpanFlow.Relocate(archive.Info.CurrentSpan);
-        LocalEvents.Hub.Broadcast(LocalEvents.Flow.SwichFlowState);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SwichFlowState);
         Controls.Clear();
         Controls.AddRange([
             Settings,
@@ -98,7 +98,7 @@ public partial class MainForm : ResizeableForm
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.MainFormOnDraw, ClientRectangle);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.MainFormOnDraw, ClientRectangle);
 
         //LocalEvents.ForTest();
     }

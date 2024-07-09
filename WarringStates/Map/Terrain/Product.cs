@@ -30,7 +30,7 @@ public class Product : ISsSerializable
         Type = type;
         Amount = amount;
         Increment = increment;
-        LocalEvents.Hub.AddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, IncrementTickOn);
+        LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, IncrementTickOn);
     }
 
     public Product() : this(Types.None, 0, 0)

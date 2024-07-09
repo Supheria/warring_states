@@ -10,8 +10,8 @@ public partial class GamePlane : Displayer
     public GamePlane()
     {
         AddOperations();
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.Hub.AddListener(LocalEvents.Graph.GridOriginSet, Relocate);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
+        LocalEvents.Hub.TryAddListener(LocalEvents.Graph.GridOriginSet, Relocate);
     }
 
     private void SetBounds(Rectangle rect)
@@ -23,7 +23,7 @@ public partial class GamePlane : Displayer
 
     private new void Relocate()
     {
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
         Invalidate();
     }
 }

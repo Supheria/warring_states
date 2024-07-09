@@ -41,7 +41,7 @@ public class SpanFlow : Flower
     private void Start()
     {
         LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Start);
-        LocalEvents.Hub.AddListener(LocalEvents.Flow.SwichFlowState, Stop);
+        LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Stop);
         KeepFlow = true;
         Timer.Start();
     }
@@ -49,7 +49,7 @@ public class SpanFlow : Flower
     private void Stop()
     {
         LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Stop);
-        LocalEvents.Hub.AddListener(LocalEvents.Flow.SwichFlowState, Start);
+        LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Start);
         KeepFlow = false;
     }
 }

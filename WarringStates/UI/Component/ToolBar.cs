@@ -18,8 +18,8 @@ public class ToolBar : Displayer
     public ToolBar()
     {
         Height = 30;
-        LocalEvents.Hub.AddListener<Rectangle>(LocalEvents.UserInterface.SettingsOnSetBounds, SetBounds);
-        LocalEvents.Hub.AddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.SettingsOnSetBounds, SetBounds);
+        LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
     private void SetBounds(Rectangle rect)
@@ -29,7 +29,7 @@ public class ToolBar : Displayer
         Relocate();
         DrawDate();
         rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
-        LocalEvents.Hub.Broadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
     }
 
     private void SetDate(SpanFlowTickOnArgs args)

@@ -38,7 +38,7 @@ partial class LatticeGrid
             y += height;
         Origin = new(x, y);
         OriginOffset = Origin - lastOrigin;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginSet);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginSet);
     }
 
     private void SetOrigin(Coordinate origin)
@@ -46,7 +46,7 @@ partial class LatticeGrid
         var lastOrigin = Origin;
         Origin = origin;
         OriginOffset = Origin - lastOrigin;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridOriginSet);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridOriginSet);
     }
 
     private void Relocate(GridToRelocateArgs args)
@@ -60,7 +60,7 @@ partial class LatticeGrid
         Graphics.Dispose();
         LastDrawRect = DrawRect;
         LastCellEdgeLength = CellEdgeLength;
-        LocalEvents.Hub.Broadcast(LocalEvents.Graph.GridRelocated, new GridRelocatedArgs(DrawRect, Origin));
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridRelocated, new GridRelocatedArgs(DrawRect, Origin));
     }
 
     private void DrawGrid()
@@ -87,7 +87,7 @@ partial class LatticeGrid
                 }
             }
 #if DEBUG
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
 #endif
         }
         //
@@ -111,7 +111,7 @@ partial class LatticeGrid
                 }
             }
 #if DEBUG
-            LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
+            LocalEvents.Hub.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
 #endif
         }
         DrawGuideLine();
