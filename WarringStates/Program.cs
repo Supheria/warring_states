@@ -44,6 +44,7 @@ internal static class Program
         //new TestForm().Show();
         //new TestForm() { TopMost = true }.Show();
         //Application.Run(new InitializeForm());
-        Application.Run(new MainForm());
+        //new ServerForm().Show();
+        //Application.Run(new ClientForm());
     }
 }

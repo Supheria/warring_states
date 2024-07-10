@@ -15,8 +15,6 @@ public partial class MainForm : ResizeableForm
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
-    ArchiveSelector ArchiveSelector { get; } = new();
-
     Settings Settings { get; } = new();
 
     ToolBar ToolBar { get; } = new();
@@ -29,9 +27,9 @@ public partial class MainForm : ResizeableForm
 
     LatticeGrid Grid { get; } = new();
 
-    SpanFlow SpanFlow { get; set; } = new();
+    //SpanFlow SpanFlow { get; set; } = new();
 
-    AnimateFlow AnimateFlow { get; set; } = new();
+    //AnimateFlow AnimateFlow { get; set; } = new();
 
     public MainForm()
     {
@@ -40,24 +38,14 @@ public partial class MainForm : ResizeableForm
         OnLoadForm += LoadForm;
         OnSaveForm += SaveForm;
         KeyDown += KeyPressed;
-        Controls.Add(ArchiveSelector);
-        ArchiveSelector.EnableListener();
-        LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, RelodeArchive);
+        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
         LocalSaves.ReLocate();
     }
 
-    private void KeyPressed(object? sender, KeyEventArgs e)
+    private void StartGame()
     {
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.KeyPressed, e.KeyCode);
-    }
-
-    private void RelodeArchive(Archive archive)
-    {
-        Atlas.Relocate(archive);
-        SpanFlow.Relocate(archive.Info.CurrentSpan);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SwichFlowState);
         Controls.Clear();
         Controls.AddRange([
             Settings,
@@ -66,24 +54,33 @@ public partial class MainForm : ResizeableForm
             GamePlane,
             InfoBar,
         ]);
-        ArchiveSelector.DisableListener();
         Settings.EnableListener();
+        DrawClient();
+    }
+
+    private void KeyPressed(object? sender, KeyEventArgs e)
+    {
+        Controls.Clear();
+        Controls.AddRange([
+            Settings,
+            ToolBar,
+            Overview,
+            GamePlane,
+            InfoBar,
+        ]);
         DrawClient();
     }
 
     private void FinishGame()
     {
-
         Controls.Clear();
-        Controls.Add(ArchiveSelector);
         Settings.DisableListener();
-        ArchiveSelector.EnableListener();
         DrawClient();
     }
 
     private void SaveForm(SsSerializer serializer)
     {
-        serializer.WriteTag(nameof(SpanFlow.CurrentSpan), SpanFlow.CurrentSpan.ToString());
+        //serializer.WriteTag(nameof(SpanFlow.CurrentSpan), SpanFlow.CurrentSpan.ToString());
         //serializer.WriteObject(Grid);
     }
 

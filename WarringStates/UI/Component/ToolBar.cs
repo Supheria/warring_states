@@ -18,8 +18,18 @@ public class ToolBar : Displayer
     public ToolBar()
     {
         Height = 30;
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.SettingsOnSetBounds, SetBounds);
+    }
+
+    public void EnableListener()
+    {
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
         LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
+    }
+
+    public void DisableListener()
+    {
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryRemoveListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
     private void SetBounds(Rectangle rect)

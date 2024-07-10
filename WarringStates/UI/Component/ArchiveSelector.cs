@@ -53,18 +53,19 @@ public partial class ArchiveSelector : Displayer
     {
         BackColor = Color.Teal;
         AddOperations();
+        SizeChanged += (_, _) => SetBounds(Bounds);
     }
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        //LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        //LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     private new void KeyPress(Keys key)

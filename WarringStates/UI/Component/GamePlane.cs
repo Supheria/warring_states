@@ -10,8 +10,18 @@ public partial class GamePlane : Displayer
     public GamePlane()
     {
         AddOperations();
+    }
+
+    public void EnableListener()
+    {
         LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
         LocalEvents.Hub.TryAddListener(LocalEvents.Graph.GridOriginSet, Relocate);
+    }
+
+    public void DisableListener()
+    {
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
+        LocalEvents.Hub.TryRemoveListener(LocalEvents.Graph.GridOriginSet, Relocate);
     }
 
     private void SetBounds(Rectangle rect)

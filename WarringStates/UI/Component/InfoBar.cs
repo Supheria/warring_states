@@ -12,8 +12,18 @@ public class InfoBar : Displayer
     public InfoBar()
     {
         Height = 100;
+    }
+
+    public void EnableListener()
+    {
         LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
     }
+
+    public void DisableListener()
+    {
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+    }
+
 
     private void SetBounds(Rectangle rect)
     {

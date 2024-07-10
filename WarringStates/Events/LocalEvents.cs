@@ -42,6 +42,7 @@ public static class LocalEvents
         ToolBarOnSetBounds,
         InfoBarOnSetBounds,
         ArchiveSelected,
+        StartGamePlay,
         FinishGamePlay,
         KeyPressed,
         MainFormToClose,

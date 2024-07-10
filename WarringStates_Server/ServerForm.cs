@@ -1,5 +1,10 @@
-﻿using LocalUtilities.IocpNet.Serve;
-using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Events;
+using WarringStates.Flow;
+using WarringStates.Map;
+using WarringStates.Net.Model;
+using WarringStates.UI.Component;
+using WarringStates.User;
 
 namespace WarringStates.UI;
 
@@ -7,7 +12,7 @@ internal class ServerForm : ResizeableForm
 {
     public override string LocalName => nameof(ServerForm);
 
-    Server Host { get; set; } = new();
+    Server Server { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -37,6 +42,12 @@ internal class ServerForm : ResizeableForm
         Text = "Send",
     };
 
+    ArchiveSelector ArchiveSelector { get; } = new();
+
+    SpanFlow SpanFlow { get; set; } = new();
+
+    AnimateFlow AnimateFlow { get; set; } = new();
+
     public ServerForm()
     {
         Text = "Server";
@@ -47,18 +58,32 @@ internal class ServerForm : ResizeableForm
             MessageBox,
             SendBox,
             SendButton,
+            //ArchiveSelector
             ]);
         OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
         SendButton.Click += SendButton_Click;
-        Host.OnLog += UpdateMessage;
-        Host.OnConnectionCountChange += Host_OnParallelRemainChange;
+        Server.OnLog += UpdateMessage;
+        Server.OnConnectionCountChange += Host_OnParallelRemainChange;
         //Host.Start((int)Port.Value);
+        LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
+        ArchiveSelector.EnableListener();
+        LocalSaves.ReLocate();
+    }
+
+    private void LoadArchive(Archive archive)
+    {
+        Atlas.Relocate(archive);
+        SpanFlow.Relocate(archive.Info.CurrentSpan);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SwichFlowState);
+        //ArchiveSelector.DisableListener();
+        DrawClient();
     }
 
     private void SendButton_Click(object? sender, EventArgs e)
     {
-        Host.BroadcastMessage(SendBox.Text);
+        Server.BroadcastMessage(SendBox.Text);
     }
 
     private void Host_OnParallelRemainChange(int args)
@@ -81,18 +106,18 @@ internal class ServerForm : ResizeableForm
 
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
-        if (Host.IsStart)
+        if (Server.IsStart)
         {
-            Host.Close();
-            if (!Host.IsStart)
+            Server.Close();
+            if (!Server.IsStart)
                 SwitchButton.Text = "Start";
             else
                 System.Windows.Forms.MessageBox.Show($"close server failed");
         }
         else
         {
-            Host.Start((int)Port.Value);
-            if (Host.IsStart)
+            Server.Start((int)Port.Value);
+            if (Server.IsStart)
                 SwitchButton.Text = "Close";
             else
                 System.Windows.Forms.MessageBox.Show($"start server failed");
@@ -116,10 +141,20 @@ internal class ServerForm : ResizeableForm
         ParallelCount.Top = top;
         ParallelCount.Width = width;
         //
+        width = (ClientWidth - Padding * 3) / 5;
+        top = SwitchButton.Bottom + Padding;
+        var height = ClientHeight - Port.Height - SendButton.Height - Padding * 4;
+        //
+        ArchiveSelector.Left = ClientLeft + Padding;
+        ArchiveSelector.Top = top;
+        ArchiveSelector.Width = width * 4;
+        ArchiveSelector.Height = height;
+        //
+        //MessageBox.Left = ArchiveSelector.Right + Padding;
         MessageBox.Left = ClientLeft + Padding;
-        MessageBox.Top = SwitchButton.Bottom + Padding;
+        MessageBox.Top = top;
         MessageBox.Width = ClientWidth - Padding * 2;
-        MessageBox.Height = ClientHeight - Port.Height - SendButton.Height - Padding * 4;
+        MessageBox.Height = height;
         //
         top = MessageBox.Bottom + Padding;
         //

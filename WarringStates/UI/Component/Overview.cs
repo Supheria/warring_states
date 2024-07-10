@@ -31,9 +31,20 @@ public partial class Overview : Displayer
     public Overview()
     {
         AddOperations();
+    }
+
+    public void EnableListener()
+    {
         LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
         LocalEvents.Hub.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
     }
+
+    public void DisableListener()
+    {
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.Hub.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
+    }
+
 
     private void SetBounds(Rectangle rect)
     {

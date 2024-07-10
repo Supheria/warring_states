@@ -1,9 +1,13 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Serve;
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using System;
 using System.Diagnostics;
+using WarringStates.Events;
+using WarringStates.Graph;
+using WarringStates.Net.Model;
+using WarringStates.UI.Component;
+using WarringStates_Client;
 
 namespace WarringStates.UI;
 
@@ -76,6 +80,10 @@ public class ClientForm : ResizeableForm
         SelectionMode = SelectionMode.MultiExtended
     };
 
+    GamePlayControl GamePlay { get; } = new();
+
+    public override Size MinimumSize { get; set; } = new(200, 200);
+
     public ClientForm()
     {
         Text = "Client";
@@ -94,6 +102,7 @@ public class ClientForm : ResizeableForm
             FilePathButton,
             UploadButton,
             DownloadButton,
+            //GamePlay,
             ]);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
@@ -105,10 +114,12 @@ public class ClientForm : ResizeableForm
         UploadButton.Click += (_, _) => Client.UploadFile(DirName.Text, FilePath.Text);
         DownloadButton.Click += (_, _) => Client.DownloadFile(DirName.Text, FilePath.Text);
         Client.OnLog += UpdateMessage;
-        Client.OnConnected += Client_OnConnected;
+        Client.OnLogined += Client_OnConnected;
         Client.OnDisconnected += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
         Client.OnUpdateUserList += Client_OnUpdateUserList;
+
+        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
     }
 
     private void SendButton_Click(object? sender, EventArgs e)
@@ -161,6 +172,7 @@ public class ClientForm : ResizeableForm
             Password.Enabled = false;
             Update();
         });
+        //GamePlay.StartGame();
     }
 
     private void ClientForm_OnSaveForm(SsSerializer serializer)
@@ -196,7 +208,7 @@ public class ClientForm : ResizeableForm
         if (Client.IsConnect)
             Client.Close();
         else
-            Client.Connect(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
+            Client.Login(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
     }
 
     private void UpdateMessage(string message)
@@ -242,13 +254,20 @@ public class ClientForm : ResizeableForm
         SwitchButton.Top = top;
         SwitchButton.Width = width;
         //
-        width = (ClientWidth - Padding * 3) / 4;
+        width = (ClientWidth - Padding * 5) / 5;
         top = Password.Bottom + Padding;
         var height = ClientHeight - HostAddress.Height - SendBox.Height - FilePath.Height - Padding * 6;
         //
+        GamePlay.Left = ClientLeft + Padding;
+        GamePlay.Top = top;
+        GamePlay.Width = width * 3;
+        GamePlay.Height = height;
+        //
+        //MessageBox.Left = GamePlay.Right + Padding;
         MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
-        MessageBox.Width = width * 3;
+        //MessageBox.Width = width;
+        MessageBox.Width = width * 4;
         MessageBox.Height = height;
         //
         UserList.Left = MessageBox.Right + Padding;
