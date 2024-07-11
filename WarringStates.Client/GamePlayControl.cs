@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using WarringStates.Events;
+﻿using WarringStates.Events;
 using WarringStates.Graph;
-using WarringStates.UI.Component;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
-using WarringStates.User;
 using WarringStates.Map;
+using WarringStates.UI.Component;
+using WarringStates.User;
 
-namespace WarringStates_Client;
+namespace WarringStates.Client;
 
 public partial class GamePlayControl : UserControl
 {
@@ -36,7 +26,7 @@ public partial class GamePlayControl : UserControl
         KeyDown += KeyPressed;
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
-        LocalSaves.ReLocate();
+        ArchiveManager.ReLocate();
     }
 
     public void StartGame()

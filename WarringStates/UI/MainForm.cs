@@ -40,7 +40,7 @@ public partial class MainForm : ResizeableForm
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
-        LocalSaves.ReLocate();
+        ArchiveManager.ReLocate();
     }
 
     private void StartGame()

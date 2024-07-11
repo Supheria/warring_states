@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.User;
 
-public static class LocalSaves
+public static class ArchiveManager
 {
     static string RegisterPath => ArchiveInfo.RegisterPath;
 

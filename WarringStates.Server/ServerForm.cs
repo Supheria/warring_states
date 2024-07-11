@@ -6,13 +6,13 @@ using WarringStates.Net;
 using WarringStates.UI.Component;
 using WarringStates.User;
 
-namespace WarringStates.UI;
+namespace WarringStates.Server;
 
 internal class ServerForm : ResizeableForm
 {
     public override string LocalName => nameof(ServerForm);
 
-    Server Server { get; set; } = new();
+    ServerHostManager Server { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -68,7 +68,7 @@ internal class ServerForm : ResizeableForm
         //Host.Start((int)Port.Value);
         LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
         ArchiveSelector.EnableListener();
-        LocalSaves.ReLocate();
+        ArchiveManager.ReLocate();
     }
 
     private void LoadArchive(Archive archive)

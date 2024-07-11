@@ -105,7 +105,7 @@ public partial class ArchiveSelector : Displayer
     {
         //Thumbnail?.Dispose();
         //Thumbnail = null;
-        if (!LocalSaves.TryGetArchiveInfo(SelectedItemIndex, out var info) || !info.Useable())
+        if (!ArchiveManager.TryGetArchiveInfo(SelectedItemIndex, out var info) || !info.Useable())
         {
             using var g = Graphics.FromImage(Image);
             var random = new Random();

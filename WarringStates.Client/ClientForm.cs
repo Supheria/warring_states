@@ -1,15 +1,9 @@
-﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
+﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using System;
-using System.Diagnostics;
 using WarringStates.Events;
-using WarringStates.Graph;
 using WarringStates.Net;
-using WarringStates.UI.Component;
-using WarringStates_Client;
 
-namespace WarringStates.UI;
+namespace WarringStates.Client;
 
 public class ClientForm : ResizeableForm
 {

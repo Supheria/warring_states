@@ -74,7 +74,7 @@ partial class ArchiveSelector
             var y = top + i * RollItemHeight;
             var rect = new Rectangle(RollItemsRect.Left, y, RollItemsRect.Width, RollItemHeight - RollPadding);
             var index = showStartItemIndex + i;
-            if (!LocalSaves.TryGetArchiveInfo(index, out var info))
+            if (!ArchiveManager.TryGetArchiveInfo(index, out var info))
                 continue;
             if (index == SelectedItemIndex)
                 brush.Color = Color.Gold;
@@ -99,7 +99,7 @@ partial class ArchiveSelector
     {
         var top = RollRect.Top;
         var height = RollRect.Height - RollPadding;
-        var itemCount = LocalSaves.Count;
+        var itemCount = ArchiveManager.Count;
         if (itemCount is 0)
             itemCount = 1;
         RollOffsetMax = Math.Max(0, itemCount * RollItemHeight - height);

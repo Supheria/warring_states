@@ -46,19 +46,19 @@ partial class ArchiveSelector
             RollReDraw();
             ThumbnailRedraw();
         }
-        else if (LoadButton.Rect.Contains(e.Location) && LocalSaves.LoadArchive(SelectedItemIndex, out var archive))
+        else if (LoadButton.Rect.Contains(e.Location) && ArchiveManager.LoadArchive(SelectedItemIndex, out var archive))
         {
             LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
-            LocalSaves.Update(SelectedItemIndex);
+            ArchiveManager.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();
             ThumbnailRedraw();
         }
-        else if (DeleteButton.Rect.Contains(e.Location) && LocalSaves.Delete(SelectedItemIndex))
+        else if (DeleteButton.Rect.Contains(e.Location) && ArchiveManager.Delete(SelectedItemIndex))
         {
-            if (LocalSaves.Count is 0)
+            if (ArchiveManager.Count is 0)
                 SelectedItemIndex = -1;
-            else if (SelectedItemIndex >= LocalSaves.Count)
+            else if (SelectedItemIndex >= ArchiveManager.Count)
                 SelectedItemIndex--;
             RollReDraw();
             ButtonRedraw(DeleteButton, false);

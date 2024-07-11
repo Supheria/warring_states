@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AltitudeMapGenerator", "_li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalUtilities", "_lib\LocalUtilities\LocalUtilities.csproj", "{6C10235C-EEEA-4359-A8AF-03FBC3C48236}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarringStates_Client", "WarringStates_Client\WarringStates_Client.csproj", "{46051504-EEFD-4D0E-B927-BA10C0FF3668}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarringStates.Client", "WarringStates.Client\WarringStates.Client.csproj", "{39C92F31-C6F4-47A1-9FB8-9A5A5DAB2492}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarringStates_Server", "WarringStates_Server\WarringStates_Server.csproj", "{DFF32E62-204B-4CC4-9314-B802FF67837A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarringStates.Server", "WarringStates.Server\WarringStates.Server.csproj", "{912E398E-3562-4121-942B-0CEAD5668658}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +31,14 @@ Global
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C10235C-EEEA-4359-A8AF-03FBC3C48236}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46051504-EEFD-4D0E-B927-BA10C0FF3668}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46051504-EEFD-4D0E-B927-BA10C0FF3668}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46051504-EEFD-4D0E-B927-BA10C0FF3668}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46051504-EEFD-4D0E-B927-BA10C0FF3668}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DFF32E62-204B-4CC4-9314-B802FF67837A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DFF32E62-204B-4CC4-9314-B802FF67837A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DFF32E62-204B-4CC4-9314-B802FF67837A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DFF32E62-204B-4CC4-9314-B802FF67837A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39C92F31-C6F4-47A1-9FB8-9A5A5DAB2492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39C92F31-C6F4-47A1-9FB8-9A5A5DAB2492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39C92F31-C6F4-47A1-9FB8-9A5A5DAB2492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39C92F31-C6F4-47A1-9FB8-9A5A5DAB2492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{912E398E-3562-4121-942B-0CEAD5668658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{912E398E-3562-4121-942B-0CEAD5668658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{912E398E-3562-4121-942B-0CEAD5668658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{912E398E-3562-4121-942B-0CEAD5668658}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

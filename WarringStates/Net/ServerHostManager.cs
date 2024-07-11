@@ -9,7 +9,7 @@ using WarringStates.Net.Common;
 
 namespace WarringStates.Net;
 
-public class Server : INetLogger
+public class ServerHostManager : INetLogger
 {
     public event NetEventHandler<int>? OnConnectionCountChange;
 

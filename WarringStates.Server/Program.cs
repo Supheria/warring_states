@@ -1,6 +1,6 @@
 using WarringStates.UI;
 
-namespace WarringStates_Client
+namespace WarringStates.Server
 {
     internal static class Program
     {
@@ -13,8 +13,7 @@ namespace WarringStates_Client
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            new ClientForm("client 1").Show();
-            Application.Run(new ClientForm("client 2"));
+            Application.Run(new ServerForm());
         }
     }
 }
