@@ -1,14 +1,13 @@
-﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Transfer;
-using LocalUtilities.IocpNet.Transfer.Packet;
+﻿using LocalUtilities.IocpNet;
+using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public class ClientService : Service
 {
@@ -96,9 +95,9 @@ public class ClientService : Service
             if (IsLogined)
                 return;
             if (userInfo is null)
-                throw new IocpException(ServiceCode.EmptyUserInfo);
+                throw new NetException(ServiceCode.EmptyUserInfo);
             if (!((ClientProtocol)Protocol).Connect(host))
-                throw new IocpException(ServiceCode.NoConnection);
+                throw new NetException(ServiceCode.NoConnection);
             UserInfo = userInfo;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
                 .AppendArgs(ServiceKey.UserName, userInfo.Name ?? "")
@@ -155,10 +154,10 @@ public class ClientService : Service
         try
         {
             if (!AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             var filePath = GetFileRepoPath(dirName, fileName);
             if (!File.Exists(filePath))
-                throw new IocpException(ServiceCode.FileNotExist, filePath);
+                throw new NetException(ServiceCode.FileNotExist, filePath);
             var task = Task.Run(() =>
             {
                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -184,7 +183,7 @@ public class ClientService : Service
         try
         {
             if (!AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             var filePath = GetFileRepoPath(dirName, fileName);
             var task = Task.Run(() =>
             {
@@ -237,7 +236,7 @@ public class ClientService : Service
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (!AutoFile.Relocate(fileStream))
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             fileArgs.FileLength = AutoFile.Length;
             fileArgs.PacketLength = AutoFile.Length > ConstTabel.DataBytesTransferredMax ? ConstTabel.DataBytesTransferredMax : AutoFile.Length;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.UploadContinue)
@@ -256,10 +255,10 @@ public class ClientService : Service
         {
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             if (AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             var data = new byte[fileArgs.PacketLength];
             if (!AutoFile.Read(data, out var count))
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             HandleUploading(AutoFile.Length, AutoFile.Position);
             fileArgs.FileLength = AutoFile.Length;
             fileArgs.FilePosition = AutoFile.Position;
@@ -296,7 +295,7 @@ public class ClientService : Service
             File.Delete(filePath);
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             if (!AutoFile.Relocate(fileStream))
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.DownloadContinue)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
@@ -313,11 +312,11 @@ public class ClientService : Service
         {
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             if (AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             AutoFile.Write(receiver.Data);
             // simple validation
             if (AutoFile.Position != fileArgs.FilePosition)
-                throw new IocpException(ServiceCode.NotSameVersion);
+                throw new NetException(ServiceCode.NotSameVersion);
             fileArgs.FilePosition = AutoFile.Position;
             if (AutoFile.Position < fileArgs.FileLength)
             {

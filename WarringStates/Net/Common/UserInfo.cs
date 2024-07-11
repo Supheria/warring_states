@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.TypeToolKit.Text;
 
-namespace WarringStates.Net;
+namespace WarringStates.Net.Common;
 
 public class UserInfo(string name, string password)
 {

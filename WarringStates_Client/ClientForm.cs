@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using WarringStates.Events;
 using WarringStates.Graph;
-using WarringStates.Net.Model;
+using WarringStates.Net;
 using WarringStates.UI.Component;
 using WarringStates_Client;
 

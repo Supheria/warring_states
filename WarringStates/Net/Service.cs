@@ -1,17 +1,12 @@
-﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Transfer;
-using LocalUtilities.IocpNet.Transfer.Packet;
+﻿using LocalUtilities.IocpNet;
+using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeGeneral.Convert;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public abstract class Service : INetLogger
 {
@@ -27,7 +22,7 @@ public abstract class Service : INetLogger
 
     public NetEventHandler<string>? OnLog { get; set; }
 
-    ConcurrentDictionary<DateTime, CommandSender> CommandWaitList { get; } = [];
+    ConcurrentDictionary<DateTime, CommandWaitingCallback> CommandWaitList { get; } = [];
 
     protected bool IsLogined { get; set; } = false;
 
@@ -82,17 +77,17 @@ public abstract class Service : INetLogger
     /// </summary>
     /// <param name="receiver"></param>
     /// <returns></returns>
-    /// <exception cref="IocpException"></exception>
+    /// <exception cref="NetException"></exception>
     public void ReceiveCallback(CommandReceiver receiver)
     {
         if (!CommandWaitList.TryGetValue(receiver.TimeStamp, out var commandSend))
-            throw new IocpException(ServiceCode.CannotFindSourceSendCommand);
+            throw new NetException(ServiceCode.CannotFindSourceSendCommand);
         commandSend.Waste();
         var callbackCode = receiver.GetArgs(ServiceKey.CallbackCode).ToEnum<ServiceCode>();
         if (callbackCode is ServiceCode.Success)
             return;
         var errorMessage = receiver.GetArgs(ServiceKey.ErrorMessage);
-        throw new IocpException(callbackCode, errorMessage);
+        throw new NetException(callbackCode, errorMessage);
     }
 
     /// <summary>
@@ -100,14 +95,15 @@ public abstract class Service : INetLogger
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="doRetry"></param>
-    /// <exception cref="IocpException"></exception>
+    /// <exception cref="NetException"></exception>
     public void SendCommand(CommandSender sender)
     {
-        sender.OnLog += this.HandleLog;
-        sender.OnWasted += () => CommandWaitList.TryRemove(sender.TimeStamp, out _);
-        if (!CommandWaitList.TryAdd(sender.TimeStamp, sender))
-            throw new IocpException(ServiceCode.CannotAddSendCommand);
-        sender.StartWaitingCallback();
+        var waitingCallback = new CommandWaitingCallback(sender);
+        waitingCallback.OnLog += this.HandleLog;
+        waitingCallback.OnWasted += () => CommandWaitList.TryRemove(sender.TimeStamp, out _);
+        if (!CommandWaitList.TryAdd(sender.TimeStamp, waitingCallback))
+            throw new NetException(ServiceCode.CannotWaitSendCommandForCallback);
+        waitingCallback.StartWaiting();
         Protocol.SendCommand(sender);
     }
 
@@ -121,7 +117,7 @@ public abstract class Service : INetLogger
     {
         var errorCode = ex switch
         {
-            IocpException iocp => iocp.ErrorCode,
+            NetException iocp => iocp.ErrorCode,
             _ => ServiceCode.UnknowError,
         };
         sender.AppendArgs(ServiceKey.CallbackCode, errorCode.ToString());

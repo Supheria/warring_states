@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WarringStates.Net;
+﻿namespace WarringStates.Net.Common;
 
 public enum ServiceCode
 {
@@ -23,7 +17,7 @@ public enum ServiceCode
     ServerNotStartYet,
     ServerHasStarted,
     CannotFindSourceSendCommand,
-    CannotAddSendCommand,
+    CannotWaitSendCommandForCallback,
     EmptyUserInfo,
     NoConnection,
 }

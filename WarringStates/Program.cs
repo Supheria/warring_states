@@ -2,7 +2,6 @@
 
 using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using WarringStates.UI;
 
 namespace WarringStates;
 

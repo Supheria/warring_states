@@ -1,10 +1,9 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Transfer.Packet;
 using LocalUtilities.TypeGeneral;
 using System.Collections.Concurrent;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public class ServerHost : Host
 {
@@ -110,7 +109,7 @@ public class ServerHost : Host
             var count = WriteU8Buffer(message, out var data);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Operate, (byte)OperateCode.Message, data, 0, count)
                 .AppendArgs(ServiceKey.ReceiveUser, UserName)
-                .AppendArgs(ServiceKey.SendUser, "Host");
+                .AppendArgs(ServiceKey.SendUser, "Server");
             Protocols[ServiceTypes.Operator].SendCommand(sender);
         }
         catch (Exception ex)

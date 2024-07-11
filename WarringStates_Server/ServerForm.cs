@@ -2,7 +2,7 @@
 using WarringStates.Events;
 using WarringStates.Flow;
 using WarringStates.Map;
-using WarringStates.Net.Model;
+using WarringStates.Net;
 using WarringStates.UI.Component;
 using WarringStates.User;
 

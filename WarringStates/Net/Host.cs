@@ -1,12 +1,10 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Transfer.Packet;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
-using Microsoft.VisualBasic.Logging;
 using System.Text;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public abstract class Host : INetLogger
 {

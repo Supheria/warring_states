@@ -1,16 +1,13 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Transfer;
-using LocalUtilities.IocpNet.Transfer.Packet;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
-using Microsoft.VisualBasic.Logging;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public class Server : INetLogger
 {
@@ -43,7 +40,7 @@ public class Server : INetLogger
         try
         {
             if (IsStart)
-                throw new IocpException(ServiceCode.ServerHasStarted);
+                throw new NetException(ServiceCode.ServerHasStarted);
             // 使用0.0.0.0作为绑定IP，则本机所有的IPv4地址都将绑定
             var localEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), port);
             Socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -64,7 +61,7 @@ public class Server : INetLogger
         try
         {
             if (!IsStart)
-                throw new IocpException(ServiceCode.ServerNotStartYet);
+                throw new NetException(ServiceCode.ServerNotStartYet);
             foreach (var user in UserMap.Values)
                 user.CloseAll();
             Socket?.Close();
@@ -148,7 +145,7 @@ public class Server : INetLogger
         {
             var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
             if (!UserMap.TryGetValue(userName, out var user))
-                throw new IocpException(ServiceCode.UserNotExist);
+                throw new NetException(ServiceCode.UserNotExist);
             user.DoOperate(receiver);
         }
         catch (Exception ex)

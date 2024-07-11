@@ -1,11 +1,9 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Protocol;
-using LocalUtilities.IocpNet.Transfer;
-using LocalUtilities.IocpNet.Transfer.Packet;
 using LocalUtilities.TypeGeneral;
 using System.Net;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public class ClientHost : Host
 {
@@ -108,7 +106,7 @@ public class ClientHost : Host
         try
         {
             if (UserInfo is null)
-                throw new IocpException(ServiceCode.EmptyUserInfo);
+                throw new NetException(ServiceCode.EmptyUserInfo);
             var count = WriteU8Buffer(message, out var data);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Operate, (byte)OperateCode.Message, data, 0, count)
                 .AppendArgs(ServiceKey.ReceiveUser, userName)

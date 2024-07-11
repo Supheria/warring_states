@@ -1,14 +1,14 @@
-﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.IocpNet.Transfer;
-using LocalUtilities.IocpNet.Transfer.Packet;
+﻿using LocalUtilities.IocpNet;
+using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.Text;
 using System.Net.Sockets;
 using System.Text;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Model;
+namespace WarringStates.Net;
 
 public class ServerService : Service
 {
@@ -58,7 +58,7 @@ public class ServerService : Service
         {
             var commandCode = (CommandCode)receiver.CommandCode;
             if (commandCode is not CommandCode.Login && !IsLogined)
-                throw new IocpException(ServiceCode.NotLogined);
+                throw new NetException(ServiceCode.NotLogined);
             switch (commandCode)
             {
                 case CommandCode.Login:
@@ -90,12 +90,12 @@ public class ServerService : Service
         try
         {
             if (IsLogined)
-                throw new IocpException(ServiceCode.UserAlreadyLogined);
+                throw new NetException(ServiceCode.UserAlreadyLogined);
             var name = receiver.GetArgs(ServiceKey.UserName);
             var password = receiver.GetArgs(ServiceKey.Password);
             var type = receiver.GetArgs(ServiceKey.ProtocolType).ToEnum<ServiceTypes>();
             if (type is ServiceTypes.None || Type is not ServiceTypes.None && Type != type)
-                throw new IocpException(ServiceCode.WrongProtocolType);
+                throw new NetException(ServiceCode.WrongProtocolType);
             Type = type;
             if (type is not ServiceTypes.HeartBeats)
             {
@@ -151,12 +151,12 @@ public class ServerService : Service
                     return fileStream.ToMd5HashString();
                 });
                 if (await task == fileArgs.Md5Value)
-                    throw new IocpException(ServiceCode.SameVersionAlreadyExist);
+                    throw new NetException(ServiceCode.SameVersionAlreadyExist);
                 File.Delete(filePath);
             }
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             if (!AutoFile.Relocate(fileStream))
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             HandleUploadStart();
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
@@ -176,11 +176,11 @@ public class ServerService : Service
         {
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             if (AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             AutoFile.Write(receiver.Data);
             // simple validation
             if (AutoFile.Position != fileArgs.FilePosition)
-                throw new IocpException(ServiceCode.NotSameVersion);
+                throw new NetException(ServiceCode.NotSameVersion);
             if (AutoFile.Position < fileArgs.FileLength)
             {
                 HandleUploading(fileArgs.FileLength, AutoFile.Position);
@@ -212,17 +212,17 @@ public class ServerService : Service
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
             if (!File.Exists(filePath))
-                throw new IocpException(ServiceCode.FileNotExist, filePath);
+                throw new NetException(ServiceCode.FileNotExist, filePath);
             var task = Task.Run(() =>
             {
                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 return fileStream.ToMd5HashString();
             });
             if (await task == fileArgs.Md5Value)
-                throw new IocpException(ServiceCode.SameVersionAlreadyExist);
+                throw new NetException(ServiceCode.SameVersionAlreadyExist);
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (!AutoFile.Relocate(fileStream))
-                throw new IocpException(ServiceCode.ProcessingFile);
+                throw new NetException(ServiceCode.ProcessingFile);
             HandleDownloadStart();
             fileArgs.FileLength = AutoFile.Length;
             fileArgs.PacketLength = AutoFile.Length > ConstTabel.DataBytesTransferredMax ? ConstTabel.DataBytesTransferredMax : AutoFile.Length;
@@ -244,11 +244,11 @@ public class ServerService : Service
         {
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             if (AutoFile.IsExpired)
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             AutoFile.Position = fileArgs.FilePosition;
             var data = new byte[fileArgs.PacketLength];
             if (!AutoFile.Read(data, out var count))
-                throw new IocpException(ServiceCode.FileExpired, fileArgs.FileName);
+                throw new NetException(ServiceCode.FileExpired, fileArgs.FileName);
             HandleDownloading(AutoFile.Length, AutoFile.Position);
             fileArgs.FilePosition = AutoFile.Position;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, count)
