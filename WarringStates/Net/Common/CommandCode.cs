@@ -7,5 +7,6 @@ public enum CommandCode : byte
     Operate,
     OperateCallback,
     HeartBeats,
-    TransferFile,
+    DownloadFile,
+    UploadFile,
 }

@@ -101,24 +101,6 @@ public class ClientHost : Host
         }
     }
 
-    public void SendMessage(string message, string userName)
-    {
-        try
-        {
-            if (UserInfo is null)
-                throw new NetException(ServiceCode.EmptyUserInfo);
-            var count = WriteU8Buffer(message, out var data);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Operate, (byte)OperateCode.Message, data, 0, count)
-                .AppendArgs(ServiceKey.ReceiveUser, userName)
-                .AppendArgs(ServiceKey.SendUser, UserInfo.Name);
-            Operator.SendCommand(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
     public void UploadFile(string dirName, string filePath)
     {
         try
@@ -141,6 +123,24 @@ public class ClientHost : Host
         {
             var fileName = Path.GetFileName(filePath);
             Download.DownLoadAsync(dirName, fileName);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
+    }
+
+    public void SendMessage(string message, string userName)
+    {
+        try
+        {
+            if (UserInfo is null)
+                throw new NetException(ServiceCode.EmptyUserInfo);
+            var count = WriteU8Buffer(message, out var data);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Operate, (byte)OperateCode.Message, data, 0, count)
+                .AppendArgs(ServiceKey.ReceiveUser, userName)
+                .AppendArgs(ServiceKey.SendUser, UserInfo.Name);
+            Operator.SendCommand(sender);
         }
         catch (Exception ex)
         {

@@ -13,9 +13,7 @@ namespace WarringStates.UI;
 
 public class ClientForm : ResizeableForm
 {
-    public override string LocalName => nameof(ClientForm);
-
-    private object FormLocker { get; } = new();
+    public override string LocalName { get; }
 
     ClientHost Client { get; } = new();
 
@@ -84,8 +82,9 @@ public class ClientForm : ResizeableForm
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
-    public ClientForm()
+    public ClientForm(string localName)
     {
+        LocalName = localName;
         Text = "Client";
         Controls.AddRange([
             HostAddress,
@@ -102,7 +101,7 @@ public class ClientForm : ResizeableForm
             FilePathButton,
             UploadButton,
             DownloadButton,
-            //GamePlay,
+            GamePlay,
             ]);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
@@ -263,11 +262,11 @@ public class ClientForm : ResizeableForm
         GamePlay.Width = width * 3;
         GamePlay.Height = height;
         //
-        //MessageBox.Left = GamePlay.Right + Padding;
-        MessageBox.Left = ClientLeft + Padding;
+        MessageBox.Left = GamePlay.Right + Padding;
+        //MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
-        //MessageBox.Width = width;
-        MessageBox.Width = width * 4;
+        MessageBox.Width = width;
+        //MessageBox.Width = width * 4;
         MessageBox.Height = height;
         //
         UserList.Left = MessageBox.Right + Padding;

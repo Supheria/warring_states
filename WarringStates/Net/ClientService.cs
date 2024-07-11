@@ -42,7 +42,7 @@ public class ClientService : Service
                 .ToString();
     }
 
-    private void Protocol_OnReceiveCommand(CommandReceiver reciver)
+    private void Protocol_OnReceiveCommand(CommandReceiver receiver)
     {
         try
         {
@@ -56,16 +56,19 @@ public class ClientService : Service
             //    else
             //        throw new IocpException(code);
             //}
-            switch ((CommandCode)reciver.CommandCode)
+            switch ((CommandCode)receiver.CommandCode)
             {
                 case CommandCode.Login:
-                    DoLogin(reciver);
+                    DoLogin(receiver);
                     break;
                 case CommandCode.HeartBeats:
-                    DoHeartBeats(reciver);
+                    DoHeartBeats(receiver);
                     break;
-                case CommandCode.TransferFile:
-                    DoTransferFile(reciver);
+                case CommandCode.UploadFile:
+                    DoUploadFile(receiver);
+                    break;
+                case CommandCode.DownloadFile:
+                    DoDownloadFile(receiver);
                     break;
             }
         }
@@ -168,7 +171,7 @@ public class ClientService : Service
                 Md5Value = await task,
             };
             HandleUploadStart();
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.UploadRequest)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Request)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
         }
@@ -195,7 +198,7 @@ public class ClientService : Service
                 Md5Value = await task,
             };
             HandleDownloadStart();
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.DownloadRequest)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Request)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
         }
@@ -205,24 +208,31 @@ public class ClientService : Service
         }
     }
 
-    private void DoTransferFile(CommandReceiver receiver)
+    private void DoUploadFile(CommandReceiver receiver)
     {
         ReceiveCallback(receiver);
         switch ((OperateCode)receiver.OperateCode)
         {
-            case OperateCode.UploadRequest:
+            case OperateCode.Request:
                 DoUploadRequest(receiver);
                 break;
-            case OperateCode.UploadContinue:
+            case OperateCode.Continue:
                 DoUploadContinue(receiver);
                 break;
-            case OperateCode.UploadFinish:
+            case OperateCode.Finish:
                 DoUploadFinish(receiver);
                 break;
-            case OperateCode.DownloadRequest:
+        }
+    }
+    private void DoDownloadFile(CommandReceiver receiver)
+    {
+        ReceiveCallback(receiver);
+        switch ((OperateCode)receiver.OperateCode)
+        {
+            case OperateCode.Request:
                 DoDownloadRequest(receiver);
                 break;
-            case OperateCode.DownloadContinue:
+            case OperateCode.Continue:
                 DoDownloadContinue(receiver);
                 break;
         }
@@ -239,7 +249,7 @@ public class ClientService : Service
                 throw new NetException(ServiceCode.ProcessingFile);
             fileArgs.FileLength = AutoFile.Length;
             fileArgs.PacketLength = AutoFile.Length > ConstTabel.DataBytesTransferredMax ? ConstTabel.DataBytesTransferredMax : AutoFile.Length;
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.UploadContinue)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
         }
@@ -262,7 +272,7 @@ public class ClientService : Service
             HandleUploading(AutoFile.Length, AutoFile.Position);
             fileArgs.FileLength = AutoFile.Length;
             fileArgs.FilePosition = AutoFile.Position;
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.UploadContinue, data, 0, count)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue, data, 0, count)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
         }
@@ -296,7 +306,7 @@ public class ClientService : Service
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             if (!AutoFile.Relocate(fileStream))
                 throw new NetException(ServiceCode.ProcessingFile);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.DownloadContinue)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
             SendCommand(sender);
         }
@@ -321,7 +331,7 @@ public class ClientService : Service
             if (AutoFile.Position < fileArgs.FileLength)
             {
                 HandleDownloading(fileArgs.FileLength, AutoFile.Position);
-                var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.DownloadContinue)
+                var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
                     .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
                 SendCommand(sender);
             }
@@ -330,7 +340,7 @@ public class ClientService : Service
                 AutoFile.Dispose();
                 HandleDownloaded(fileArgs.StartTime);
                 var startTime = BitConverter.GetBytes(fileArgs.StartTime.ToBinary());
-                var sender = new CommandSender(DateTime.Now, (byte)CommandCode.TransferFile, (byte)OperateCode.DownloadFinish, startTime, 0, startTime.Length);
+                var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Finish, startTime, 0, startTime.Length);
                 SendCommand(sender);
             }
         }

@@ -58,7 +58,7 @@ internal class ServerForm : ResizeableForm
             MessageBox,
             SendBox,
             SendButton,
-            //ArchiveSelector
+            ArchiveSelector
             ]);
         OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
@@ -150,8 +150,8 @@ internal class ServerForm : ResizeableForm
         ArchiveSelector.Width = width * 4;
         ArchiveSelector.Height = height;
         //
-        //MessageBox.Left = ArchiveSelector.Right + Padding;
-        MessageBox.Left = ClientLeft + Padding;
+        MessageBox.Left = ArchiveSelector.Right + Padding;
+        //MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
         MessageBox.Width = ClientWidth - Padding * 2;
         MessageBox.Height = height;

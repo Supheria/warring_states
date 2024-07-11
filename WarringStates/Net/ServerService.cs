@@ -67,8 +67,11 @@ public class ServerService : Service
                 case CommandCode.HeartBeats:
                     DoHeartBeats(receiver);
                     break;
-                case CommandCode.TransferFile:
-                    DoTransferFile(receiver);
+                case CommandCode.UploadFile:
+                    DoUploadFile(receiver);
+                    break;
+                case CommandCode.DownloadFile:
+                    DoDownloadFile(receiver);
                     break;
             }
         }
@@ -115,23 +118,30 @@ public class ServerService : Service
         }
     }
 
-    public void DoTransferFile(CommandReceiver receiver)
+    public void DoUploadFile(CommandReceiver receiver)
     {
         switch ((OperateCode)receiver.OperateCode)
         {
-            case OperateCode.UploadRequest:
+            case OperateCode.Request:
                 DoUploadRequestAsync(receiver);
                 break;
-            case OperateCode.UploadContinue:
+            case OperateCode.Continue:
                 DoUploadContinue(receiver);
                 break;
-            case OperateCode.DownloadRequest:
+        }
+    }
+
+    public void DoDownloadFile(CommandReceiver receiver)
+    {
+        switch ((OperateCode)receiver.OperateCode)
+        {
+            case OperateCode.Request:
                 DoDownloadRequestAsync(receiver);
                 break;
-            case OperateCode.DownloadContinue:
+            case OperateCode.Continue:
                 DoDownloadContinue(receiver);
                 break;
-            case OperateCode.DownloadFinish:
+            case OperateCode.Finish:
                 DoDownloadFinish(receiver);
                 break;
         }
@@ -193,7 +203,7 @@ public class ServerService : Service
                 AutoFile.Dispose();
                 HandleUploaded(fileArgs.StartTime);
                 var startTime = BitConverter.GetBytes(fileArgs.StartTime.ToBinary());
-                var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.UploadFinish, startTime, 0, startTime.Length);
+                var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Finish, startTime, 0, startTime.Length);
                 CallbackSuccess(sender);
             }
         }
