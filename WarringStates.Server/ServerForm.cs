@@ -2,6 +2,7 @@
 using WarringStates.Flow;
 using WarringStates.Net;
 using WarringStates.Server.Component;
+using WarringStates.Server.User;
 using WarringStates.User;
 
 namespace WarringStates.Server;
@@ -66,7 +67,7 @@ internal class ServerForm : ResizeableForm
         //Host.Start((int)Port.Value);
         LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
         ArchiveSelector.EnableListener();
-        ArchiveManager.ReLocate();
+        LocalArchives.ReLocate();
     }
 
     private void LoadArchive(Archive archive)

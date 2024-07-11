@@ -5,6 +5,7 @@ using LocalUtilities.TypeGeneral.Convert;
 using System.Collections.Concurrent;
 using System.Text;
 using WarringStates.Net.Common;
+using WarringStates.User;
 
 namespace WarringStates.Net;
 

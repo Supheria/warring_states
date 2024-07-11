@@ -1,6 +1,5 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using WarringStates.Server.User;
 using WarringStates.User;
 
 namespace WarringStates.Server.Component;
@@ -46,19 +45,19 @@ partial class ArchiveSelector
             RollReDraw();
             ThumbnailRedraw();
         }
-        else if (LoadButton.Rect.Contains(e.Location) && LocalArchives.LoadArchive(SelectedItemIndex, out var archive))
+        else if (LoadButton.Rect.Contains(e.Location) && ArchiveManager.LoadArchive(SelectedItemIndex, out var archive))
         {
             LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
-            LocalArchives.Update(SelectedItemIndex);
+            ArchiveManager.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();
             ThumbnailRedraw();
         }
-        else if (DeleteButton.Rect.Contains(e.Location) && LocalArchives.Delete(SelectedItemIndex))
+        else if (DeleteButton.Rect.Contains(e.Location) && ArchiveManager.Delete(SelectedItemIndex))
         {
-            if (LocalArchives.Count is 0)
+            if (ArchiveManager.Count is 0)
                 SelectedItemIndex = -1;
-            else if (SelectedItemIndex >= LocalArchives.Count)
+            else if (SelectedItemIndex >= ArchiveManager.Count)
                 SelectedItemIndex--;
             RollReDraw();
             ButtonRedraw(DeleteButton, false);

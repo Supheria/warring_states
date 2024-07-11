@@ -2,7 +2,7 @@
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Flow.Model;
-using WarringStates.Server.User;
+using WarringStates.User;
 
 namespace WarringStates.Server.Component;
 
@@ -104,7 +104,7 @@ public partial class ArchiveSelector : Displayer
     {
         //Thumbnail?.Dispose();
         //Thumbnail = null;
-        if (!LocalArchives.TryGetArchiveInfo(SelectedItemIndex, out var info))
+        if (!ArchiveManager.TryGetArchiveInfo(SelectedItemIndex, out var info) || !info.Useable())
         {
             using var g = Graphics.FromImage(Image);
             var random = new Random();

@@ -3,6 +3,7 @@ using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
 using WarringStates.Net.Common;
+using WarringStates.User;
 
 namespace WarringStates.Net;
 

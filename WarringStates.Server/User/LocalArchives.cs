@@ -2,13 +2,15 @@
 using LocalUtilities.SimpleScript.Serialization;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WarringStates.User;
+namespace WarringStates.Server.User;
 
-public static class ArchiveManager
+public static class LocalArchives
 {
-    static string RegisterPath => ArchiveInfo.RegisterPath;
+    public static string RootPath { get; } = Directory.CreateDirectory(nameof(Archives)).FullName;
 
-    static List<ArchiveInfo> Saves { get; set; } = [];
+    static string RegisterPath { get; } = Path.Combine(RootPath, nameof(Archives));
+
+    static List<ArchiveInfo> Archives { get; set; } = [];
     //[
     //new("测试存档中文1"),
     //];
@@ -29,23 +31,23 @@ public static class ArchiveManager
     {
         try
         {
-            Saves = SerializeTool.LoadFromSimpleScript<ArchiveInfo>(nameof(Saves), RegisterPath).ToList();
+            Archives = SerializeTool.LoadFromSimpleScript<ArchiveInfo>(nameof(Archives), RegisterPath).ToList();
         }
         catch
         {
             Save();
         }
-        return Saves;
+        return Archives;
     }
 
-    public static int Count => Saves.Count;
+    public static int Count => Archives.Count;
 
     public static bool TryGetArchiveInfo(int index, [NotNullWhen(true)] out ArchiveInfo? info)
     {
         info = null;
         if (index < 0 || index >= Count)
             return false;
-        info = Saves[index];
+        info = Archives[index];
         return true;
     }
 
@@ -56,7 +58,7 @@ public static class ArchiveManager
             return false;
         try
         {
-            archive = new Archive().LoadFromSimpleScript(info.GetArchivePath());
+            archive = Archive.Load(info);
             return true;
         }
         catch
@@ -70,10 +72,9 @@ public static class ArchiveManager
         archive = null;
         if (!TryGetArchiveInfo(index, out var info))
             return false;
-        var dir = info.GetArchivePath();
         try
         {
-            archive = new Archive().LoadFromSimpleScript(dir);
+            archive = Archive.Load(info);
             UserException.ThrowIfNotUseable(archive);
             return true;
         }
@@ -87,22 +88,21 @@ public static class ArchiveManager
     public static ArchiveInfo CreateArchive(this AltitudeMapData mapData, string worldName)
     {
         var info = new ArchiveInfo(worldName);
-        Archive.Create(info, mapData).SaveToSimpleScript(false, info.GetArchivePath());
+        Archive.Create(info, mapData).Save();
         var saves = new List<ArchiveInfo>() { info };
-        saves.AddRange(Saves);
-        Saves = saves;
+        saves.AddRange(Archives);
+        Archives = saves;
         Save();
         return info;
     }
 
     public static void Update(this Archive archive)
     {
-        Saves.Remove(archive.Info);
-        archive.Info.UpdateLastSaveTime();
-        archive.SaveToSimpleScript(false, archive.Info.GetArchivePath());
+        Archives.Remove(archive.Info);
+        archive.Save();
         var saves = new List<ArchiveInfo>() { archive.Info };
-        saves.AddRange(Saves);
-        Saves = saves;
+        saves.AddRange(Archives);
+        Archives = saves;
     }
 
 #if DEBUG
@@ -110,11 +110,11 @@ public static class ArchiveManager
     {
         if (!TryGetArchiveInfo(index, out var info))
             return;
-        Saves.Remove(info);
+        Archives.Remove(info);
         info.UpdateLastSaveTime();
         var saves = new List<ArchiveInfo>() { info };
-        saves.AddRange(Saves);
-        Saves = saves;
+        saves.AddRange(Archives);
+        Archives = saves;
     }
 #endif
 
@@ -124,19 +124,19 @@ public static class ArchiveManager
             return false;
         if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
             return false;
-        var path = info.GetArchivePath();
-        if (File.Exists(path))
-            File.Delete(path);
-        path = info.GetThumbnailPath();
-        if (File.Exists(path))
-            File.Delete(path);
-        Saves.Remove(info);
+        var path = info.RootPath;
+        try
+        {
+            Directory.Delete(path, true);
+        }
+        catch { }
+        Archives.Remove(info);
         Save();
         return true;
     }
 
     private static void Save()
     {
-        Saves.SaveToSimpleScript(nameof(Saves), true, RegisterPath);
+        Archives.SaveToSimpleScript(nameof(Archives), true, RegisterPath);
     }
 }

@@ -6,6 +6,7 @@ using LocalUtilities.TypeToolKit.Text;
 using System.Net;
 using System.Text;
 using WarringStates.Net.Common;
+using WarringStates.User;
 
 namespace WarringStates.Net;
 
