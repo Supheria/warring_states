@@ -1,12 +1,12 @@
 ﻿//#define MOUSE_DRAG_FREE
 
 using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
-using WarringStates.Graph;
-using WarringStates.Map;
-using WarringStates.Terrain;
+using WarringStates.Client.Events;
+using WarringStates.Client.Graph;
+using WarringStates.Client.Map;
+using WarringStates.Map.Terrain;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 partial class GamePlane
 {

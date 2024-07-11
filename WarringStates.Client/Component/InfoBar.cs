@@ -1,9 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
-using WarringStates.Map;
+using WarringStates.Client.Map;
 using WarringStates.Map.Terrain;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 public class InfoBar : Displayer
 {

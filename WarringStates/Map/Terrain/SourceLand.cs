@@ -1,8 +1,7 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Map.Terrain;
 
-namespace WarringStates.Terrain;
+namespace WarringStates.Map.Terrain;
 
 public partial class SourceLand : ILand, ISsSerializable
 {

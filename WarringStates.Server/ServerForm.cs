@@ -1,9 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
 using WarringStates.Flow;
-using WarringStates.Map;
 using WarringStates.Net;
-using WarringStates.UI.Component;
+using WarringStates.Server.Component;
 using WarringStates.User;
 
 namespace WarringStates.Server;
@@ -73,7 +71,7 @@ internal class ServerForm : ResizeableForm
 
     private void LoadArchive(Archive archive)
     {
-        Atlas.Relocate(archive);
+        //Atlas.Relocate(archive);
         SpanFlow.Relocate(archive.Info.CurrentSpan);
         LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
         LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SwichFlowState);

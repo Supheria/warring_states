@@ -1,5 +1,3 @@
-using WarringStates.UI;
-
 namespace WarringStates.Server
 {
     internal static class Program

@@ -1,9 +1,10 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
-using WarringStates.Map;
-using WarringStates.UI;
+using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Client.Events;
+using WarringStates.Client.Map;
+using WarringStates.Map.Terrain;
 
-namespace WarringStates.Graph;
+namespace WarringStates.Client.Graph;
 
 partial class LatticeGrid
 {
@@ -83,7 +84,10 @@ partial class LatticeGrid
                 {
                     var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
                     var land = cell.TerrainPoint.GetLand();
-                    count += land.DrawCell(Graphics, cell, DrawRect, BackColor, null);
+                    if (land is SingleLand singleLand)
+                        count += DrawSingleLand(cell, singleLand, null);
+                    else if (land is SourceLand sourceLand)
+                        count += DrawSourceLand(cell, sourceLand);
                 }
             }
 #if DEBUG
@@ -107,7 +111,10 @@ partial class LatticeGrid
                     var cell = new Cell(new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height));
                     var land = cell.TerrainPoint.GetLand();
                     var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
-                    count += land.DrawCell(Graphics, cell, DrawRect, BackColor, lastLand);
+                    if (land is SingleLand singleLand)
+                        count += DrawSingleLand(cell, singleLand, lastLand);
+                    else if (land is SourceLand sourceLand)
+                        count += DrawSourceLand(cell, sourceLand);
                 }
             }
 #if DEBUG
@@ -117,7 +124,63 @@ partial class LatticeGrid
         DrawGuideLine();
     }
 
+    public int DrawSingleLand(Cell cell, SingleLand land, ILand? lastLand)
+    {
+        if (land.Type.Equals(lastLand?.Type))
+            return 0;
+        var count = 0;
+        if (lastLand is SourceLand)
+        {
+            if (cell.RealRect.CutRectInRange(DrawRect, out var r))
+            {
+                Graphics?.FillRectangle(new SolidBrush(BackColor), r.Value);
+                count++;
+            }
+        }
+        if (cell.CenterRealRect.CutRectInRange(DrawRect, out var rect))
+        {
+            Graphics?.FillRectangle(new SolidBrush(land.Color), rect.Value);
+            count++;
+        }
+        return count;
+    }
 
+    public int DrawSourceLand(Cell cell, SourceLand land)
+    {
+        var count = 0;
+        var direction = land[cell.TerrainPoint];
+        if (direction is not Directions.Center)
+        {
+            if (cell.RealRect.CutRectInRange(DrawRect, out var r))
+            {
+                Graphics?.FillRectangle(new SolidBrush(BackColor), r.Value);
+                count++;
+            }
+        }
+        if (GetSourceLandCellRect(direction, cell).CutRectInRange(DrawRect, out var rect))
+        {
+            Graphics?.FillRectangle(new SolidBrush(land.Color), rect.Value);
+            count++;
+        }
+        return count;
+    }
+
+    private static Rectangle GetSourceLandCellRect(Directions direction, Cell cell)
+    {
+        return direction switch
+        {
+            Directions.LeftTop => new(new(cell.CenterRealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Top => new(cell.RealRect.Left, cell.CenterRealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+            Directions.TopRight => new(new(cell.RealRect.Left, cell.CenterRealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Left => new(cell.CenterRealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+            Directions.Center => cell.RealRect,
+            Directions.Right => new(cell.RealRect.Left, cell.RealRect.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
+            Directions.LeftBottom => new(new(cell.CenterRealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+            Directions.Bottom => new(cell.RealRect.Left, cell.RealRect.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
+            Directions.BottomRight => new(new(cell.RealRect.Left, cell.RealRect.Top), CellCenterSizeAddOnePadding),
+            _ => new()
+        };
+    }
 
     private void DrawGuideLine()
     {

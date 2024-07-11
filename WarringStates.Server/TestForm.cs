@@ -1,9 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
-using WarringStates.Events;
 
-namespace WarringStates.UI;
+namespace WarringStates.Server;
 
 internal class TestForm : ResizeableForm
 {

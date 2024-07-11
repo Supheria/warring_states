@@ -3,23 +3,22 @@ using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Text;
 using WarringStates.Map.Terrain;
-using WarringStates.Terrain;
 
 namespace WarringStates.Map;
 
-internal class LandMap()
+public class LandMap()
 {
-    internal Size Size { get; set; }
+    public Size Size { get; set; }
 
-    internal int Width => Size.Width;
+    public int Width => Size.Width;
 
-    internal int Height => Size.Height;
+    public int Height => Size.Height;
 
     Dictionary<Coordinate, ILand> LandPoints { get; set; } = [];
 
     Dictionary<Enum, int> LandCount { get; } = [];
 
-    internal ILand this[Coordinate point]
+    public ILand this[Coordinate point]
     {
         get
         {
@@ -29,7 +28,7 @@ internal class LandMap()
         }
     }
 
-    internal string GetLandTypeCount(Enum type)
+    public string GetLandTypeCount(Enum type)
     {
         var total = LandCount.Values.Sum();
         if (LandCount.TryGetValue(type, out var count))
@@ -44,7 +43,7 @@ internal class LandMap()
             return "0";
     }
 
-    internal void Relocate(AltitudeMap altitudeMap, List<SourceLand> sourceLands)
+    public void Relocate(AltitudeMap altitudeMap, List<SourceLand> sourceLands)
     {
         Relocate(altitudeMap);
         foreach (var sourceLand in sourceLands)
@@ -62,7 +61,7 @@ internal class LandMap()
         }
     }
 
-    internal void Relocate(AltitudeMap altitudeMap)
+    public void Relocate(AltitudeMap altitudeMap)
     {
         LandPoints.Clear();
         LandCount.Clear();

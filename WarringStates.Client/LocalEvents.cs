@@ -1,9 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.EventProcess;
 using System.Text;
-using WarringStates.UI;
 
-namespace WarringStates.Events;
+namespace WarringStates.Client;
 
 public static class LocalEvents
 {

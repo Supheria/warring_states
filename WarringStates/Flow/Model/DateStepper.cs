@@ -1,6 +1,6 @@
 ﻿namespace WarringStates.Flow.Model;
 
-internal class DateStepper
+public class DateStepper
 {
     Year Year { get; set; }
 
@@ -10,7 +10,7 @@ internal class DateStepper
 
     DateType DateType { get; set; }
 
-    internal DateStepper()
+    public DateStepper()
     {
         Year = new(1);
         Month = new(Year.IsLeap, 1);
@@ -18,7 +18,7 @@ internal class DateStepper
         DateType = DateType.Monday;
     }
 
-    internal void SetStartSpan(int spanTo01_01_01)
+    public void SetStartSpan(int spanTo01_01_01)
     {
         Year = new(1);
         Month = new(Year.IsLeap, 1);
@@ -28,7 +28,7 @@ internal class DateStepper
             StepOn();
     }
 
-    internal void StepOn()
+    public void StepOn()
     {
         if (!Day.StepOn())
         {
@@ -45,7 +45,7 @@ internal class DateStepper
             DateType++;
     }
 
-    internal Date GetDate()
+    public Date GetDate()
     {
         return new(Year.Value, Month.Value, Day.Value, DateType);
     }

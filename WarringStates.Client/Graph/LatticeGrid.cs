@@ -1,8 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Events;
+using WarringStates.Client.Events;
 
-namespace WarringStates.Graph;
+namespace WarringStates.Client.Graph;
 
 public partial class LatticeGrid
 {

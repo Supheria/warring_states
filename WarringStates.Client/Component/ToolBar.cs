@@ -1,9 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Events;
+using WarringStates.Client.Events;
 using WarringStates.Flow;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 public class ToolBar : Displayer
 {

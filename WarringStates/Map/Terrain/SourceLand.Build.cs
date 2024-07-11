@@ -1,15 +1,13 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Map;
-using WarringStates.Map.Terrain;
 
-namespace WarringStates.Terrain;
+namespace WarringStates.Map.Terrain;
 
 partial class SourceLand
 {
-    public static bool TryBuild(Coordinate site, Types targetType, out SourceLand? sourceLand)
+    public static bool TryBuild(Coordinate site, LandMap landMap, Types targetType, out SourceLand? sourceLand)
     {
         sourceLand = null;
-        if (!GetTerrains(site, out var counts, out var points))
+        if (!GetTerrains(site, landMap, out var counts, out var points))
             return false;
         if (!CanBuild(counts, targetType))
             return false;
@@ -36,7 +34,7 @@ partial class SourceLand
                 ]);
     }
 
-    private static bool GetTerrains(Coordinate site, out Dictionary<SingleLand.Types, int> counts, out Dictionary<Coordinate, Directions> points)
+    private static bool GetTerrains(Coordinate site, LandMap landMap, out Dictionary<SingleLand.Types, int> counts, out Dictionary<Coordinate, Directions> points)
     {
         points = [];
         counts = new()
@@ -53,8 +51,8 @@ partial class SourceLand
         {
             for (var j = 0; j < 3; j++)
             {
-                var point = new Coordinate(left + i, top + j).SetPointWithinTerrainMap();
-                var land = point.GetLand();
+                var point = SetPointWithinTerrainMap(new(left + i, top + j));
+                var land = landMap[point];
                 if (land is not SingleLand singleLand)
                     return false;
                 points[point] = GetDirectionByOrder(directionOrder++);
@@ -77,6 +75,16 @@ partial class SourceLand
                 8 => Directions.BottomRight,
                 _ => Directions.None,
             };
+        }
+        Coordinate SetPointWithinTerrainMap(Coordinate point)
+        {
+            var x = point.X % landMap.Width;
+            if (x < 0)
+                x += landMap.Width;
+            var y = point.Y % landMap.Height;
+            if (y < 0)
+                y += landMap.Height;
+            return new(x, y);
         }
     }
 

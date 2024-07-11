@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 public class Settings : Displayer
 {

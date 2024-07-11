@@ -2,7 +2,7 @@
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.User;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Server.Component;
 
 partial class ArchiveSelector
 {

@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 
-namespace WarringStates.Events;
+namespace WarringStates.Client.Events;
 
 internal class GridRelocatedArgs(Rectangle drawRect, Coordinate origin)
 {

@@ -15,7 +15,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Component\ArchiveSelector.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Component\ArchiveSelector.Op.cs" />
+    <Compile Update="Component\ArchiveSelector.Roll.cs" />
     <Compile Update="ServerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="TestForm.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

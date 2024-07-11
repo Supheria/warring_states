@@ -1,3 +1,6 @@
+using WarringStates.Client.Map;
+using WarringStates.User;
+
 namespace WarringStates.Client
 {
     internal static class Program
@@ -11,7 +14,8 @@ namespace WarringStates.Client
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            new ClientForm("client 1").Show();
+            //new ClientForm("client 1").Show();
+            new TestForm() { TopMost = true }.Show();
             Application.Run(new ClientForm("client 2"));
         }
     }

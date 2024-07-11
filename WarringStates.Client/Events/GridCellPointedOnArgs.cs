@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 
-namespace WarringStates.Events;
+namespace WarringStates.Client.Events;
 
 public sealed class GridCellPointedOnArgs(Coordinate terrainPoint, Directions realPointOnPart)
 {

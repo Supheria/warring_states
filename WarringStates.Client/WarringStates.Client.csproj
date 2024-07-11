@@ -18,8 +18,28 @@
     <Compile Update="ClientForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Component\GamePlane.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Component\GamePlane.Op.cs" />
     <Compile Update="GamePlayControl.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Component\InfoBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Component\Overview.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Component\Overview.Op.cs" />
+    <Compile Update="Component\Settings.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Component\ToolBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="TestForm.cs">
+      <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
 

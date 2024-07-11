@@ -1,11 +1,10 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Events;
 using WarringStates.Flow.Model;
 using WarringStates.User;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Server.Component;
 
 public partial class ArchiveSelector : Displayer
 {

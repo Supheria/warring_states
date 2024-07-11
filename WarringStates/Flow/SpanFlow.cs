@@ -1,5 +1,4 @@
-﻿using WarringStates.Events;
-using WarringStates.Flow.Model;
+﻿using WarringStates.Flow.Model;
 
 namespace WarringStates.Flow;
 
@@ -21,7 +20,7 @@ public class SpanFlow : Flower
 
     public void Relocate(int startSpan)
     {
-        LocalEvents.Hub.ClearListener(LocalEvents.Flow.SwichFlowState);
+        //LocalEvents.Hub.ClearListener(LocalEvents.Flow.SwichFlowState);
         Stop();
         CurrentSpan = startSpan;
         DateStepper.SetStartSpan(CurrentSpan);
@@ -29,7 +28,7 @@ public class SpanFlow : Flower
 
     private void TickOn()
     {
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, new SpanFlowTickOnArgs(CurrentSpan, CurrentDate));
+        //LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, new SpanFlowTickOnArgs(CurrentSpan, CurrentDate));
         CurrentSpan++;
         DateStepper.StepOn();
         Timer.Stop();
@@ -40,16 +39,16 @@ public class SpanFlow : Flower
 
     private void Start()
     {
-        LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Start);
-        LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Stop);
+        //LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Start);
+        //LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Stop);
         KeepFlow = true;
         Timer.Start();
     }
 
     private void Stop()
     {
-        LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Stop);
-        LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Start);
+        //LocalEvents.Hub.TryRemoveListener(LocalEvents.Flow.SwichFlowState, Stop);
+        //LocalEvents.Hub.TryAddListener(LocalEvents.Flow.SwichFlowState, Start);
         KeepFlow = false;
     }
 }

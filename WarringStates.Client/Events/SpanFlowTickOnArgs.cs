@@ -1,6 +1,6 @@
 ﻿using WarringStates.Flow;
 
-namespace WarringStates.Events;
+namespace WarringStates.Client.Events;
 
 public class SpanFlowTickOnArgs(int currentSpan, Date currentDate)
 {

@@ -1,5 +1,4 @@
-﻿using WarringStates.Events;
-using Timer = System.Windows.Forms.Timer;
+﻿using Timer = System.Windows.Forms.Timer;
 
 namespace WarringStates.Flow;
 
@@ -13,7 +12,7 @@ public class AnimateFlow : Flower
 
     private void TickOn()
     {
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.AnimateFlowTickOn);
+        //LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.AnimateFlowTickOn);
         Timer.Stop();
         Timer.Interval = GetInterval();
         Timer.Start();

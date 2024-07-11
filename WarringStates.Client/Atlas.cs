@@ -1,12 +1,13 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Map;
 using WarringStates.Map.Terrain;
 using WarringStates.User;
 
-namespace WarringStates.Map;
+namespace WarringStates.Client.Map;
 
 public static class Atlas
 {
-    static LandMap LandMap { get; } = new();
+    public static LandMap LandMap { get; } = new();
 
     public static int Width => LandMap.Width;
 

@@ -2,11 +2,11 @@
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Drawing.Drawing2D;
-using WarringStates.Events;
-using WarringStates.Graph;
-using WarringStates.Map;
+using WarringStates.Client.Events;
+using WarringStates.Client.Graph;
+using WarringStates.Client.Map;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 public partial class Overview : Displayer
 {

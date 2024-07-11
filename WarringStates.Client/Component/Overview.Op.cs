@@ -1,9 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Events;
-using WarringStates.Map;
+using WarringStates.Client.Map;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 partial class Overview
 {

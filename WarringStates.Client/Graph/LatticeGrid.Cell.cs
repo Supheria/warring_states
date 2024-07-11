@@ -1,7 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Map;
+using WarringStates.Client.Map;
 
-namespace WarringStates.Graph;
+namespace WarringStates.Client.Graph;
 
 partial class LatticeGrid
 {

@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 
-namespace WarringStates.Graph;
+namespace WarringStates.Client.Graph;
 
 public class GridData : ISsSerializable
 {

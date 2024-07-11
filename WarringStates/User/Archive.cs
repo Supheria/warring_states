@@ -2,7 +2,7 @@
 using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Map;
-using WarringStates.Terrain;
+using WarringStates.Map.Terrain;
 
 namespace WarringStates.User;
 

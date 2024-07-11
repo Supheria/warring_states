@@ -1,4 +1,4 @@
-﻿namespace WarringStates.Events;
+﻿namespace WarringStates.Client.Events;
 
 public class GridToRelocateArgs(Image source, Color backColor)
 {

@@ -1,7 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
+using WarringStates.Client.Events;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Client.Component;
 
 public partial class GamePlane : Displayer
 {

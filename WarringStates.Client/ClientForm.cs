@@ -1,7 +1,9 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Events;
+using WarringStates.Client.Map;
+using WarringStates.Map.Terrain;
 using WarringStates.Net;
+using WarringStates.User;
 
 namespace WarringStates.Client;
 
@@ -152,6 +154,7 @@ public class ClientForm : ResizeableForm
             Password.Enabled = true;
             Update();
         });
+        GamePlay.FinishGame();
     }
 
     private void Client_OnConnected()
@@ -165,7 +168,13 @@ public class ClientForm : ResizeableForm
             Password.Enabled = false;
             Update();
         });
-        //GamePlay.StartGame();
+        // TODO: for test
+        ArchiveManager.LoadArchive(0, out var archive);
+        Atlas.Relocate(archive);
+        SourceLand.TryBuild(new(22, 22), Atlas.LandMap, SourceLand.Types.TerraceLand, out var s1);
+        archive.SourceLands.Add(s1);
+        Atlas.Relocate(archive);
+        GamePlay.StartGame();
     }
 
     private void ClientForm_OnSaveForm(SsSerializer serializer)

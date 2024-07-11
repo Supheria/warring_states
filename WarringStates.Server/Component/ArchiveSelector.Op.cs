@@ -1,9 +1,8 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using WarringStates.Events;
 using WarringStates.User;
 
-namespace WarringStates.UI.Component;
+namespace WarringStates.Server.Component;
 
 partial class ArchiveSelector
 {

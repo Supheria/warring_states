@@ -1,7 +1,6 @@
-﻿using WarringStates.Events;
-using WarringStates.Graph;
-using WarringStates.Map;
-using WarringStates.UI.Component;
+﻿using WarringStates.Client.Component;
+using WarringStates.Client.Graph;
+using WarringStates.Client.Map;
 using WarringStates.User;
 
 namespace WarringStates.Client;
@@ -45,21 +44,24 @@ public partial class GamePlayControl : UserControl
             Settings.EnableListener();
             ToolBar.EnableListener();
             GamePlane.EnableListener();
-            //Overview.EnableListener();
+            Overview.EnableListener();
             InfoBar.EnableListener();
             DrawClient();
         });
     }
 
-    private void FinishGame()
+    public void FinishGame()
     {
-        Controls.Clear();
-        Settings.DisableListener();
-        ToolBar.DisableListener();
-        GamePlane.DisableListener();
-        Overview.DisableListener();
-        InfoBar.DisableListener();
-        DrawClient();
+        BeginInvoke(() =>
+        {
+            Controls.Clear();
+            Settings.DisableListener();
+            ToolBar.DisableListener();
+            GamePlane.DisableListener();
+            Overview.DisableListener();
+            InfoBar.DisableListener();
+            DrawClient();
+        });
     }
 
     private void KeyPressed(object? sender, KeyEventArgs e)

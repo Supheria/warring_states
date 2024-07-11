@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral.Convert;
-using WarringStates.Events;
 
 namespace WarringStates.Map.Terrain;
 
@@ -30,7 +29,7 @@ public class Product : ISsSerializable
         Type = type;
         Amount = amount;
         Increment = increment;
-        LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, IncrementTickOn);
+        //LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, IncrementTickOn);
     }
 
     public Product() : this(Types.None, 0, 0)
@@ -38,14 +37,14 @@ public class Product : ISsSerializable
 
     }
 
-    private void IncrementTickOn(SpanFlowTickOnArgs args)
-    {
-        if (++CurrentTickOnTimes > IncrementTickOnTimes)
-        {
-            Amount += Increment;
-            CurrentTickOnTimes = 0;
-        }
-    }
+    //private void IncrementTickOn(SpanFlowTickOnArgs args)
+    //{
+    //    if (++CurrentTickOnTimes > IncrementTickOnTimes)
+    //    {
+    //        Amount += Increment;
+    //        CurrentTickOnTimes = 0;
+    //    }
+    //}
 
     public void Serialize(SsSerializer serializer)
     {
