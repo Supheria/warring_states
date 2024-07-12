@@ -19,15 +19,15 @@ partial class ClientService
             var filePath = GetFileRepoPath(dirName, fileName);
             if (!File.Exists(filePath))
                 throw new NetException(ServiceCode.FileNotExist, filePath);
-            //var task = Task.Run(() =>
-            //{
-            //    using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            //    return fileStream.ToMd5HashString();
-            //});
-            var fileArgs = new FileTransferArgs(dirName, fileName);
-            //{
-            //    Md5Value = await task,
-            //};
+            var task = Task.Run(() =>
+            {
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return fileStream.ToMd5HashString();
+            });
+            var fileArgs = new FileTransferArgs(dirName, fileName)
+            {
+                Md5Value = await task,
+            };
             HandleUploadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Request)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
@@ -44,15 +44,15 @@ partial class ClientService
         try
         {
             var filePath = GetFileRepoPath(dirName, fileName);
-            //var task = Task.Run(() =>
-            //{
-            //    using var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-            //    return fileStream.ToMd5HashString();
-            //});
-            var fileArgs = new FileTransferArgs(dirName, fileName);
-            //{
-            //    Md5Value = await task,
-            //};
+            var task = Task.Run(() =>
+            {
+                using var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                return fileStream.ToMd5HashString();
+            });
+            var fileArgs = new FileTransferArgs(dirName, fileName)
+            {
+                Md5Value = await task,
+            };
             HandleDownloadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Request)
                 .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
@@ -160,9 +160,7 @@ partial class ClientService
         {
             var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
-            if (File.Exists(filePath))
-                filePath = filePath.RenamePathByDateTime();
-            //File.Delete(filePath);
+            File.Delete(filePath);
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             var autoFile = new AutoDisposeFileStream(fileStream, fileArgs.StartTime);
             autoFile.OnDisposed += () => this.HandleLog(AutoFiles.Count.ToString());

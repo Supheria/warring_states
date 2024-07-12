@@ -49,14 +49,14 @@ partial class ServerService
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
             if (File.Exists(filePath))
             {
-                //var task = Task.Run(() =>
-                //{
-                //    using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                //    return fileStream.ToMd5HashString();
-                //});
-                //if (await task == fileArgs.Md5Value)
-                //    throw new NetException(ServiceCode.SameVersionAlreadyExist);
-                //File.Delete(filePath);
+                var task = Task.Run(() =>
+                {
+                    using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    return fileStream.ToMd5HashString();
+                });
+                if (await task == fileArgs.Md5Value)
+                    throw new NetException(ServiceCode.SameVersionAlreadyExist);
+                File.Delete(filePath);
                 filePath = filePath.RenamePathByDateTime();
             }
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
