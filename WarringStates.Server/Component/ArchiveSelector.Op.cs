@@ -1,7 +1,6 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
 using WarringStates.Server.User;
-using WarringStates.User;
 
 namespace WarringStates.Server.Component;
 

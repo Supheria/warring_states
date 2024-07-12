@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.IocpNet;
 using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Net;

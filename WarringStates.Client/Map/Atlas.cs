@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Map;
 using WarringStates.Map.Terrain;
-using WarringStates.User;
 
 namespace WarringStates.Client.Map;
 

@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral.Convert;
 using LocalUtilities.TypeToolKit.Text;
-using WarringStates.User;
 
 namespace WarringStates.Server.User;
 

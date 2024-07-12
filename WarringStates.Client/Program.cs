@@ -1,6 +1,3 @@
-using WarringStates.Client.Map;
-using WarringStates.User;
-
 namespace WarringStates.Client
 {
     internal static class Program

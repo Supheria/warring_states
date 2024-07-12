@@ -2,7 +2,6 @@
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeGeneral.Convert;
-using System.Collections.Concurrent;
 using System.Text;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -100,7 +99,7 @@ public abstract class Service : INetLogger
     }
 
     public abstract void DoCommand(CommandReceiver receiver);
-    
+
     private void DoCommandError(CommandReceiver receiver)
     {
         try
@@ -121,14 +120,14 @@ public abstract class Service : INetLogger
     }
 
     private void SendAsync(CommandSender sender)
-    { 
+    {
         var packet = sender.GetPacket();
         var timeStamp = sender.TimeStamp;
         var commandInfo = new byte[2] { sender.CommandCode, sender.OperateCode };
         sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Start, commandInfo, 0, 2);
         Protocol.SendAsync(sender);
         var offset = 0;
-        while (offset < packet.Length) 
+        while (offset < packet.Length)
         {
             var count = Math.Min(packet.Length - offset, CommandLengthMax);
             sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Continue, packet, offset, count);

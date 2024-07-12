@@ -1,7 +1,6 @@
 ﻿using WarringStates.Client.Component;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
-using WarringStates.User;
 
 namespace WarringStates.Client;
 

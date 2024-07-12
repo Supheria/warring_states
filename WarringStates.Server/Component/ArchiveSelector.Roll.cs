@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Server.User;
-using WarringStates.User;
 
 namespace WarringStates.Server.Component;
 

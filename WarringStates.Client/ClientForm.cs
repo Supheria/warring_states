@@ -1,9 +1,6 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Map;
 using WarringStates.Client.Net;
-using WarringStates.Map.Terrain;
-using WarringStates.User;
 
 namespace WarringStates.Client;
 
