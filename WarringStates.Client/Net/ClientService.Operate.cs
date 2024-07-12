@@ -54,29 +54,29 @@ partial class ClientService
 
     private void DoMessage(CommandReceiver receiver)
     {
-        try
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Request)
         {
-            switch ((OperateCode)receiver.OperateCode)
-            {
-                case OperateCode.Request:
-                    HandleMessage(receiver);
-                    var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback)
-                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
-                    CallbackSuccess(sender);
-                    break;
-                case OperateCode.Callback:
-                    ReceiveCallback(receiver);
-                    HandleMessage(receiver);
-                    break;
-
-            }
+            HandleMessage(receiver);
+            var message = receiver.Data;
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, message, 0, message.Length)
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+            CallbackSuccess(sender);
         }
-        catch (Exception ex)
+        else if (operateCode is OperateCode.Callback)
         {
-            this.HandleException(ex);
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback);
-            CallbackFailure(sender, ex);
+            ReceiveCallback(receiver);
+            HandleMessage(receiver);
+        }
+        else if (operateCode is OperateCode.Broadcast)
+        {
+            HandleMessage(receiver);
+            var message = receiver.Data;
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, message, 0, message.Length)
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+            CallbackSuccess(sender);
         }
     }
 

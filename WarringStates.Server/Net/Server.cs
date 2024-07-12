@@ -25,7 +25,7 @@ internal class Server : INetLogger
     {
         return new StringBuilder()
             .Append(SignTable.OpenParenthesis)
-            .Append("host")
+            .Append(nameof(Server))
             .Append(SignTable.CloseParenthesis)
             .Append(SignTable.Space)
             .Append(message)
@@ -52,7 +52,7 @@ internal class Server : INetLogger
         }
         catch (Exception ex)
         {
-            HandleException(ex);
+            this.HandleException(ex);
         }
     }
 
@@ -70,7 +70,7 @@ internal class Server : INetLogger
         }
         catch (Exception ex)
         {
-            HandleException(ex);
+            this.HandleException(ex);
         }
     }
 
@@ -97,7 +97,7 @@ internal class Server : INetLogger
         service.OnLog += this.HandleLog;
         service.OnLogined += () => AddService(service);
         service.OnClosed += () => RemoveService(service);
-        service.OnCommand += HandleOperate;
+        service.OnRelayCommand += RelayCommand;
         service.Accept(acceptArgs.AcceptSocket);
     ACCEPT:
         if (acceptArgs.SocketError is SocketError.Success)
@@ -124,25 +124,24 @@ internal class Server : INetLogger
         HandleUpdateConnection();
     }
 
-    private void HandleOperate(CommandReceiver receiver)
+    private void RelayCommand(CommandReceiver receiver)
     {
         try
         {
-            var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
+            var userName = (OperateCode)receiver.OperateCode switch
+            {
+                OperateCode.Request => receiver.GetArgs(ServiceKey.ReceiveUser),
+                OperateCode.Callback => receiver.GetArgs(ServiceKey.SendUser),
+                _ => "",
+            };
             if (!UserMap.TryGetValue(userName, out var user))
                 throw new NetException(ServiceCode.UserNotExist);
             user.DoCommand(receiver);
         }
         catch (Exception ex)
         {
-            HandleException(ex);
+            this.HandleException(ex);
         }
-    }
-
-    private void HandleException(Exception ex)
-    {
-        // TODO:
-        this.HandleLog(ex.Message);
     }
 
     public void BroadcastMessage(string message)

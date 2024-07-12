@@ -9,4 +9,5 @@ public enum OperateCode : byte
     Finish,
     Callback,
     JoinArchive,
+    Broadcast,
 }

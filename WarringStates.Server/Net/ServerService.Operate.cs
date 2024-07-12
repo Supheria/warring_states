@@ -7,7 +7,7 @@ namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    public NetEventHandler<CommandReceiver>? OnCommand;
+    public NetEventHandler<CommandReceiver>? OnRelayCommand;
 
     private void DoHeartBeats(CommandReceiver receiver)
     {
@@ -42,9 +42,9 @@ partial class ServerService
         try
         {
             var count = WriteU8Buffer(message, out var data);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, count)
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Broadcast, data, 0, count)
                 .AppendArgs(ServiceKey.ReceiveUser, UserInfo?.Name ?? "")
-                .AppendArgs(ServiceKey.SendUser, "Server");
+                .AppendArgs(ServiceKey.SendUser, nameof(Server));
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -55,48 +55,41 @@ partial class ServerService
 
     private void DoMessage(CommandReceiver receiver)
     {
-        switch ((OperateCode)receiver.OperateCode)
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Request)
         {
-            case OperateCode.Request:
-                try
-                {
-                    var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
-                    if (userName != UserInfo?.Name)
-                    {
-                        OnCommand?.Invoke(receiver);
-                        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback)
-                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
-                        CallbackSuccess(sender);
-                    }
-                    else
-                    {
-                        HandleMessage(receiver);
-                        var data = receiver.Data;
-                        var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Request, data, 0, data.Length)
-                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
-                        SendCommand(sender);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    this.HandleException(ex);
-                    var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback);
-                    CallbackFailure(sender, ex);
-                }
-                break;
-            case OperateCode.Callback:
-                try
-                {
-                    ReceiveCallback(receiver);
-                    HandleMessage(receiver);
-                }
-                catch (Exception ex)
-                {
-                    this.HandleException(ex);
-                }
-                break;
+            if (UserInfo?.Name == receiver.GetArgs(ServiceKey.ReceiveUser))
+            {
+                HandleMessage(receiver);
+                var message = receiver.Data;
+                var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Request, message, 0, message.Length)
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                SendCommand(sender);
+            }
+            else
+                OnRelayCommand?.Invoke(receiver);
+        }
+        else if (operateCode is OperateCode.Callback)
+        {
+            if (UserInfo?.Name == receiver.GetArgs(ServiceKey.SendUser))
+            {
+                var message = receiver.Data;
+                var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, message, 0, message.Length)
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                CallbackSuccess(sender);
+            }
+            else
+            {
+                ReceiveCallback(receiver);
+                OnRelayCommand?.Invoke(receiver);
+            }
+        }
+        else if (operateCode is OperateCode.Broadcast)
+        {
+            ReceiveCallback(receiver);
+            HandleMessage(receiver);
         }
     }
 

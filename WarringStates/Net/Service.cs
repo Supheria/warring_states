@@ -277,7 +277,7 @@ public abstract class Service : INetLogger
             .Append(receiver.GetArgs(ServiceKey.SendUser))
             .Append(SignTable.Sub)
             .Append(SignTable.Greater)
-            .Append(UserInfo?.Name)
+            .Append(receiver.GetArgs(ServiceKey.ReceiveUser))
             .Append(SignTable.Colon)
             .Append(SignTable.Space)
             .Append(ReadU8Buffer(receiver.Data))

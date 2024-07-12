@@ -40,8 +40,6 @@ internal partial class ServerService : Service
         catch (Exception ex)
         {
             this.HandleException(ex);
-            var sender = new CommandSender(receiver.TimeStamp, (byte)CommandCode.CommandError, (byte)OperateCode.None);
-            CallbackFailure(sender, ex);
         }
     }
 
