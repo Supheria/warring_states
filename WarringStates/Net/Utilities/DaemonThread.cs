@@ -1,4 +1,4 @@
-﻿namespace WarringStates.Net.Common;
+﻿namespace WarringStates.Net.Utilities;
 
 public class DaemonThread
 {

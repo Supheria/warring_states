@@ -13,4 +13,5 @@ public enum CommandCode : byte
     UploadFile,
     Archive,
     Message,
+    UpdateUserList,
 }

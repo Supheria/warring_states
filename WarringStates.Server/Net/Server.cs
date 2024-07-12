@@ -97,7 +97,7 @@ internal class Server : INetLogger
         service.OnLog += this.HandleLog;
         service.OnLogined += () => AddService(service);
         service.OnClosed += () => RemoveService(service);
-        //service.OnOperate += HandleOperate;
+        service.OnCommand += HandleOperate;
         service.Accept(acceptArgs.AcceptSocket);
     ACCEPT:
         if (acceptArgs.SocketError is SocketError.Success)
@@ -118,25 +118,26 @@ internal class Server : INetLogger
     private void RemoveService(ServerService service)
     {
         if (service.UserInfo is null || service.UserInfo.Name is "" ||
-            !UserMap.TryRemove(service.UserInfo.Name, out _))
+            !(UserMap.TryGetValue(service.UserInfo.Name, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
+        UserMap.TryRemove(service.UserInfo.Name, out _);
         HandleUpdateConnection();
     }
 
-    //private void HandleOperate(CommandReceiver receiver)
-    //{
-    //    try
-    //    {
-    //        var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
-    //        if (!UserMap.TryGetValue(userName, out var user))
-    //            throw new NetException(ServiceCode.UserNotExist);
-    //        user.DoOperate(receiver);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        HandleException(ex);
-    //    }
-    //}
+    private void HandleOperate(CommandReceiver receiver)
+    {
+        try
+        {
+            var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
+            if (!UserMap.TryGetValue(userName, out var user))
+                throw new NetException(ServiceCode.UserNotExist);
+            user.DoCommand(receiver);
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
+        }
+    }
 
     private void HandleException(Exception ex)
     {
@@ -152,13 +153,14 @@ internal class Server : INetLogger
 
     public void BroadcastUserList()
     {
-        //foreach (var service in UserMap.Values)
-        //    service.UpdateUserList(UserMap.Keys.ToArray());
+        var users = UserMap.Keys.ToArray();
+        foreach (var service in UserMap.Values)
+            service.UpdateUserList(users);
     }
 
     public void HandleUpdateConnection()
     {
-        //OnConnectionCountChange?.Invoke(UserMap.Sum(g => g.Value.Count));
-        //BroadcastUserList();
+        OnConnectionCountChange?.Invoke(UserMap.Count);
+        BroadcastUserList();
     }
 }

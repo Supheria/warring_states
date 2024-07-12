@@ -112,7 +112,7 @@ public class ClientForm : ResizeableForm
         Client.OnLogined += Client_OnConnected;
         Client.OnClosed += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
-        //Client.OnUpdateUserList += Client_OnUpdateUserList;
+        Client.OnUpdateUserList += Client_OnUpdateUserList;
 
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
     }
@@ -129,15 +129,15 @@ public class ClientForm : ResizeableForm
 
     private void SendButton_Click(object? sender, EventArgs e)
     {
-        Client.SendMessage(SendBox.Text, "");
-        //var index = UserList.SelectedIndex;
-        //if (index is -1)
-        //{
-        //    UpdateMessage("no selected user to send message");
-        //    return;
-        //}
-        //foreach (var item in UserList.SelectedItems)
-        //    Client.SendMessage(SendBox.Text, (string)item);
+        //Client.SendMessage(SendBox.Text, "");
+        var index = UserList.SelectedIndex;
+        if (index is -1)
+        {
+            UpdateMessage("no selected user to send message");
+            return;
+        }
+        foreach (var item in UserList.SelectedItems)
+            Client.SendMessage(SendBox.Text, (string)item);
     }
 
     private void Client_OnUpdateUserList(string[] userList)

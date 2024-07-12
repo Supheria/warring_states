@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WarringStates.Common;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Common;
+namespace WarringStates.Net.Utilities;
 
 internal abstract class CommandWaitingHelper() : AutoDisposeItem(ConstTabel.CommandWaitingIntervalMilliseconds), INetLogger
 {

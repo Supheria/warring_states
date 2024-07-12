@@ -25,6 +25,24 @@ public partial class ClientService : Service
         DoCommands[CommandCode.UploadFile] = DoUploadFile;
         DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
         DoCommands[CommandCode.Message] = DoMessage;
+        DoCommands[CommandCode.UpdateUserList] = DoUpdateUserList;
+    }
+
+    public override void DoCommand(CommandReceiver receiver)
+    {
+        try
+        {
+            var commandCode = (CommandCode)receiver.CommandCode;
+            if (!DoCommands.TryGetValue(commandCode, out var doCommand))
+                throw new NetException(ServiceCode.UnknownCommand, commandCode.ToString());
+            doCommand(receiver);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+            var sender = new CommandSender(receiver.TimeStamp, (byte)CommandCode.CommandError, (byte)OperateCode.None);
+            CallbackFailure(sender, ex);
+        }
     }
 
     public override string GetLog(string message)

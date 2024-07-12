@@ -5,11 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WarringStates.Net.Common;
+using LocalUtilities.TypeGeneral;
 
 namespace WarringStates.Client.Net;
 
 partial class ClientService
 {
+    public event NetEventHandler<string[]>? OnUpdateUserList;
+
     private void DoHeartBeats(CommandReceiver receiver)
     {
         try
@@ -44,8 +47,7 @@ partial class ClientService
         {
             var count = WriteU8Buffer(message, out var data);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, count)
-                .AppendArgs(ServiceKey.ReceiveUser, UserInfo?.Name ?? "")
-                //.AppendArgs(ServiceKey.SendUser, sendUser);
+                .AppendArgs(ServiceKey.ReceiveUser, sendUser)
                 .AppendArgs(ServiceKey.SendUser, UserInfo?.Name ?? "");
             SendCommand(sender);
         }
@@ -64,7 +66,8 @@ partial class ClientService
                 case OperateCode.Request:
                     HandleMessage(receiver);
                     var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback)
-                        .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
                     CallbackSuccess(sender);
                     break;
                 case OperateCode.Callback:
@@ -80,5 +83,13 @@ partial class ClientService
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback);
             CallbackFailure(sender, ex);
         }
+    }
+
+    private void DoUpdateUserList(CommandReceiver receiver)
+    {
+        var userList = ReadU8Buffer(receiver.Data).ToArray();
+        OnUpdateUserList?.Invoke(userList);
+        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.None);
+        CallbackSuccess(sender);
     }
 }

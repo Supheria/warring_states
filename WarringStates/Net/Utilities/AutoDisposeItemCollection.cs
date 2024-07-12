@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WarringStates.Net.Common;
+namespace WarringStates.Net.Utilities;
 
 public class AutoDisposeItemCollection<T> : ICollection<T> where T : AutoDisposeItem
 {
@@ -17,10 +17,10 @@ public class AutoDisposeItemCollection<T> : ICollection<T> where T : AutoDispose
 
     public bool IsReadOnly => false;
 
-    public T this[DateTime key] 
+    public T this[DateTime key]
     {
-        get => Items[key]; 
-        set => Items[key] = value; 
+        get => Items[key];
+        set => Items[key] = value;
     }
 
     public bool TryAdd(T item)

@@ -6,11 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WarringStates.Net.Common;
+using LocalUtilities.TypeGeneral;
 
 namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
+    public NetEventHandler<CommandReceiver>? OnCommand;
+
     private void DoHeartBeats(CommandReceiver receiver)
     {
         var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
@@ -62,10 +65,24 @@ partial class ServerService
             case OperateCode.Request:
                 try
                 {
-                    HandleMessage(receiver);
-                    var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback)
-                        .AppendArgs(ServiceKey.SendUser, "Server");
-                    CallbackSuccess(sender);
+                    var userName = receiver.GetArgs(ServiceKey.ReceiveUser);
+                    if (userName != UserInfo?.Name)
+                    {
+                        OnCommand?.Invoke(receiver);
+                        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback)
+                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                        CallbackSuccess(sender);
+                    }
+                    else
+                    {
+                        HandleMessage(receiver);
+                        var data = receiver.Data;
+                        var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Request, data, 0, data.Length)
+                            .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
+                            .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                        SendCommand(sender);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -77,7 +94,6 @@ partial class ServerService
             case OperateCode.Callback:
                 try
                 {
-
                     ReceiveCallback(receiver);
                     HandleMessage(receiver);
                 }
@@ -86,6 +102,20 @@ partial class ServerService
                     this.HandleException(ex);
                 }
                 break;
+        }
+    }
+
+    public void UpdateUserList(string[] userList)
+    {
+        try
+        {
+            var count = WriteU8Buffer(userList.ToArrayString(), out var data);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UpdateUserList, (byte)OperateCode.None, data, 0, count);
+            SendCommand(sender);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
         }
     }
 }

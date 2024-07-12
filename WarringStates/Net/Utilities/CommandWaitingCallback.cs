@@ -2,8 +2,9 @@
 using LocalUtilities.TypeGeneral;
 using System.Text;
 using WarringStates.Common;
+using WarringStates.Net.Common;
 
-namespace WarringStates.Net.Common;
+namespace WarringStates.Net.Utilities;
 
 internal class CommandWaitingCallback : CommandWaitingHelper
 {

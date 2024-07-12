@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WarringStates.Net.Common;
+namespace WarringStates.Net.Utilities;
 
 public abstract class AutoDisposeItem
 {

@@ -5,6 +5,7 @@ using LocalUtilities.TypeGeneral.Convert;
 using System.Collections.Concurrent;
 using System.Text;
 using WarringStates.Net.Common;
+using WarringStates.Net.Utilities;
 using WarringStates.User;
 
 namespace WarringStates.Net;
@@ -98,25 +99,8 @@ public abstract class Service : INetLogger
         }
     }
 
-    private void DoCommand(CommandReceiver receiver)
-    {
-        try
-        {
-            var commandCode = (CommandCode)receiver.CommandCode;
-            if (commandCode is not CommandCode.Login && !IsLogined)
-                throw new NetException(ServiceCode.NotLogined);
-            if (!DoCommands.TryGetValue(commandCode, out var doCommand))
-                throw new NetException(ServiceCode.UnknownCommand, commandCode.ToString());
-            doCommand(receiver);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-            var sender = new CommandSender(receiver.TimeStamp, (byte)CommandCode.CommandError, (byte)OperateCode.None);
-            CallbackFailure(sender, ex);
-        }
-    }
-
+    public abstract void DoCommand(CommandReceiver receiver);
+    
     private void DoCommandError(CommandReceiver receiver)
     {
         try
