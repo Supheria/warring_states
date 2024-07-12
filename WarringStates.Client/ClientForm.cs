@@ -1,8 +1,8 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Map;
+using WarringStates.Client.Net;
 using WarringStates.Map.Terrain;
-using WarringStates.Net;
 using WarringStates.User;
 
 namespace WarringStates.Client;
@@ -11,7 +11,7 @@ public class ClientForm : ResizeableForm
 {
     public override string LocalName { get; }
 
-    ClientHost Client { get; } = new();
+    ClientService Client { get; } = new();
 
     TextBox HostAddress { get; } = new()
     {
@@ -97,36 +97,47 @@ public class ClientForm : ResizeableForm
             FilePathButton,
             UploadButton,
             DownloadButton,
-            GamePlay,
+            //GamePlay,
             ]);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
-        FormClosing += (_, _) => Client.Close();
+        FormClosing += (_, _) => Client.Dispose();
         OnDrawClient += ClientForm_OnDrawClient;
         SwitchButton.Click += SwitchButton_Click;
         SendButton.Click += SendButton_Click;
         FilePathButton.Click += FilePathButton_Click;
-        UploadButton.Click += (_, _) => Client.UploadFile(DirName.Text, FilePath.Text);
-        DownloadButton.Click += (_, _) => Client.DownloadFile(DirName.Text, FilePath.Text);
+        UploadButton.Click += UploadButton_Click;
+        DownloadButton.Click += (_, _) => Client.DownLoadFileAsync(DirName.Text, Path.GetFileName(FilePath.Text));
         Client.OnLog += UpdateMessage;
         Client.OnLogined += Client_OnConnected;
-        Client.OnDisconnected += Client_OnDisconnected;
+        Client.OnClosed += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
-        Client.OnUpdateUserList += Client_OnUpdateUserList;
+        //Client.OnUpdateUserList += Client_OnUpdateUserList;
 
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
     }
 
+    private void UploadButton_Click(object? sender, EventArgs e)
+    {
+        var fileName = Path.GetFileName(FilePath.Text);
+        var filePath = Client.GetFileRepoPath(DirName.Text, fileName);
+        // HACK: for test
+        if (!File.Exists(filePath))
+            File.Copy(FilePath.Text, filePath);
+        Client.UploadFileAsync(DirName.Text, fileName);
+    }
+
     private void SendButton_Click(object? sender, EventArgs e)
     {
-        var index = UserList.SelectedIndex;
-        if (index is -1)
-        {
-            UpdateMessage("no selected user to send message");
-            return;
-        }
-        foreach (var item in UserList.SelectedItems)
-            Client.SendMessage(SendBox.Text, (string)item);
+        Client.SendMessage(SendBox.Text, "");
+        //var index = UserList.SelectedIndex;
+        //if (index is -1)
+        //{
+        //    UpdateMessage("no selected user to send message");
+        //    return;
+        //}
+        //foreach (var item in UserList.SelectedItems)
+        //    Client.SendMessage(SendBox.Text, (string)item);
     }
 
     private void Client_OnUpdateUserList(string[] userList)
@@ -154,7 +165,7 @@ public class ClientForm : ResizeableForm
             Password.Enabled = true;
             Update();
         });
-        GamePlay.FinishGame();
+        //GamePlay.FinishGame();
     }
 
     private void Client_OnConnected()
@@ -169,12 +180,13 @@ public class ClientForm : ResizeableForm
             Update();
         });
         // TODO: for test
-        ArchiveManager.LoadArchive(0, out var archive);
-        Atlas.Relocate(archive);
-        SourceLand.TryBuild(new(22, 22), Atlas.LandMap, SourceLand.Types.TerraceLand, out var s1);
-        archive.SourceLands.Add(s1);
-        Atlas.Relocate(archive);
-        GamePlay.StartGame();
+        //ArchiveManager.LoadArchive(0, out var archive);
+        //Atlas.Relocate(archive);
+        //SourceLand.TryBuild(new(22, 22), Atlas.LandMap, SourceLand.Types.TerraceLand, out var s1);
+        //archive.SourceLands.Add(s1);
+        //Atlas.Relocate(archive);
+
+        //GamePlay.StartGame();
     }
 
     private void ClientForm_OnSaveForm(SsSerializer serializer)
@@ -207,8 +219,8 @@ public class ClientForm : ResizeableForm
 
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
-        if (Client.IsConnect)
-            Client.Close();
+        if (Client.IsLogined)
+            Client.Dispose();
         else
             Client.Login(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
     }
@@ -265,11 +277,11 @@ public class ClientForm : ResizeableForm
         GamePlay.Width = width * 3;
         GamePlay.Height = height;
         //
-        MessageBox.Left = GamePlay.Right + Padding;
-        //MessageBox.Left = ClientLeft + Padding;
+        //MessageBox.Left = GamePlay.Right + Padding;
+        MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
-        MessageBox.Width = width;
-        //MessageBox.Width = width * 4;
+        //MessageBox.Width = width;
+        MessageBox.Width = width * 4;
         MessageBox.Height = height;
         //
         UserList.Left = MessageBox.Right + Padding;

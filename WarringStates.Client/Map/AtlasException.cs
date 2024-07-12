@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 
-namespace WarringStates.Map;
+namespace WarringStates.Client.Map;
 
 public class AtlasException(string message) : Exception(message)
 {

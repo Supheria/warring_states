@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WarringStates.Server;
 
-public static class LocalEvents
+internal static class LocalEvents
 {
     public static EventHub Hub { get; } = new();
 

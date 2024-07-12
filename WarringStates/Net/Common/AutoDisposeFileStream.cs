@@ -2,13 +2,9 @@
 
 namespace WarringStates.Net.Common;
 
-public class AutoDisposeFileStream
+public class AutoDisposeFileStream : AutoDisposeItem
 {
-    FileStream? FileStream { get; set; } = null;
-
-    DaemonThread DaemonThread { get; }
-
-    public bool IsExpired => FileStream is null;
+    FileStream FileStream { get; set; }
 
     public long Length => FileStream?.Length ?? 0;
 
@@ -22,35 +18,17 @@ public class AutoDisposeFileStream
         }
     }
 
-    public AutoDisposeFileStream()
+    public AutoDisposeFileStream(FileStream fileStream, DateTime timeStamp) : base(ConstTabel.FileStreamExpireMilliseconds)
     {
-        DaemonThread = new(ConstTabel.FileStreamExpireMilliseconds, Dispose);
-    }
-
-    public bool Relocate(FileStream fileStream)
-    {
-        if (!IsExpired)
-        {
-            fileStream.Dispose();
-            return false;
-        }
         FileStream = fileStream;
+        TimeStamp = timeStamp;
+        OnDisposed += FileStream.Dispose;
         DaemonThread.Start();
-        return true;
     }
 
-    public void Dispose()
-    {
-        FileStream?.Dispose();
-        FileStream = null;
-        DaemonThread.Stop();
-    }
-
-    public bool Read(byte[] buffer, out int readCount)
+    public void Read(byte[] buffer, out int readCount)
     {
         readCount = 0;
-        if (FileStream is null)
-            return false;
         DaemonThread.Stop();
         try
         {
@@ -60,13 +38,10 @@ public class AutoDisposeFileStream
         {
             DaemonThread.Start();
         }
-        return true;
     }
 
-    public bool Write(byte[] buffer)
+    public void Write(byte[] buffer)
     {
-        if (FileStream is null)
-            return false;
         DaemonThread.Stop();
         try
         {
@@ -77,6 +52,5 @@ public class AutoDisposeFileStream
             DaemonThread.Start();
         }
         DaemonThread.Start();
-        return true;
     }
 }

@@ -3,6 +3,9 @@
 public class ServiceKey
 {
     public const string None = nameof(None);
+    public const string Command = nameof(Command);
+    public const string CommandCode = nameof(CommandCode);
+    public const string OperateCode = nameof(OperateCode);
     public const string UserName = nameof(UserName);
     public const string Password = nameof(Password);
     public const string ProtocolType = nameof(ProtocolType);

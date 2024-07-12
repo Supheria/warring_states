@@ -2,7 +2,7 @@
 
 namespace WarringStates.Server.User;
 
-public class UserException(string message) : Exception(message)
+internal class UserException(string message) : Exception(message)
 {
     public static void ThrowIfNotUseable(Archive archive)
     {

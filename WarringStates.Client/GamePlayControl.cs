@@ -25,7 +25,7 @@ public partial class GamePlayControl : UserControl
         KeyDown += KeyPressed;
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
-        ArchiveManager.ReLocate();
+        //ArchiveManager.ReLocate();
     }
 
     public void StartGame()

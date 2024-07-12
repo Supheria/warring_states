@@ -6,7 +6,7 @@ using WarringStates.User;
 
 namespace WarringStates.Server.User;
 
-public class Player : ISsSerializable
+internal class Player : ISsSerializable
 {
     public UserInfo UserInfo { get; private set; } = new();
 

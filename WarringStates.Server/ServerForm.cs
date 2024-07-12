@@ -2,6 +2,7 @@
 using WarringStates.Flow;
 using WarringStates.Net;
 using WarringStates.Server.Component;
+using WarringStates.Server.Net;
 using WarringStates.Server.User;
 using WarringStates.User;
 
@@ -11,7 +12,7 @@ internal class ServerForm : ResizeableForm
 {
     public override string LocalName => nameof(ServerForm);
 
-    ServerHostManager Server { get; set; } = new();
+    Net.Server Server { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -57,7 +58,7 @@ internal class ServerForm : ResizeableForm
             MessageBox,
             SendBox,
             SendButton,
-            ArchiveSelector
+            //ArchiveSelector
             ]);
         OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
@@ -149,8 +150,8 @@ internal class ServerForm : ResizeableForm
         ArchiveSelector.Width = width * 4;
         ArchiveSelector.Height = height;
         //
-        MessageBox.Left = ArchiveSelector.Right + Padding;
-        //MessageBox.Left = ClientLeft + Padding;
+        //MessageBox.Left = ArchiveSelector.Right + Padding;
+        MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
         MessageBox.Width = ClientWidth - Padding * 2;
         MessageBox.Height = height;

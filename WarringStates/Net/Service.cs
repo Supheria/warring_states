@@ -11,31 +11,37 @@ namespace WarringStates.Net;
 
 public abstract class Service : INetLogger
 {
+    public const int CommandLengthMax = 1024 * 1024 * 2;
+
+    public const int DataLengthMax = 1024 * 1024;
+
     public event NetEventHandler? OnLogined;
 
     public event NetEventHandler? OnClosed;
 
     public event NetEventHandler<string>? OnProcessing;
 
-    public event NetEventHandler<CommandReceiver>? OnOperate;
-
-    public event NetEventHandler<CommandReceiver>? OnOperateCallback;
+    protected delegate void CommandHandler(CommandReceiver receiver);
 
     public NetEventHandler<string>? OnLog { get; set; }
 
-    ConcurrentDictionary<DateTime, CommandWaitingCallback> CommandWaitList { get; } = [];
+    AutoDisposeItemCollection<CommandWaitingCallback> CommandsWaitingCallback { get; } = [];
 
-    protected bool IsLogined { get; set; } = false;
+    AutoDisposeItemCollection<CommandWaitingCompose> CommandsWaitingCompose { get; } = [];
+
+    public bool IsLogined { get; protected set; } = false;
 
     public UserInfo? UserInfo { get; protected set; } = new();
 
     protected abstract string RepoPath { get; set; }
 
-    protected AutoDisposeFileStream AutoFile { get; } = new();
+    protected AutoDisposeItemCollection<AutoDisposeFileStream> AutoFiles { get; } = [];
 
     protected DaemonThread? DaemonThread { get; set; }
 
     protected Protocol Protocol { get; }
+
+    protected Dictionary<CommandCode, CommandHandler> DoCommands { get; } = [];
 
     public Service(Protocol protocol)
     {
@@ -43,52 +49,110 @@ public abstract class Service : INetLogger
         Protocol.OnLog += this.HandleLog;
         Protocol.OnDisposed += () =>
         {
-            AutoFile.Dispose();
+            foreach (var autoFile in AutoFiles)
+                autoFile.Dispose();
             DaemonThread?.Stop();
             IsLogined = false;
             this.HandleLog("close");
             OnClosed?.Invoke();
         };
-        Protocol.OnReceiveCommand += Protocol_OnReceiveCommand
-            ;
+        Protocol.OnReceiveCommand += Protocol_OnReceiveCommand;
+        DoCommands[CommandCode.CommandError] = DoCommandError;
     }
-
-    public abstract string GetLog(string message);
 
     private void Protocol_OnReceiveCommand(CommandReceiver receiver)
     {
-        switch ((CommandCode)receiver.CommandCode)
+        try
         {
-            case CommandCode.Operate:
-                DoOperate(receiver);
-                break;
-            case CommandCode.OperateCallback:
-                DoOperateCallback(receiver);
-                break;
+            if ((CommandCode)receiver.CommandCode is not CommandCode.ComposeCommand)
+                throw new NetException(ServiceCode.WrongCommandFormat);
+            var operateCode = (OperateCode)receiver.OperateCode;
+            if (operateCode is OperateCode.Start)
+            {
+                var waitingCompose = new CommandWaitingCompose(receiver);
+                waitingCompose.OnLog += this.HandleLog;
+                if (!CommandsWaitingCompose.TryAdd(waitingCompose))
+                    throw new NetException(ServiceCode.CannotAddCommandWaitingForCompose);
+                waitingCompose.StartWaiting();
+            }
+            else if (operateCode is OperateCode.Continue)
+            {
+                if (!CommandsWaitingCompose.TryGetValue(receiver.TimeStamp, out var waitingCompose))
+                    throw new NetException(ServiceCode.CannotFindSourceCommandToCompose);
+                waitingCompose.AppendCommand(receiver);
+            }
+            else if (operateCode is OperateCode.Finish)
+            {
+                if (!CommandsWaitingCompose.TryGetValue(receiver.TimeStamp, out var waitingCompose))
+                    throw new NetException(ServiceCode.CannotFindSourceCommandToCompose);
+                var commandReceive = waitingCompose.GetCommand();
+                waitingCompose.Dispose();
+                DoCommand(commandReceive);
+            }
+            else
+                throw new NetException(ServiceCode.UnknownOperate);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
         }
     }
+
+    private void DoCommand(CommandReceiver receiver)
+    {
+        try
+        {
+            var commandCode = (CommandCode)receiver.CommandCode;
+            if (commandCode is not CommandCode.Login && !IsLogined)
+                throw new NetException(ServiceCode.NotLogined);
+            if (!DoCommands.TryGetValue(commandCode, out var doCommand))
+                throw new NetException(ServiceCode.UnknownCommand, commandCode.ToString());
+            doCommand(receiver);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+            var sender = new CommandSender(receiver.TimeStamp, (byte)CommandCode.CommandError, (byte)OperateCode.None);
+            CallbackFailure(sender, ex);
+        }
+    }
+
+    private void DoCommandError(CommandReceiver receiver)
+    {
+        try
+        {
+            ReceiveCallback(receiver);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
+    }
+
+    public abstract string GetLog(string message);
 
     public void Dispose()
     {
         Protocol.Dispose();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="receiver"></param>
-    /// <returns></returns>
-    /// <exception cref="NetException"></exception>
-    public void ReceiveCallback(CommandReceiver receiver)
-    {
-        if (!CommandWaitList.TryGetValue(receiver.TimeStamp, out var commandSend))
-            throw new NetException(ServiceCode.CannotFindSourceSendCommand);
-        commandSend.Waste();
-        var callbackCode = receiver.GetArgs(ServiceKey.CallbackCode).ToEnum<ServiceCode>();
-        if (callbackCode is ServiceCode.Success)
-            return;
-        var errorMessage = receiver.GetArgs(ServiceKey.ErrorMessage);
-        throw new NetException(callbackCode, errorMessage);
+    private void SendAsync(CommandSender sender)
+    { 
+        var packet = sender.GetPacket();
+        var timeStamp = sender.TimeStamp;
+        var commandInfo = new byte[2] { sender.CommandCode, sender.OperateCode };
+        sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Start, commandInfo, 0, 2);
+        Protocol.SendAsync(sender);
+        var offset = 0;
+        while (offset < packet.Length) 
+        {
+            var count = Math.Min(packet.Length - offset, CommandLengthMax);
+            sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Continue, packet, offset, count);
+            Protocol.SendAsync(sender);
+            offset += count;
+        }
+        sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Finish);
+        Protocol.SendAsync(sender);
     }
 
     /// <summary>
@@ -101,17 +165,16 @@ public abstract class Service : INetLogger
     {
         var waitingCallback = new CommandWaitingCallback(sender);
         waitingCallback.OnLog += this.HandleLog;
-        waitingCallback.OnWasted += () => CommandWaitList.TryRemove(sender.TimeStamp, out _);
-        if (!CommandWaitList.TryAdd(sender.TimeStamp, waitingCallback))
-            throw new NetException(ServiceCode.CannotWaitSendCommandForCallback);
+        if (!CommandsWaitingCallback.TryAdd(waitingCallback))
+            throw new NetException(ServiceCode.CannotAddCommandWaitingForCallback);
         waitingCallback.StartWaiting();
-        Protocol.SendCommand(sender);
+        SendAsync(sender);
     }
 
     public void CallbackSuccess(CommandSender sender)
     {
         sender.AppendArgs(ServiceKey.CallbackCode, ServiceCode.Success.ToString());
-        Protocol.SendCommand(sender);
+        SendAsync(sender);
     }
 
     public void CallbackFailure(CommandSender sender, Exception ex)
@@ -123,25 +186,25 @@ public abstract class Service : INetLogger
         };
         sender.AppendArgs(ServiceKey.CallbackCode, errorCode.ToString());
         sender.AppendArgs(ServiceKey.ErrorMessage, ex.Message);
-        Protocol.SendCommand(sender);
+        SendAsync(sender);
     }
 
-    private void DoOperate(CommandReceiver receiver)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="receiver"></param>
+    /// <returns></returns>
+    /// <exception cref="NetException"></exception>
+    public void ReceiveCallback(CommandReceiver receiver)
     {
-        OnOperate?.Invoke(receiver);
-    }
-
-    private void DoOperateCallback(CommandReceiver receiver)
-    {
-        try
-        {
-            ReceiveCallback(receiver);
-            OnOperateCallback?.Invoke(receiver);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
+        if (!CommandsWaitingCallback.TryGetValue(receiver.TimeStamp, out var commandSend))
+            throw new NetException(ServiceCode.CannotFindSourceSendCommand);
+        commandSend.Dispose();
+        var callbackCode = receiver.GetArgs(ServiceKey.CallbackCode).ToEnum<ServiceCode>();
+        if (callbackCode is ServiceCode.Success)
+            return;
+        var errorMessage = receiver.GetArgs(ServiceKey.ErrorMessage);
+        throw new NetException(callbackCode, errorMessage);
     }
 
     public string GetFileRepoPath(string dirName, string fileName)
@@ -223,5 +286,30 @@ public abstract class Service : INetLogger
             .ToString();
         this.HandleLog(message);
         OnProcessing?.Invoke(message);
+    }
+
+    protected void HandleMessage(CommandReceiver receiver)
+    {
+        var str = new StringBuilder()
+            .Append(receiver.GetArgs(ServiceKey.SendUser))
+            .Append(SignTable.Sub)
+            .Append(SignTable.Greater)
+            .Append(UserInfo?.Name)
+            .Append(SignTable.Colon)
+            .Append(SignTable.Space)
+            .Append(ReadU8Buffer(receiver.Data))
+            .ToString();
+        OnLog?.Invoke(str);
+    }
+
+    protected static int WriteU8Buffer(string str, out byte[] buffer)
+    {
+        buffer = Encoding.UTF8.GetBytes(str);
+        return buffer.Length;
+    }
+
+    protected static string ReadU8Buffer(byte[] buffer)
+    {
+        return Encoding.UTF8.GetString(buffer);
     }
 }

@@ -9,7 +9,7 @@ using WarringStates.Map.Terrain;
 
 namespace WarringStates.Server.User;
 
-public class SourceLandsOwnerMap : SerializableTagValues<string, List<SourceLand>>
+internal class SourceLandsOwnerMap : SerializableTagValues<string, List<SourceLand>>
 {
     public override string LocalName => nameof(SourceLandsOwnerMap);
 

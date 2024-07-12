@@ -25,10 +25,10 @@ public static class Atlas
         return LandMap.GetLandTypeCount(type);
     }
 
-    public static void Relocate(Archive archive)
-    {
-        LandMap.Relocate(archive.AltitudeMap, archive.SourceLands);
-    }
+    //public static void Relocate(Archive archive)
+    //{
+    //    LandMap.Relocate(archive.AltitudeMap, archive.SourceLands);
+    //}
 
     public static Coordinate SetPointWithinTerrainMap(this Coordinate Point)
     {

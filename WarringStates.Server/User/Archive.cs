@@ -7,7 +7,7 @@ using WarringStates.User;
 
 namespace WarringStates.Server.User;
 
-public class Archive
+internal class Archive
 {
     public string LocalName => nameof(Archive);
 

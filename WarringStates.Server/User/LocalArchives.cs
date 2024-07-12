@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.Server.User;
 
-public static class LocalArchives
+internal static class LocalArchives
 {
     public static string RootPath { get; } = Directory.CreateDirectory(nameof(Archives)).FullName;
 

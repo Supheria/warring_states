@@ -5,7 +5,7 @@ using WarringStates.User;
 
 namespace WarringStates.Server.User;
 
-public class ArchiveInfo : ISsSerializable
+internal class ArchiveInfo : ISsSerializable
 {
     public string Id { get; private set; } = "";
 

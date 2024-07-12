@@ -3,10 +3,10 @@
 public enum OperateCode : byte
 {
     None,
-    Message,
-    UpdateUserList,
+    Start,
     Request,
     Continue,
     Finish,
+    Callback,
     JoinArchive,
 }

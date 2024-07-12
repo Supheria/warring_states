@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
+using static WarringStates.Map.Terrain.SourceLand;
 
 namespace WarringStates.Map.Terrain;
 
-partial class SourceLand
+internal class SourceLandBuilder
 {
     public static bool TryBuild(Coordinate site, LandMap landMap, Types targetType, out SourceLand? sourceLand)
     {
