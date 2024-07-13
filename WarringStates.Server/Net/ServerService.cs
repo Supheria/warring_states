@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using WarringStates.Net;
 using WarringStates.Net.Common;
+using WarringStates.Net.Utilities;
 
 namespace WarringStates.Server.Net;
 
@@ -14,6 +15,8 @@ internal partial class ServerService : Service
     protected override string RepoPath { get; set; } = @"repo\server";
 
     public string TimeStamp { get; } = DateTime.Now.ToString(DateTimeFormat.Data);
+
+    protected override DaemonThread DaemonThread { get; init; }
 
     public ServerService() : base(new ServerProtocol())
     {
@@ -24,6 +27,7 @@ internal partial class ServerService : Service
         DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
         DoCommands[CommandCode.Message] = DoMessage;
         DoCommands[CommandCode.UpdateUserList] = ReceiveCallback;
+        DoCommands[CommandCode.Archive] = DoArchive;
     }
 
     public override void DoCommand(CommandReceiver receiver)

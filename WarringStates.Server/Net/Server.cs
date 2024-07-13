@@ -106,7 +106,7 @@ internal class Server : INetLogger
 
     private void AddService(ServerService service)
     {
-        if (service.UserInfo is null || service.UserInfo.Name is "" ||
+        if (service.UserInfo.Name is "" ||
             !UserMap.TryAdd(service.UserInfo.Name, service))
         {
             service.Dispose();
@@ -117,7 +117,7 @@ internal class Server : INetLogger
 
     private void RemoveService(ServerService service)
     {
-        if (service.UserInfo is null || service.UserInfo.Name is "" ||
+        if (service.UserInfo.Name is "" ||
             !(UserMap.TryGetValue(service.UserInfo.Name, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
         UserMap.TryRemove(service.UserInfo.Name, out _);

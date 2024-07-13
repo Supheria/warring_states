@@ -1,7 +1,10 @@
 ﻿using LocalUtilities.IocpNet.Common;
+using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeGeneral.Convert;
 using WarringStates.Net.Common;
+using WarringStates.Server.User;
+using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
@@ -43,7 +46,7 @@ partial class ServerService
         {
             var count = WriteU8Buffer(message, out var data);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Broadcast, data, 0, count)
-                .AppendArgs(ServiceKey.ReceiveUser, UserInfo?.Name ?? "")
+                .AppendArgs(ServiceKey.ReceiveUser, UserInfo.Name)
                 .AppendArgs(ServiceKey.SendUser, nameof(Server));
             SendCommand(sender);
         }
@@ -95,15 +98,33 @@ partial class ServerService
 
     public void UpdateUserList(string[] userList)
     {
-        try
+        var count = WriteU8Buffer(userList.ToArrayString(), out var data);
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UpdateUserList, (byte)OperateCode.None, data, 0, count);
+        SendCommand(sender);
+    }
+
+    private void DoArchive(CommandReceiver receiver)
+    {
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Fetch)
         {
-            var count = WriteU8Buffer(userList.ToArrayString(), out var data);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UpdateUserList, (byte)OperateCode.None, data, 0, count);
-            SendCommand(sender);
+            var archiverInfoList = new List<PlayerArchiveInfo>();
+            foreach (var info in LocalArchives.ReLocate())
+            {
+                var players = Archive.LoadPlayers(info);
+                var sourceLands = Archive.LoadSourceLands(info);
+                if (!sourceLands.TryGetValue(UserInfo.Id, out var ownLands))
+                    ownLands = [];
+                var archiveInfo = new PlayerArchiveInfo(info.Id, info.WorldName, info.WorldSize, players.Count, ownLands);
+                archiverInfoList.Add(archiveInfo);
+            }
+            var data = archiverInfoList.ToSsBuffer(ServiceKey.ArchiveList);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
+            CallbackSuccess(sender);
         }
-        catch (Exception ex)
+        if (operateCode is OperateCode.Join)
         {
-            this.HandleException(ex);
+            // TODO: join archive
         }
     }
 }

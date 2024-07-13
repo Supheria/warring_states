@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using WarringStates.Net;
 using WarringStates.Net.Common;
+using WarringStates.Net.Utilities;
 using WarringStates.User;
 
 namespace WarringStates.Client.Net;
@@ -16,6 +17,8 @@ public partial class ClientService : Service
 
     AutoResetEvent LoginDone { get; } = new(false);
 
+    protected override DaemonThread DaemonThread { get; init; }
+
     public ClientService() : base(new ClientProtocol())
     {
         DaemonThread = new(ConstTabel.HeartBeatsInterval, HeartBeats);
@@ -25,6 +28,7 @@ public partial class ClientService : Service
         DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
         DoCommands[CommandCode.Message] = DoMessage;
         DoCommands[CommandCode.UpdateUserList] = DoUpdateUserList;
+        DoCommands[CommandCode.Archive] = DoArchive;
     }
 
     public override void DoCommand(CommandReceiver receiver)
@@ -82,7 +86,7 @@ public partial class ClientService : Service
             if (!((ClientProtocol)Protocol).Connect(host))
                 throw new NetException(ServiceCode.NoConnection);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
-                .AppendArgs(ServiceKey.UserName, UserInfo.Name ?? "")
+                .AppendArgs(ServiceKey.UserName, UserInfo.Name)
                 .AppendArgs(ServiceKey.Password, UserInfo.Password);
             SendCommand(sender);
             LoginDone?.WaitOne(ConstTabel.BlockkMilliseconds);

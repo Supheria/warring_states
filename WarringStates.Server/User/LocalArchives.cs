@@ -87,7 +87,7 @@ internal static class LocalArchives
 
     public static ArchiveInfo CreateArchive(this AltitudeMapData mapData, string worldName)
     {
-        var info = new ArchiveInfo(worldName);
+        var info = new ArchiveInfo(worldName, mapData.Size);
         Archive.Create(info, mapData).Save();
         var saves = new List<ArchiveInfo>() { info };
         saves.AddRange(Archives);

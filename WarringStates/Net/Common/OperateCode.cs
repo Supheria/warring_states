@@ -8,6 +8,7 @@ public enum OperateCode : byte
     Continue,
     Finish,
     Callback,
-    JoinArchive,
+    Join,
     Broadcast,
+    Fetch,
 }

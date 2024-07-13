@@ -14,15 +14,18 @@ internal class ArchiveInfo : ISsSerializable
 
     public string WorldName { get; private set; } = "";
 
+    public Size WorldSize { get; private set; } = new();
+
     public long CreateTime { get; private set; } = 0;
 
     public long LastSaveTime { get; private set; } = 0;
 
     public int CurrentSpan { get; private set; } = 0;
 
-    public ArchiveInfo(string worldName)
+    public ArchiveInfo(string worldName, Size worldSize)
     {
         WorldName = worldName;
+        WorldSize = worldSize;
         LastSaveTime = CreateTime = DateTime.Now.ToBinary();
         Id = (WorldName + CreateTime).ToMd5HashString();
         RootPath = Path.Combine(LocalArchives.RootPath, Id);
@@ -36,6 +39,7 @@ internal class ArchiveInfo : ISsSerializable
     public void Serialize(SsSerializer serializer)
     {
         serializer.WriteTag(nameof(WorldName), WorldName);
+        serializer.WriteTag(nameof(WorldSize), WorldSize.ToArrayString());
         serializer.WriteTag(nameof(CreateTime), CreateTime.ToString());
         serializer.WriteTag(nameof(LastSaveTime), LastSaveTime.ToString());
         serializer.WriteTag(nameof(CurrentSpan), CurrentSpan.ToString());
@@ -44,6 +48,7 @@ internal class ArchiveInfo : ISsSerializable
     public void Deserialize(SsDeserializer deserializer)
     {
         WorldName = deserializer.ReadTag(nameof(WorldName));
+        WorldSize = deserializer.ReadTag(nameof(WorldSize), s => s.ToSize());
         CreateTime = deserializer.ReadTag(nameof(CreateTime), s => s.ToLong());
         LastSaveTime = deserializer.ReadTag(nameof(LastSaveTime), s => s.ToLong());
         CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), s => s.ToInt());

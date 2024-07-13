@@ -94,7 +94,7 @@ public class ClientForm : ResizeableForm
             FilePathButton,
             UploadButton,
             DownloadButton,
-            //GamePlay,
+            GamePlay,
             ]);
         OnLoadForm += ClientForm_OnLoadForm;
         OnSaveForm += ClientForm_OnSaveForm;
@@ -112,6 +112,7 @@ public class ClientForm : ResizeableForm
         Client.OnUpdateUserList += Client_OnUpdateUserList;
 
         LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
+        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.ArchiveListToRelocate, Client.FetchArchiveList);
     }
 
     private void UploadButton_Click(object? sender, EventArgs e)
@@ -274,11 +275,11 @@ public class ClientForm : ResizeableForm
         GamePlay.Width = width * 3;
         GamePlay.Height = height;
         //
-        //MessageBox.Left = GamePlay.Right + Padding;
-        MessageBox.Left = ClientLeft + Padding;
+        MessageBox.Left = GamePlay.Right + Padding;
+        //MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
-        //MessageBox.Width = width;
-        MessageBox.Width = width * 4;
+        MessageBox.Width = width;
+        //MessageBox.Width = width * 4;
         MessageBox.Height = height;
         //
         UserList.Left = MessageBox.Right + Padding;

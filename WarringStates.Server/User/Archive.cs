@@ -15,7 +15,7 @@ internal class Archive
 
     public SourceLandsOwnerMap SourceLands { get; private set; } = [];
 
-    public List<Player> Players { get; private set; } = [];
+    public PlayerRoster Players { get; private set; } = [];
 
     private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
     {
@@ -57,7 +57,7 @@ internal class Archive
         Info.SaveToSimpleScript(false, Info.GetArchiveInfoPath());
         AltitudeMap.SaveToSimpleScript(false, Info.GetAltitudeMapPath());
         SourceLands.SaveToSimpleScript(false, Info.GetSourceLandsPath());
-        Players.SaveToSimpleScript(nameof(Players), false, Info.GetPlayersPath());
+        Players.SaveToSimpleScript(false, Info.GetPlayersPath());
     }
 
     public static Archive Load(ArchiveInfo info)
@@ -65,9 +65,24 @@ internal class Archive
         return new Archive
         {
             Info = info,
-            AltitudeMap = new AltitudeMap().LoadFromSimpleScript(info.GetAltitudeMapPath()),
-            SourceLands = new SourceLandsOwnerMap().LoadFromSimpleScript(info.GetSourceLandsPath()),
-            Players = SerializeTool.LoadFromSimpleScript<Player>(nameof(Players), info.GetPlayersPath())
+            AltitudeMap = LoadAltitudeMap(info),
+            SourceLands = LoadSourceLands(info),
+            Players = LoadPlayers(info),
         };
+    }
+
+    public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)
+    {
+        return new AltitudeMap().LoadFromSimpleScript(info.GetAltitudeMapPath());
+    }
+
+    public static SourceLandsOwnerMap LoadSourceLands(ArchiveInfo info)
+    {
+        return new SourceLandsOwnerMap().LoadFromSimpleScript(info.GetSourceLandsPath());
+    }
+
+    public static PlayerRoster LoadPlayers(ArchiveInfo info)
+    {
+        return new PlayerRoster().LoadFromSimpleScript(info.GetPlayersPath());
     }
 }

@@ -36,7 +36,10 @@ public static class LocalEvents
 
     public enum UserInterface
     {
-        MainFormOnDraw,
+        ArchiveListToRelocate,
+        ArchiveListRelocated,
+
+        GamePlayControlOnDraw,
         SettingsOnSetBounds,
         ToolBarOnSetBounds,
         InfoBarOnSetBounds,

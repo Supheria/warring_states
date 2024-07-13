@@ -1,6 +1,9 @@
 ﻿using LocalUtilities.IocpNet.Common;
+using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using WarringStates.Client.User;
 using WarringStates.Net.Common;
+using WarringStates.User;
 
 namespace WarringStates.Client.Net;
 
@@ -22,18 +25,11 @@ partial class ClientService
 
     private void DoLogin(CommandReceiver receiver)
     {
-        try
-        {
-            ReceiveCallback(receiver);
-            IsLogined = true;
-            LoginDone.Set();
-            HandleLogined();
-            DaemonThread?.Start();
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
+        ReceiveCallback(receiver);
+        IsLogined = true;
+        LoginDone.Set();
+        HandleLogined();
+        DaemonThread.Start();
     }
 
     public void SendMessage(string message, string sendUser)
@@ -43,7 +39,7 @@ partial class ClientService
             var count = WriteU8Buffer(message, out var data);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, count)
                 .AppendArgs(ServiceKey.ReceiveUser, sendUser)
-                .AppendArgs(ServiceKey.SendUser, UserInfo?.Name ?? "");
+                .AppendArgs(ServiceKey.SendUser, UserInfo.Name);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -87,4 +83,29 @@ partial class ClientService
         var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.None);
         CallbackSuccess(sender);
     }
+
+    public void FetchArchiveList()
+    {
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Fetch);
+        SendCommand(sender);
+    }
+
+    public void JoinArchive(string id)
+    {
+        var count = WriteU8Buffer(id, out var data);
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join, data, 0, count);
+        SendCommand(sender);
+    }
+
+    private void DoArchive(CommandReceiver receiver)
+    {
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Fetch)
+        {
+            ReceiveCallback(receiver);
+            var archiveInfoList = SerializeTool.ParseSs<PlayerArchiveInfo>(ServiceKey.ArchiveList, receiver.Data, 0, receiver.Data.Length);
+            LocalArchives.ReLocate(archiveInfoList);
+        }
+    }
+
 }

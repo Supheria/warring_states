@@ -31,13 +31,13 @@ public abstract class Service : INetLogger
 
     public bool IsLogined { get; protected set; } = false;
 
-    public UserInfo? UserInfo { get; protected set; } = new();
+    public UserInfo UserInfo { get; protected set; } = new();
 
     protected abstract string RepoPath { get; set; }
 
     protected AutoDisposeItemCollection<AutoDisposeFileStream> AutoFiles { get; } = [];
 
-    protected DaemonThread? DaemonThread { get; set; }
+    protected abstract DaemonThread DaemonThread { get; init; }
 
     protected Protocol Protocol { get; }
 
@@ -51,7 +51,7 @@ public abstract class Service : INetLogger
         {
             foreach (var autoFile in AutoFiles)
                 autoFile.Dispose();
-            DaemonThread?.Stop();
+            DaemonThread.Stop();
             IsLogined = false;
             this.HandleLog("close");
             OnClosed?.Invoke();

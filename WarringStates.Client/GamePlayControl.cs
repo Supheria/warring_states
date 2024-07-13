@@ -1,11 +1,14 @@
 ﻿using WarringStates.Client.Component;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
+using WarringStates.Server.Component;
 
 namespace WarringStates.Client;
 
 public partial class GamePlayControl : UserControl
 {
+    ArchiveSelector ArchiveSelector { get; } = new();
+
     Settings Settings { get; } = new();
 
     ToolBar ToolBar { get; } = new();
@@ -25,6 +28,8 @@ public partial class GamePlayControl : UserControl
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
         //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
         //ArchiveManager.ReLocate();
+        Controls.Add(ArchiveSelector);
+        ArchiveSelector.EnableListener();
     }
 
     public void StartGame()
@@ -80,6 +85,6 @@ public partial class GamePlayControl : UserControl
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.MainFormOnDraw, ClientRectangle);
+        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.GamePlayControlOnDraw, ClientRectangle);
     }
 }

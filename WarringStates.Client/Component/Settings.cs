@@ -10,13 +10,13 @@ public class Settings : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 

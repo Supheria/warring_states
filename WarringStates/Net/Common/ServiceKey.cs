@@ -16,4 +16,5 @@ public class ServiceKey
     public const string ReceiveUser = nameof(ReceiveUser);
     public const string SendUser = nameof(SendUser);
     public const string StartTime = nameof(StartTime);
+    public const string ArchiveList = nameof(ArchiveList);
 }

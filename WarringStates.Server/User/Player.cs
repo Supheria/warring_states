@@ -1,20 +1,23 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.TypeGeneral;
 using WarringStates.User;
 
 namespace WarringStates.Server.User;
 
-internal class Player : ISsSerializable
+internal class Player : RosterItem<string>
 {
     public UserInfo UserInfo { get; private set; } = new();
 
-    public string LocalName => nameof(Player);
+    public override string LocalName => nameof(Player);
 
-    public void Serialize(SsSerializer serializer)
+    public override string Signature => UserInfo.Id;
+
+    public override void Serialize(SsSerializer serializer)
     {
         serializer.WriteObject(UserInfo);
     }
 
-    public void Deserialize(SsDeserializer deserializer)
+    public override void Deserialize(SsDeserializer deserializer)
     {
         deserializer.ReadObject(UserInfo);
     }
