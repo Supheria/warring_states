@@ -1,9 +1,10 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Flow;
-using WarringStates.Server.Component;
+using WarringStates.Server.Events;
+using WarringStates.Server.UI.Component;
 using WarringStates.Server.User;
 
-namespace WarringStates.Server;
+namespace WarringStates.Server.UI;
 
 internal class ServerForm : ResizeableForm
 {
@@ -63,7 +64,7 @@ internal class ServerForm : ResizeableForm
         Server.OnLog += UpdateMessage;
         Server.OnConnectionCountChange += Host_OnParallelRemainChange;
         //Host.Start((int)Port.Value);
-        LocalEvents.Hub.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
+        LocalEvents.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
         ArchiveSelector.EnableListener();
         LocalArchives.ReLocate();
     }
@@ -72,8 +73,8 @@ internal class ServerForm : ResizeableForm
     {
         //Atlas.Relocate(archive);
         SpanFlow.Relocate(archive.Info.CurrentSpan);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Flow.SwichFlowState);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
+        LocalEvents.TryBroadcast(LocalEvents.Flow.SwichFlowState);
         //ArchiveSelector.DisableListener();
         DrawClient();
     }

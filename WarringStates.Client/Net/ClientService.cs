@@ -22,7 +22,7 @@ public partial class ClientService : Service
     public ClientService() : base(new ClientProtocol())
     {
         DaemonThread = new(ConstTabel.HeartBeatsInterval, HeartBeats);
-        DoCommands[CommandCode.HeartBeats] = DoHeartBeats;
+        DoCommands[CommandCode.HeartBeats] = ReceiveCallback;
         DoCommands[CommandCode.Login] = DoLogin;
         DoCommands[CommandCode.UploadFile] = DoUploadFile;
         DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
@@ -75,6 +75,7 @@ public partial class ClientService : Service
             this.HandleException(ex);
         }
     }
+
     public void Login(string address, int port, string name, string password)
     {
         try
@@ -96,5 +97,14 @@ public partial class ClientService : Service
             Dispose();
             this.HandleException(ex);
         }
+    }
+
+    private void DoLogin(CommandReceiver receiver)
+    {
+        ReceiveCallback(receiver);
+        IsLogined = true;
+        LoginDone.Set();
+        HandleLogined();
+        DaemonThread.Start();
     }
 }

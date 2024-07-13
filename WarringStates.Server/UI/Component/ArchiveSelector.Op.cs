@@ -1,8 +1,9 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
+using WarringStates.Server.Events;
 using WarringStates.Server.User;
 
-namespace WarringStates.Server.Component;
+namespace WarringStates.Server.UI.Component;
 
 partial class ArchiveSelector
 {
@@ -47,7 +48,7 @@ partial class ArchiveSelector
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalArchives.LoadArchive(SelectedItemIndex, out var archive))
         {
-            LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
             LocalArchives.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();
@@ -78,7 +79,7 @@ partial class ArchiveSelector
             testButton(BuildButton, () => true);
             testButton(LoadButton, () => SelectedItemIndex is not -1);
             testButton(DeleteButton, () => SelectedItemIndex is not -1);
-            //LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("SelectedItemIndex", SelectedItemIndex.ToString()));
+            //LocalEvents.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("SelectedItemIndex", SelectedItemIndex.ToString()));
         }
         else
             RollChangeOffset(e.Y - DragStartPoint.Y);

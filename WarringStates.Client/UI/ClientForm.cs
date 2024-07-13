@@ -1,8 +1,10 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
+using WarringStates.Client.Events;
 using WarringStates.Client.Net;
+using WarringStates.Client.User;
 
-namespace WarringStates.Client;
+namespace WarringStates.Client.UI;
 
 public class ClientForm : ResizeableForm
 {
@@ -111,8 +113,21 @@ public class ClientForm : ResizeableForm
         Client.OnProcessing += UpdateFormText;
         Client.OnUpdateUserList += Client_OnUpdateUserList;
 
-        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
-        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.ArchiveListToRelocate, Client.FetchArchiveList);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.FetchArchiveList, RefreshArchiveList);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.LogoutPlayer, Logout);
+    }
+
+    private void RefreshArchiveList()
+    {
+        Client.Login(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
+        Client.FetchArchiveList();
+    }
+
+    private void Logout()
+    {
+        Client.Dispose();
+        LocalArchives.ReLocate([]);
     }
 
     private void UploadButton_Click(object? sender, EventArgs e)

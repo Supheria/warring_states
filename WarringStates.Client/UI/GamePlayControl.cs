@@ -1,9 +1,9 @@
-﻿using WarringStates.Client.Component;
+﻿using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
-using WarringStates.Server.Component;
+using WarringStates.Client.UI.Component;
 
-namespace WarringStates.Client;
+namespace WarringStates.Client.UI;
 
 public partial class GamePlayControl : UserControl
 {
@@ -25,8 +25,8 @@ public partial class GamePlayControl : UserControl
     {
         Resize += (_, _) => DrawClient();
         KeyDown += KeyPressed;
-        //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
-        //LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
+        //LocalEvents.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
+        //LocalEvents.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
         //ArchiveManager.ReLocate();
         Controls.Add(ArchiveSelector);
         ArchiveSelector.EnableListener();
@@ -85,6 +85,6 @@ public partial class GamePlayControl : UserControl
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.GamePlayControlOnDraw, ClientRectangle);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.GamePlayControlOnDraw, ClientRectangle);
     }
 }

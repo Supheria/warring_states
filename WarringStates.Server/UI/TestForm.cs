@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
+using WarringStates.Server.Events;
 
-namespace WarringStates.Client;
+namespace WarringStates.Server.UI;
 
 internal class TestForm : ResizeableForm
 {
@@ -12,27 +13,27 @@ internal class TestForm : ResizeableForm
             Text
             ]);
         FormClosing += OnFormClosing;
-        LocalEvents.Hub.TryAddListener<StringInfo>(LocalEvents.Test.AddInfo, info =>
+        LocalEvents.TryAddListener<StringInfo>(LocalEvents.Test.AddInfo, info =>
         {
             InfoList.Add(new(info.Name, info.Info));
             UpdateInfo();
         });
-        //LocalEvents.Hub.AddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        //LocalEvents.AddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         //{
         //    infoList.ForEach(info => InfoList.Add(new(info.Name, info.Info)));
         //    UpdateInfo();
         //});
-        LocalEvents.Hub.TryAddListener<StringInfo>(LocalEvents.Test.AddSingleInfo, info =>
+        LocalEvents.TryAddListener<StringInfo>(LocalEvents.Test.AddSingleInfo, info =>
         {
             InfoMap[info.Name] = info.Info;
             UpdateInfo();
         });
-        LocalEvents.Hub.TryAddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        LocalEvents.TryAddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
         {
             infoList.ForEach(info => InfoMap[info.Name] = info.Info);
             UpdateInfo();
         });
-        LocalEvents.Hub.TryAddListener<ValueInfo>(LocalEvents.Test.ValueForMax, info =>
+        LocalEvents.TryAddListener<ValueInfo>(LocalEvents.Test.ValueForMax, info =>
         {
             if (ValueMap.TryGetValue(info.Name, out var value))
             {
@@ -42,7 +43,7 @@ internal class TestForm : ResizeableForm
                 ValueMap[info.Name] = info.Value;
             UpdateInfo();
         });
-        LocalEvents.Hub.TryAddListener<ValueInfo>(LocalEvents.Test.AddValue, info =>
+        LocalEvents.TryAddListener<ValueInfo>(LocalEvents.Test.AddValue, info =>
         {
             if (ValueMap.TryGetValue(info.Name, out var value))
             {
@@ -52,7 +53,7 @@ internal class TestForm : ResizeableForm
                 ValueMap[info.Name] = value;
             UpdateInfo();
         });
-        LocalEvents.Hub.TryAddListener<string>(LocalEvents.Test.ClearValue, name =>
+        LocalEvents.TryAddListener<string>(LocalEvents.Test.ClearValue, name =>
         {
             ValueMap[name] = 0;
             UpdateInfo();

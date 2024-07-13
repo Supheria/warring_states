@@ -11,27 +11,6 @@ partial class ClientService
 {
     public event NetEventHandler<string[]>? OnUpdateUserList;
 
-    private void DoHeartBeats(CommandReceiver receiver)
-    {
-        try
-        {
-            ReceiveCallback(receiver);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
-    private void DoLogin(CommandReceiver receiver)
-    {
-        ReceiveCallback(receiver);
-        IsLogined = true;
-        LoginDone.Set();
-        HandleLogined();
-        DaemonThread.Start();
-    }
-
     public void SendMessage(string message, string sendUser)
     {
         try
@@ -107,5 +86,4 @@ partial class ClientService
             LocalArchives.ReLocate(archiveInfoList);
         }
     }
-
 }

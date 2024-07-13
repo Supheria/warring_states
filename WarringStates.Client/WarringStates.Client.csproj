@@ -15,33 +15,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="ClientForm.cs">
+    <Compile Update="UI\ClientForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Component\ArchiveSelector.cs" />
-    <Compile Update="Component\ArchiveSelector.Op.cs" />
-    <Compile Update="Component\ArchiveSelector.Roll.cs" />
-    <Compile Update="Component\GamePlane.cs">
+    <Compile Update="UI\Component\ArchiveSelector.cs" />
+    <Compile Update="UI\Component\ArchiveSelector.Op.cs" />
+    <Compile Update="UI\Component\ArchiveSelector.Roll.cs" />
+    <Compile Update="UI\Component\GamePlane.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Component\GamePlane.Op.cs" />
-    <Compile Update="GamePlayControl.cs">
+    <Compile Update="UI\Component\GamePlane.Op.cs" />
+    <Compile Update="UI\GamePlayControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Component\InfoBar.cs">
+    <Compile Update="UI\Component\InfoBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Component\Overview.cs">
+    <Compile Update="UI\Component\Overview.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Component\Overview.Op.cs" />
-    <Compile Update="Component\Settings.cs">
+    <Compile Update="UI\Component\Overview.Op.cs" />
+    <Compile Update="UI\Component\Settings.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Component\ToolBar.cs">
+    <Compile Update="UI\Component\ToolBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="TestForm.cs">
+    <Compile Update="UI\TestForm.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

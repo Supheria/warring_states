@@ -1,13 +1,5 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using WarringStates.Client.Events;
 using WarringStates.User;
 
 namespace WarringStates.Client.User;
@@ -34,7 +26,7 @@ internal static class LocalArchives
     public static void ReLocate(List<PlayerArchiveInfo> infos)
     {
         Archives = infos;
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ArchiveListRelocated);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.RelocateArchiveList);
     }
 
     public static int Count => Archives.Count;

@@ -47,17 +47,17 @@ public partial class LatticeGrid
 
     private void EnableListner()
     {
-        LocalEvents.Hub.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToReset, SetOrigin);
-        LocalEvents.Hub.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToOffset, OffsetOrigin);
-        LocalEvents.Hub.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
-        LocalEvents.Hub.TryAddListener<Point>(LocalEvents.Graph.GridCellToPointOn, GetLatticeCell);
+        LocalEvents.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToReset, SetOrigin);
+        LocalEvents.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToOffset, OffsetOrigin);
+        LocalEvents.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
+        LocalEvents.TryAddListener<Point>(LocalEvents.Graph.GridCellToPointOn, GetLatticeCell);
     }
 
     public void GetLatticeCell(Point realPoint)
     {
         var latticeCell = RealPointToLatticePoint(realPoint);
         var cell = new Cell(latticeCell);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.Graph.GridCellPointedOn, new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint)));
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridCellPointedOn, new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint)));
     }
 
     public Coordinate RealPointToLatticePoint(Point realPoint)

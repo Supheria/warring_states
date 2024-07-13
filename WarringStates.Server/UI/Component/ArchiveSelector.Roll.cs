@@ -1,9 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Client.User;
-using WarringStates.User;
+using WarringStates.Server.User;
 
-namespace WarringStates.Server.Component;
+namespace WarringStates.Server.UI.Component;
 
 partial class ArchiveSelector
 {
@@ -69,7 +68,7 @@ partial class ArchiveSelector
         g.FillRectangle(brush, RollRect);
         var showStartItemIndex = RollOffset / RollItemHeight;
         var top = RollItemsRect.Top - (RollOffset % RollItemHeight) + RollPadding;
-        //LocalEvents.Hub.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("showStartItemIndex", showStartItemIndex.ToString()));
+        //LocalEvents.Broadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("showStartItemIndex", showStartItemIndex.ToString()));
         for (var i = 0; i < RollItemToShowCount; i++)
         {
             var y = top + i * RollItemHeight;

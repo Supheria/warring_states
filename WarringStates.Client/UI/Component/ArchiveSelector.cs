@@ -1,12 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
-using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Client;
+using WarringStates.Client.Events;
 using WarringStates.Client.User;
-using WarringStates.Flow.Model;
-using WarringStates.User;
 
-namespace WarringStates.Server.Component;
+namespace WarringStates.Client.UI.Component;
 
 public partial class ArchiveSelector : Displayer
 {
@@ -36,7 +33,7 @@ public partial class ArchiveSelector : Displayer
 
     Button JoinButton { get; } = new("加入");
 
-    //Button DeleteButton { get; } = new("删除");
+    Button LogoutButton { get; } = new("登出");
 
     new Size Padding { get; } = new(30, 30);
 
@@ -59,23 +56,30 @@ public partial class ArchiveSelector : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener(LocalEvents.UserInterface.ArchiveListRelocated, RollReDraw);
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        //LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.RelocateArchiveList, RelocateArchiveList);
+        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+    }
+
+    private void RelocateArchiveList()
+    {
+        if (LocalArchives.Count is 0)
+            SelectedItemIndex = -1;
+        RollReDraw();
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRelocated, RollReDraw);
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        //LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.RelocateArchiveList, RelocateArchiveList);
+        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     private new void KeyPress(Keys key)
     {
         if (key is not Keys.Escape)
             return;
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
     }
 
     private void SetBounds(Rectangle rect)
@@ -99,8 +103,8 @@ public partial class ArchiveSelector : Displayer
         JoinButton.Rect = new(left, RefreshButton.Rect.Bottom + buttonPadding, colWidth, ButtonHeight);
         ButtonRedraw(JoinButton);
         var buttonWidth = colWidth - Padding.Width * 2;
-        //DeleteButton.Rect = new(left + Padding.Width, JoinButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
-        //ButtonRedraw(DeleteButton);
+        LogoutButton.Rect = new(left + Padding.Width, JoinButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
+        ButtonRedraw(LogoutButton);
         Invalidate();
     }
 

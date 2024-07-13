@@ -6,7 +6,7 @@ using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
 
-namespace WarringStates.Client.Component;
+namespace WarringStates.Client.UI.Component;
 
 public partial class Overview : Displayer
 {
@@ -35,14 +35,14 @@ public partial class Overview : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
-        LocalEvents.Hub.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
+        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
-        LocalEvents.Hub.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
+        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
     }
 
 

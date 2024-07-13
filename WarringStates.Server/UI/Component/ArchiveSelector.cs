@@ -2,9 +2,10 @@
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Flow.Model;
+using WarringStates.Server.Events;
 using WarringStates.Server.User;
 
-namespace WarringStates.Server.Component;
+namespace WarringStates.Server.UI.Component;
 
 public partial class ArchiveSelector : Displayer
 {
@@ -57,21 +58,21 @@ public partial class ArchiveSelector : Displayer
 
     public void EnableListener()
     {
-        //LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        //LocalEvents.Hub.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
     {
-        //LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        //LocalEvents.Hub.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
+        //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     private new void KeyPress(Keys key)
     {
         if (key is not Keys.Escape)
             return;
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
     }
 
     private void SetBounds(Rectangle rect)

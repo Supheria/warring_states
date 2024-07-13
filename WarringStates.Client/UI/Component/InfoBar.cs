@@ -1,8 +1,9 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Map.Terrain;
 
-namespace WarringStates.Client.Component;
+namespace WarringStates.Client.UI.Component;
 
 public class InfoBar : Displayer
 {
@@ -15,12 +16,12 @@ public class InfoBar : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
     }
 
 
@@ -34,6 +35,6 @@ public class InfoBar : Displayer
         g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
         Invalidate();
         rect = new(rect.Left, rect.Top, rect.Width, rect.Height - Height);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.InfoBarOnSetBounds, rect);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.InfoBarOnSetBounds, rect);
     }
 }

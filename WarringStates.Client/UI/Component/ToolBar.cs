@@ -3,7 +3,7 @@ using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Flow;
 
-namespace WarringStates.Client.Component;
+namespace WarringStates.Client.UI.Component;
 
 public class ToolBar : Displayer
 {
@@ -22,14 +22,14 @@ public class ToolBar : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.Hub.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.Hub.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
+        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
     public void DisableListener()
     {
-        LocalEvents.Hub.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.Hub.TryRemoveListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
+        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryRemoveListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
     private void SetBounds(Rectangle rect)
@@ -39,7 +39,7 @@ public class ToolBar : Displayer
         Relocate();
         DrawDate();
         rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
-        LocalEvents.Hub.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
     }
 
     private void SetDate(SpanFlowTickOnArgs args)
