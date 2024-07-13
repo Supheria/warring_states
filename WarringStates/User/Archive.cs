@@ -1,65 +1,64 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Text;
-using WarringStates.Map;
-using WarringStates.Terrain;
+﻿//using AltitudeMapGenerator;
+//using LocalUtilities.SimpleScript.Serialization;
+//using LocalUtilities.TypeGeneral;
+//using WarringStates.Map;
+//using WarringStates.Map.Terrain;
 
-namespace WarringStates.User;
+//namespace WarringStates.User;
 
-public class Archive : ISsSerializable
-{
-    public string LocalName => nameof(Archive);
+//public class Archive : ISsSerializable
+//{
+//    public string LocalName => nameof(Archive);
 
-    public ArchiveInfo Info { get; private set; } = new();
+//    public ArchiveInfo Info { get; private set; } = new();
 
-    public AltitudeMap AltitudeMap { get; private set; } = new();
+//    public AltitudeMap AltitudeMap { get; private set; } = new();
 
-    public List<SourceLand> SourceLands { get; private set; } = [];
+//    public List<SourceLand> SourceLands { get; private set; } = [];
 
-    private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
-    {
-        Info = info;
-        AltitudeMap = altitudeMap;
-    }
+//    private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
+//    {
+//        Info = info;
+//        AltitudeMap = altitudeMap;
+//    }
 
-    public Archive()
-    {
+//    public Archive()
+//    {
 
-    }
+//    }
 
-    public static Archive Create(ArchiveInfo info, AltitudeMapData mapData)
-    {
-        var altitudeMap = new AltitudeMap(mapData);
-        var landMap = new LandMap();
-        landMap.Relocate(altitudeMap);
-        using var thumbnail = new Bitmap(landMap.Width, landMap.Height);
-        var pThumbnail = new PointBitmap(thumbnail);
-        pThumbnail.LockBits();
-        for (int i = 0; i < landMap.Width; i++)
-        {
-            for (int j = 0; j < landMap.Height; j++)
-            {
-                var color = landMap[new(i, j)].Color;
-                pThumbnail.SetPixel(i, j, color);
-            }
-        }
-        pThumbnail.UnlockBits();
-        thumbnail.Save(info.GetOverviewPath());
-        return new(info, altitudeMap);
-    }
+//    public static Archive Create(ArchiveInfo info, AltitudeMapData mapData)
+//    {
+//        var altitudeMap = new AltitudeMap(mapData);
+//        var landMap = new LandMap();
+//        landMap.Relocate(altitudeMap);
+//        using var thumbnail = new Bitmap(landMap.Width, landMap.Height);
+//        var pThumbnail = new PointBitmap(thumbnail);
+//        pThumbnail.LockBits();
+//        for (int i = 0; i < landMap.Width; i++)
+//        {
+//            for (int j = 0; j < landMap.Height; j++)
+//            {
+//                var color = landMap[new(i, j)].Color;
+//                pThumbnail.SetPixel(i, j, color);
+//            }
+//        }
+//        pThumbnail.UnlockBits();
+//        thumbnail.Save(info.GetThumbnailPath());
+//        return new(info, altitudeMap);
+//    }
 
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteObject(Info);
-        serializer.WriteObject(AltitudeMap);
-        serializer.WriteObjects(nameof(SourceLands), SourceLands);
-    }
+//    public void Serialize(SsSerializer serializer)
+//    {
+//        serializer.WriteObject(Info);
+//        serializer.WriteObject(AltitudeMap);
+//        serializer.WriteObjects(nameof(SourceLands), SourceLands);
+//    }
 
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        deserializer.ReadObject(Info);
-        deserializer.ReadObject(AltitudeMap);
-        SourceLands = deserializer.ReadObjects<SourceLand>(nameof(SourceLands));
-    }
-}
+//    public void Deserialize(SsDeserializer deserializer)
+//    {
+//        deserializer.ReadObject(Info);
+//        deserializer.ReadObject(AltitudeMap);
+//        SourceLands = deserializer.ReadObjects<SourceLand>(nameof(SourceLands));
+//    }
+//}

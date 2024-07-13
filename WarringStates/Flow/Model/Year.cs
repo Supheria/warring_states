@@ -8,7 +8,7 @@ internal class Year
 
     internal Year(int value)
     {
-        Value = value < 0 ? throw LoopException.ValueOutRange<Year>(value) : value;
+        Value = value < 0 ? throw FlowException.ValueOutRange<Year>(value) : value;
         SetIsLeap();
     }
 

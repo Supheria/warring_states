@@ -1,10 +1,9 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Map.Terrain;
 
-namespace WarringStates.Terrain;
+namespace WarringStates.Map.Terrain;
 
-public partial class SourceLand : ILand, ISsSerializable
+public class SourceLand : ILand, ISsSerializable
 {
     public string LocalName => nameof(SourceLand);
 
@@ -46,7 +45,7 @@ public partial class SourceLand : ILand, ISsSerializable
 
     Dictionary<Coordinate, Directions> Points { get; set; }
 
-    private SourceLand(Dictionary<Coordinate, Directions> points, Types type, List<Product> products)
+    public SourceLand(Dictionary<Coordinate, Directions> points, Types type, List<Product> products)
     {
         Type = type;
         Points = points;

@@ -1,7 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Graph;
-using WarringStates.Terrain;
 
 namespace WarringStates.Map.Terrain;
 
@@ -46,29 +44,6 @@ public class SingleLand : ILand
     {
         Type = AltitudeFilter(altitudeRatio, random);
         Point = point;
-    }
-
-    public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand)
-    {
-        if (g is null)
-            return 0;
-        if (Type.Equals(lastLand?.Type))
-            return 0;
-        var count = 0;
-        if (lastLand is SourceLand)
-        {
-            if (cell.RealRect.CutRectInRange(drawRect, out var r))
-            {
-                g?.FillRectangle(new SolidBrush(backColor), r.Value);
-                count++;
-            }
-        }
-        if (cell.CenterRealRect.CutRectInRange(drawRect, out var rect))
-        {
-            g?.FillRectangle(new SolidBrush(Colors[Type]), rect.Value);
-            count++;
-        }
-        return count;
     }
 
     private static Types AltitudeFilter(double altitudeRatio, double random)

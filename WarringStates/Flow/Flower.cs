@@ -1,10 +1,4 @@
-﻿using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Timer = System.Windows.Forms.Timer;
+﻿using Timer = System.Timers.Timer;
 
 namespace WarringStates.Flow;
 
@@ -23,23 +17,23 @@ public class Flower
 
     protected Timer Timer { get; } = new();
 
-    int IntervalNormal { get; }
+    double IntervalNormal { get; }
 
-    int IntervalHalf { get; }
+    double IntervalHalf { get; }
 
-    int Interval2x { get; }
+    double Interval2x { get; }
 
-    int Interval3x { get; }
+    double Interval3x { get; }
 
-    protected Flower(int normalInterval)
+    protected Flower(double normalInterval)
     {
         IntervalNormal = normalInterval;
-        IntervalHalf = normalInterval * 2;
-        Interval2x = (normalInterval * 0.5).ToRoundInt();
-        Interval3x = (normalInterval * 0.333).ToRoundInt();
+        IntervalHalf = normalInterval * 2d;
+        Interval2x = normalInterval / 2d;
+        Interval3x = normalInterval / 3d;
     }
 
-    protected int GetInterval()
+    protected double GetInterval()
     {
         return Speed switch
         {

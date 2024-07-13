@@ -1,6 +1,4 @@
-﻿using WarringStates.Graph;
-
-namespace WarringStates.Map.Terrain;
+﻿namespace WarringStates.Map.Terrain;
 
 public interface ILand
 {
@@ -13,5 +11,5 @@ public interface ILand
 
     public Color Color { get; }
 
-    public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand);
+    //public int DrawCell(Graphics? g, LatticeGrid.Cell cell, Rectangle drawRect, Color backColor, ILand? lastLand);
 }
