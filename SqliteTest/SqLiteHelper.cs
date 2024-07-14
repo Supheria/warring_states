@@ -1,14 +1,18 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.TypeGeneral;
 using SqliteTest;
 using System.Data.SQLite;
+using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
+using static System.Runtime.InteropServices.Marshalling.IIUnknownCacheStrategy;
 
 /// <summary>
 /// SQLite 操作类
 /// </summary>
 class SqLiteHelper
 {
-    public const int Version = 3;
+    public static Volume Version = new("3");
     /// <summary>
     /// 数据库连接定义
     /// </summary>
@@ -28,16 +32,15 @@ class SqLiteHelper
     /// 构造函数
     /// </summary>
     /// <param name="connectionString">连接SQLite库字符串</param>
-    public SqLiteHelper(string filePath)
+    public SqLiteHelper(Volume filePath)
     {
         var query = new QueryComposer()
-            .Append(StringTable.Data)
-            .Append(StringTable.Source)
-            .Append(SignTable.Equal)
+            .Append(Keywords.DataSource)
+            .Append(Keywords.Equal)
             .Append(filePath)
             .Finish()
-            .Append(StringTable.Version)
-            .Append(SignTable.Equal)
+            .Append(Keywords.Version)
+            .Append(Keywords.Equal)
             .Append(Version)
             .Finish()
             .ToString();
@@ -63,12 +66,19 @@ class SqLiteHelper
     /// </summary>
     /// <returns>The query.</returns>
     /// <param name="queryString">SQL命令字符串</param>
-    public SQLiteDataReader ExecuteQuery(QueryComposer queryComposer)
+    public SQLiteDataReader? ExecuteQuery(QueryComposer queryComposer)
     {
-        Command = Connection.CreateCommand();
-        Command.CommandText = queryComposer.ToString();
-        DataReader = Command.ExecuteReader();
-        return DataReader;
+        try
+        {
+            Command = Connection.CreateCommand();
+            Command.CommandText = queryComposer.ToString();
+            DataReader = Command.ExecuteReader();
+            return DataReader;
+        }
+        catch(Exception ex)
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -89,32 +99,109 @@ class SqLiteHelper
     /// </summary>
     /// <returns>The full table.</returns>
     /// <param name="tableName">数据表名称</param>
-    public SQLiteDataReader ReadFullTable(string tableName)
+    public SQLiteDataReader? ReadFullTable(Volume tableName)
     {
         var query = new QueryComposer()
-            .Append(StringTable.Select)
-            .Append(SignTable.Asterisk)
-            .Append(StringTable.From)
+            .Append(Keywords.Select)
+            .Append(Keywords.Any)
+            .Append(Keywords.From)
             .Append(tableName)
             .Finish();
         return ExecuteQuery(query);
     }
 
-
-    /// <summary>
-    /// 向指定数据表中插入数据
-    /// </summary>
-    /// <returns>The values.</returns>
-    /// <param name="tableName">数据表名称</param>
-    /// <param name="values">插入的数值</param>
-    public SQLiteDataReader InsertValues(string tableName, params string[] values)
+    public SQLiteDataReader? CreateTable(Type type)
     {
-        ReadFullTable(tableName).ThrowIfFieldCountNotMatch(values);
+        return CreateSubTable(type, null);
+    }
+
+    private SQLiteDataReader? CreateSubTable(Type type, string? tableName)
+    {
+        var table = type.GetCustomAttribute<Table>();
+        if (table is null)
+            return null;
+        var fields = new List<Field>();
+        if (tableName is null)
+            tableName = table.Name ?? type.Name;
+        else
+        {
+            tableName = tableName + SignTable.Dot + (table.Name ?? type.Name);
+            fields.Add(new("sub-module stamp"));
+        }
+        foreach (var property in type.GetProperties())
+        {
+            if (property.GetCustomAttribute<TableFieldIgnore>() is not null)
+                continue;
+            var tableField = property.GetCustomAttribute<TableField>();
+            if (tableField is null)
+                CreateSubTable(property.PropertyType, tableName);
+            var fieldName = tableField?.Name ?? property.Name;
+            fields.Add(new(fieldName));
+        }
         var query = new QueryComposer()
-            .Append(StringTable.InsertInto)
+            .Append(Keywords.CreateTableNotExists)
+            .Append(new(tableName))
+            .AppendFields(fields.ToArray())
+            .Finish();
+        return ExecuteQuery(query);
+    }
+
+    private static string? SerializeObject(object? obj)
+    {
+        return obj switch
+        {
+            ISsSerializable iss => iss.ToSsString(),
+            object o => o.ToString(),
+            _ => null
+        };
+    }
+
+    public SQLiteDataReader? InsertFieldValues(object obj)
+    {
+        InsertSubFieldValues(obj, null, null, out var reader);
+        return reader;
+    }
+
+    private bool InsertSubFieldValues(object obj, string? tableName, Volume? stamp, out SQLiteDataReader? reader)
+    {
+        reader = null;
+        var type = obj.GetType();
+        var table = type.GetCustomAttribute<Table>();
+        if (table is null)
+            return false;
+        if (tableName is null)
+            tableName = table.Name ?? type.Name;
+        else
+            tableName = tableName + SignTable.Dot + (table.Name ?? type.Name);
+        var fieldValues = new List<Volume>();
+        if (stamp is not null)
+            fieldValues.Add(stamp);
+        stamp = new Volume(DateTime.Now.ToBinary().ToString());
+        foreach (var property in type.GetProperties())
+        {
+            if (property.GetCustomAttribute<TableFieldIgnore>() is not null)
+                continue;
+            var subObj = property.GetValue(obj);
+            if (subObj is null ||
+                property.GetCustomAttribute<TableField>() is not null ||
+                !InsertSubFieldValues(subObj, tableName, stamp, out _))
+            {
+                var value = SerializeObject(subObj);
+                fieldValues.Add(new(value ?? ""));
+            }
+            else
+                fieldValues.Add(stamp);
+        }
+        reader = InsertFieldValues(new(tableName), fieldValues.ToArray());
+        return true;
+    }
+
+    private SQLiteDataReader? InsertFieldValues(Volume tableName, Volume[] fieldValues)
+    {
+        var query = new QueryComposer()
+            .Append(Keywords.InsertInto)
             .Append(tableName)
-            .Append(StringTable.Values)
-            .AppendValues(values)
+            .AppendValues(fieldValues.ToArray())
             .Finish();
         return ExecuteQuery(query);
     }
@@ -129,17 +216,14 @@ class SqLiteHelper
     /// <param name="key">关键字</param>
     /// <param name="value">关键字对应的值</param>
     /// <param name="operation">运算符：=,<,>,...，默认“=”</param>
-    public SQLiteDataReader UpdateValues(string tableName, Condition condition, params ColumnField[] updateFields)
+    public SQLiteDataReader UpdateValues(Volume tableName, Condition condition, params Assignment[] updateFields)
     {
         var query = new QueryComposer()
-            .Append(StringTable.Update)
+            .Append(Keywords.Update)
             .Append(tableName)
-            .Append(StringTable.Set)
+            .Append(Keywords.Set)
             .AppendColumnFields(updateFields)
-            .Append(StringTable.Where)
-            .Append(condition.Key)
-            .Append(condition.Operate.ToChar())
-            .AppendValue(condition.Value)
+            .AppendCondition(condition)
             .Finish();
         return ExecuteQuery(query);
     }
@@ -151,62 +235,15 @@ class SqLiteHelper
     /// <param name="tableName">数据表名称</param>
     /// <param name="colNames">字段名</param>
     /// <param name="colValues">字段名对应的数据</param>
-    public SQLiteDataReader DeleteValuesOR(string tableName, string[] colNames, string[] colValues, string[] operations)
+    public SQLiteDataReader DeleteValues(Volume tableName, Condition[] conditions, Condition.Combos combo)
     {
-        //当字段名称和字段数值不对应时引发异常
-        if (colNames.Length != colValues.Length || operations.Length != colNames.Length || operations.Length != colValues.Length)
-        {
-            throw new SQLiteException("colNames.Length!=colValues.Length || operations.Length!=colNames.Length || operations.Length!=colValues.Length");
-        }
-
-        string queryString = "DELETE FROM " + tableName + " WHERE " + colNames[0] + operations[0] + "'" + colValues[0] + "'";
-        for (int i = 1; i < colValues.Length; i++)
-        {
-            queryString += "OR " + colNames[i] + operations[0] + "'" + colValues[i] + "'";
-        }
-        return ExecuteQuery(queryString);
-    }
-
-    /// <summary>
-    /// 删除指定数据表内的数据
-    /// </summary>
-    /// <returns>The values.</returns>
-    /// <param name="tableName">数据表名称</param>
-    /// <param name="colNames">字段名</param>
-    /// <param name="colValues">字段名对应的数据</param>
-    public SQLiteDataReader DeleteValuesAND(string tableName, string[] colNames, string[] colValues, string[] operations)
-    {
-        //当字段名称和字段数值不对应时引发异常
-        if (colNames.Length != colValues.Length || operations.Length != colNames.Length || operations.Length != colValues.Length)
-        {
-            throw new SQLiteException("colNames.Length!=colValues.Length || operations.Length!=colNames.Length || operations.Length!=colValues.Length");
-        }
-
-        string queryString = "DELETE FROM " + tableName + " WHERE " + colNames[0] + operations[0] + "'" + colValues[0] + "'";
-        for (int i = 1; i < colValues.Length; i++)
-        {
-            queryString += " AND " + colNames[i] + operations[i] + "'" + colValues[i] + "'";
-        }
-        return ExecuteQuery(queryString);
-    }
-
-
-    /// <summary>
-    /// 创建数据表
-    /// </summary> +
-    /// <returns>The table.</returns>
-    /// <param name="tableName">数据表名</param>
-    /// <param name="colNames">字段名</param>
-    /// <param name="colTypes">字段名类型</param>
-    public SQLiteDataReader CreateTable(string tableName, string[] colNames, string[] colTypes)
-    {
-        string queryString = "CREATE TABLE IF NOT EXISTS " + tableName + "( " + colNames[0] + " " + colTypes[0];
-        for (int i = 1; i < colNames.Length; i++)
-        {
-            queryString += ", " + colNames[i] + " " + colTypes[i];
-        }
-        queryString += "  ) ";
-        return ExecuteQuery(queryString);
+        var query = new QueryComposer()
+            .Append(Keywords.Delete)
+            .Append(Keywords.From)
+            .Append(tableName)
+            .AppendConditions(conditions, combo)
+            .Finish();
+        return ExecuteQuery(query);
     }
 
     /// <summary>
@@ -231,14 +268,5 @@ class SqLiteHelper
             queryString += " AND " + colNames[i] + " " + operations[i] + " " + colValues[0] + " ";
         }
         return ExecuteQuery(queryString);
-    }
-
-    /// <summary>
-    /// 本类log
-    /// </summary>
-    /// <param name="s"></param>
-    static void Log(string s)
-    {
-        Console.WriteLine("class SqLiteHelper:::" + s);
     }
 }

@@ -9,7 +9,7 @@ namespace SqliteTest;
 
 internal static class SQLiteExceptionEx
 {
-    public static void ThrowIfFieldCountNotMatch(this SQLiteDataReader reader, string[] values)
+    public static void ThrowIfFieldCountNotMatch(this SQLiteDataReader reader, Volume[] values)
     {
         if (reader.FieldCount != values.Length)
             throw new SQLiteException("insert value number is not match to column count");

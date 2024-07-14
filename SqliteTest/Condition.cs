@@ -7,19 +7,52 @@ using System.Threading.Tasks;
 
 namespace SqliteTest;
 
-internal class Condition(string key, string value, OperatorTypes operate)
+internal class Condition(Volume key, Volume value, Condition.Operates operate)
 {
-    public string Key { get; } = key;
+    public enum Combos
+    {
+        Or,
+        And,
+    }
 
-    public string Value { get; } = value;
+    public enum Operates
+    {
+        Equal,
+        Less,
+        Greater,
+    }
 
-    public OperatorTypes Operate { get; } = operate;
+    public Volume Key { get; } = key;
+
+    public Volume Value { get; } = value;
+
+    public char Operate { get; } = operate switch
+    {
+        Operates.Equal => SignTable.Equal,
+        Operates.Less => SignTable.Less,
+        Operates.Greater => SignTable.Greater,
+        _ => '\0'
+    };
+
+    public override string ToString()
+    {
+        return new StringBuilder()
+            .Append(Key)
+            .Append(Operate)
+            .Append(Value)
+            .ToString();
+    }
 }
 
-
-internal class ColumnField(string key, string value)
+internal static class ConditionCombo
 {
-    public string Key { get; set; } = key;
-
-    public string Value { get; set; } = value;
+    public static Keywords ToKeywords(this Condition.Combos combo)
+    {
+        return combo switch
+        {
+            Condition.Combos.Or => Keywords.Or,
+            Condition.Combos.And => Keywords.And,
+            _ => Keywords.Null
+        };
+    }
 }

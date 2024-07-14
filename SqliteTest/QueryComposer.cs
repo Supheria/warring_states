@@ -14,65 +14,62 @@ internal class QueryComposer
 
     public QueryComposer Finish()
     {
-        Query.Append(SignTable.Semicolon)
-            .Append(SignTable.Space);
+        Query.Append(SignTable.Semicolon);
         return this;
     }
 
-    public QueryComposer Append(string word)
+    public QueryComposer Append(Volume volume)
     {
-        Query.Append(word)
-            .Append(SignTable.Space);
+        Query.Append(volume);
         return this;
     }
 
-    public QueryComposer Append(char sign)
+    public QueryComposer AppendFields(Field[] fields)
     {
-        Query.Append(sign)
-            .Append(SignTable.Space);
+        Query.Append(SignTable.OpenParenthesis)
+            .AppendJoin(SignTable.Comma, fields, (sb, field) =>
+            {
+                sb.Append(field.Name)
+                .Append(Keywords.Text);
+            })
+            .Append(SignTable.CloseParenthesis);
         return this;
     }
 
-    public QueryComposer Append(object obj)
+    public QueryComposer AppendValues(Volume[] values)
     {
-        Query.Append(obj.ToString())
-            .Append(SignTable.Space);
-        return this;
-    }
-
-    public QueryComposer AppendValue(string value)
-    {
-        Query.Append(SignTable.SingleQuote)
-                .Append(value)
-                .Append(SignTable.SingleQuote)
-                .Append(SignTable.Space);
-        return this;
-    }
-
-    public QueryComposer AppendValues(string[] values)
-    {
+        Append(Keywords.Values);
         Query.Append(SignTable.OpenParenthesis)
             .AppendJoin(SignTable.Comma, values, (sb, value) =>
             {
-                sb.Append(SignTable.SingleQuote)
-                .Append(value)
-                .Append(SignTable.SingleQuote);
+                sb.Append(value);
             })
-            .Append(SignTable.CloseParenthesis)
-            .Append(SignTable.Space);
+            .Append(SignTable.CloseParenthesis);
         return this;
     }
 
-    public QueryComposer AppendColumnFields(ColumnField[] columnFields)
+    public QueryComposer AppendCondition(Condition condition)
     {
-        Query.AppendJoin(SignTable.Comma, columnFields, (sb, field) =>
+        Append(Keywords.Where);
+        Query.Append(condition);
+        return this;
+    }
+
+    public QueryComposer AppendConditions(Condition[] conditioins, Condition.Combos combo)
+    {
+        Append(Keywords.Where);
+        Query.AppendJoin(combo.ToKeywords().ToString(), conditioins, (sb, condition) =>
         {
-            sb.Append(field.Key)
-            .Append(SignTable.Equal)
-            .Append(SignTable.SingleQuote)
-            .Append(field.Value)
-            .Append(SignTable.SingleQuote)
-            .Append(SignTable.Space);
+            Query.Append(condition);
+        });
+        return this;
+    }
+
+    public QueryComposer AppendColumnFields(Assignment[] assignments)
+    {
+        Query.AppendJoin(SignTable.Comma, assignments, (sb, assignment) =>
+        {
+            sb.Append(assignment);
         });
         return this;
     }
