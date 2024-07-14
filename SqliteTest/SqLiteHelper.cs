@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using SqliteTest;
+using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
 using System.Text;
@@ -13,6 +14,8 @@ using static System.Runtime.InteropServices.Marshalling.IIUnknownCacheStrategy;
 class SqLiteHelper
 {
     public static Volume Version = new("3");
+
+    static string SubModulStampField = "sub-module stamp";
     /// <summary>
     /// 数据库连接定义
     /// </summary>
@@ -66,27 +69,7 @@ class SqLiteHelper
     /// </summary>
     /// <returns>The query.</returns>
     /// <param name="queryString">SQL命令字符串</param>
-    public SQLiteDataReader? ExecuteQuery(QueryComposer queryComposer)
-    {
-        try
-        {
-            Command = Connection.CreateCommand();
-            Command.CommandText = queryComposer.ToString();
-            DataReader = Command.ExecuteReader();
-            return DataReader;
-        }
-        catch(Exception ex)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 执行SQL命令
-    /// </summary>
-    /// <returns>The query.</returns>
-    /// <param name="queryString">SQL命令字符串</param>
-    public SQLiteDataReader ExecuteQuery(string queryComposer)
+    public SQLiteDataReader ExecuteQuery(QueryComposer queryComposer)
     {
         Command = Connection.CreateCommand();
         Command.CommandText = queryComposer.ToString();
@@ -94,28 +77,82 @@ class SqLiteHelper
         return DataReader;
     }
 
+    public object[] ReadFullTable(Type type)
+    {
+        return ReadFullTable(type, null, null);
+    }
+
     /// <summary>
     /// 读取整张数据表
     /// </summary>
     /// <returns>The full table.</returns>
     /// <param name="tableName">数据表名称</param>
-    public SQLiteDataReader? ReadFullTable(Volume tableName)
+    private object[] ReadFullTable(Type type, string? tableName, string? stamp)
     {
+        var objects = new List<object>();
+        var table = type.GetCustomAttribute<Table>();
+        if (table is null)
+            return objects.ToArray();
+        if (tableName is null)
+            tableName = table.Name ?? type.Name;
+        else
+            tableName = tableName + SignTable.Dot + (table.Name ?? type.Name);
         var query = new QueryComposer()
             .Append(Keywords.Select)
             .Append(Keywords.Any)
             .Append(Keywords.From)
-            .Append(tableName)
-            .Finish();
-        return ExecuteQuery(query);
+            .Append(new(tableName));
+        if (stamp is not null)
+            query.AppendCondition(new(new(SubModulStampField), new(stamp), Condition.Operates.Equal));
+        query.Finish();
+        var reader = ExecuteQuery(query);
+        while(reader.Read())
+        {
+            var obj = Assembly.GetExecutingAssembly().CreateInstance(type.FullName ?? "");
+            if (obj is null)
+                continue;
+            foreach (var property in type.GetProperties())
+            {
+                if (property.GetCustomAttribute<TableFieldIgnore>() is not null)
+                    continue;
+                var subTable = property.PropertyType.GetCustomAttribute<Table>();
+                if (subTable is not null)
+                {
+                    stamp = reader.GetInt64(reader.GetOrdinal(subTable.Name ?? property.Name)).ToString();
+                    var subObj = ReadFullTable(property.PropertyType, tableName, stamp);
+                    property.SetValue(obj, subObj[0]);
+                    continue;
+                }
+                var ordinal = reader.GetOrdinal(property.GetCustomAttribute<TableField>()?.Name ?? property.Name);
+                property.SetValue(obj, FromSqlType(property.PropertyType, reader, ordinal));
+            }
+            objects.Add(obj);
+        }
+        return objects.ToArray();
+    }
+
+    private object FromSqlType(Type type, SQLiteDataReader reader, int ordinal)
+    {
+        if (type == typeof(short))
+            return reader.GetInt16(ordinal);
+        else if (type == typeof(int))
+            return reader.GetInt32(ordinal);
+        else if (type == typeof(long))
+            return reader.GetInt64(ordinal);
+        else if (type == typeof(float))
+            return reader.GetFloat(ordinal);
+        else if (type == typeof(double))
+            return reader.GetDouble(ordinal);
+        else
+            return reader.GetString(ordinal);
     }
 
     public SQLiteDataReader? CreateTable(Type type)
     {
-        return CreateSubTable(type, null);
+        return CreateTable(type, null);
     }
 
-    private SQLiteDataReader? CreateSubTable(Type type, string? tableName)
+    private SQLiteDataReader? CreateTable(Type type, string? tableName)
     {
         var table = type.GetCustomAttribute<Table>();
         if (table is null)
@@ -126,17 +163,21 @@ class SqLiteHelper
         else
         {
             tableName = tableName + SignTable.Dot + (table.Name ?? type.Name);
-            fields.Add(new("sub-module stamp"));
+            fields.Add(new(SubModulStampField, Keywords.Integer));
         }
         foreach (var property in type.GetProperties())
         {
             if (property.GetCustomAttribute<TableFieldIgnore>() is not null)
                 continue;
+            var subTable = property.PropertyType.GetCustomAttribute<Table>();
+            if (subTable is not null)
+            {
+                CreateTable(property.PropertyType, tableName);
+                fields.Add(new(subTable.Name ?? property.Name, Keywords.Integer));
+                continue;
+            }
             var tableField = property.GetCustomAttribute<TableField>();
-            if (tableField is null)
-                CreateSubTable(property.PropertyType, tableName);
-            var fieldName = tableField?.Name ?? property.Name;
-            fields.Add(new(fieldName));
+            fields.Add(new(tableField?.Name ?? property.Name, ToSqlType(property.PropertyType)));
         }
         var query = new QueryComposer()
             .Append(Keywords.CreateTableNotExists)
@@ -146,29 +187,31 @@ class SqLiteHelper
         return ExecuteQuery(query);
     }
 
-    private static string? SerializeObject(object? obj)
+    private Keywords ToSqlType(Type type)
     {
-        return obj switch
-        {
-            ISsSerializable iss => iss.ToSsString(),
-            object o => o.ToString(),
-            _ => null
-        };
+        if (type == typeof(short) ||
+            type == typeof(int) ||
+            type == typeof(long))
+            return Keywords.Integer;
+        if (type == typeof(float) ||
+            type == typeof(double))
+            return Keywords.Real;
+        return Keywords.Text;
     }
 
-    public SQLiteDataReader? InsertFieldValues(object obj)
+    public SQLiteDataReader? InsertFields(object obj)
     {
-        InsertSubFieldValues(obj, null, null, out var reader);
-        return reader;
+        return InsertFields(obj, null, null);
     }
 
-    private bool InsertSubFieldValues(object obj, string? tableName, Volume? stamp, out SQLiteDataReader? reader)
+    private SQLiteDataReader? InsertFields(object? obj, string? tableName, Volume? stamp)
     {
-        reader = null;
+        if (obj is null)
+            return null;
         var type = obj.GetType();
         var table = type.GetCustomAttribute<Table>();
         if (table is null)
-            return false;
+            return null;
         if (tableName is null)
             tableName = table.Name ?? type.Name;
         else
@@ -176,34 +219,31 @@ class SqLiteHelper
         var fieldValues = new List<Volume>();
         if (stamp is not null)
             fieldValues.Add(stamp);
-        stamp = new Volume(DateTime.Now.ToBinary().ToString());
+        stamp = GetStamp();
         foreach (var property in type.GetProperties())
         {
             if (property.GetCustomAttribute<TableFieldIgnore>() is not null)
                 continue;
             var subObj = property.GetValue(obj);
-            if (subObj is null ||
-                property.GetCustomAttribute<TableField>() is not null ||
-                !InsertSubFieldValues(subObj, tableName, stamp, out _))
+            if (property.PropertyType.GetCustomAttribute<Table>() is not null)
             {
-                var value = SerializeObject(subObj);
-                fieldValues.Add(new(value ?? ""));
-            }
-            else
+                InsertFields(subObj, tableName, stamp);
                 fieldValues.Add(stamp);
+                continue;
+            }
+            fieldValues.Add(new(subObj?.ToString() ?? ""));
         }
-        reader = InsertFieldValues(new(tableName), fieldValues.ToArray());
-        return true;
+        var query = new QueryComposer()
+             .Append(Keywords.InsertInto)
+             .Append(new(tableName))
+             .AppendValues(fieldValues.ToArray())
+             .Finish();
+        return ExecuteQuery(query);
     }
 
-    private SQLiteDataReader? InsertFieldValues(Volume tableName, Volume[] fieldValues)
+    private Volume GetStamp()
     {
-        var query = new QueryComposer()
-            .Append(Keywords.InsertInto)
-            .Append(tableName)
-            .AppendValues(fieldValues.ToArray())
-            .Finish();
-        return ExecuteQuery(query);
+        return new(DateTime.Now.ToBinary().ToString());
     }
 
     /// <summary>
@@ -255,18 +295,18 @@ class SqLiteHelper
     /// <param name="colNames">Col names.</param>
     /// <param name="operations">Operations.</param>
     /// <param name="colValues">Col values.</param>
-    public SQLiteDataReader ReadTable(string tableName, string[] items, string[] colNames, string[] operations, string[] colValues)
-    {
-        string queryString = "SELECT " + items[0];
-        for (int i = 1; i < items.Length; i++)
-        {
-            queryString += ", " + items[i];
-        }
-        queryString += " FROM " + tableName + " WHERE " + colNames[0] + " " + operations[0] + " " + colValues[0];
-        for (int i = 0; i < colNames.Length; i++)
-        {
-            queryString += " AND " + colNames[i] + " " + operations[i] + " " + colValues[0] + " ";
-        }
-        return ExecuteQuery(queryString);
-    }
+    //public SQLiteDataReader ReadTable(string tableName, string[] items, string[] colNames, string[] operations, string[] colValues)
+    //{
+    //    string queryString = "SELECT " + items[0];
+    //    for (int i = 1; i < items.Length; i++)
+    //    {
+    //        queryString += ", " + items[i];
+    //    }
+    //    queryString += " FROM " + tableName + " WHERE " + colNames[0] + " " + operations[0] + " " + colValues[0];
+    //    for (int i = 0; i < colNames.Length; i++)
+    //    {
+    //        queryString += " AND " + colNames[i] + " " + operations[i] + " " + colValues[0] + " ";
+    //    }
+    //    return ExecuteQuery(queryString);
+    //}
 }

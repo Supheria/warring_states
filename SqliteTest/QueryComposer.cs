@@ -29,8 +29,7 @@ internal class QueryComposer
         Query.Append(SignTable.OpenParenthesis)
             .AppendJoin(SignTable.Comma, fields, (sb, field) =>
             {
-                sb.Append(field.Name)
-                .Append(Keywords.Text);
+                sb.Append(field);
             })
             .Append(SignTable.CloseParenthesis);
         return this;

@@ -1,3 +1,4 @@
+using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using SqliteTest;
 using System.Data.SQLite;
@@ -11,10 +12,14 @@ partial class Program
     {
         sql = new SqLiteHelper(new("..\\mydb.db"));
 
-        var user = new User();
+        var user = new User(12345, "hello", 3.1415926);
+        user.UserB = new();
+        user.UserB.UserC = new();
+        user.UserB.UserC.Font = new FontData().ToSsString();
         //创建名为table1的数据表
         sql.CreateTable(user.GetType());
-        sql.InsertFieldValues(user);
+        sql.InsertFields(user);
+        var a = sql.ReadFullTable(user.GetType());
         //插入两条数据
         //sql.InsertValues(table, new string[] { "1", "张三", "22", "Zhang@163.com" });
         //sql.InsertValues("table1", new string[] { "2", "李四", "25", "Li4@163.com" });
@@ -42,33 +47,37 @@ partial class Program
     }
 
     [Table]
-    class User
+    class User(int id, string name, double age)
     {
         [TableField(Name = "UID")]
-        public int Id { get; } = 0;
+        public int Id { get; private set; } = id;
 
-        public string Name { get; } = "test";
+        public string Name { get; private set; } = name;
 
-        public int Age { get; } = 10;
+        public double Age { get; private set; } = age;
 
         [TableFieldIgnore]
-        public string Email { get; } = "xx@xx";
+        public string Email { get; private set; } = "xx@xx";
 
-        //[TableField]
-        public UserB UserB { get; } = new();
+        public UserB UserB { get; set; } = new();
+
+        public User(): this(0, "", 0)
+        {
+
+        }
     }
 
     [Table]
     class UserB
     {
         //[Table(Name = "shit")]
-        public UserC Font { get; } = new();
+        public UserC UserC { get; set; } = new();
     }
 
     [Table]
     class UserC
     {
         //[Table(Name = "shit")]
-        public FontData Font { get; } = new();
+        public string Font { get; set; } = "";
     }
 }

@@ -26,12 +26,12 @@ internal class Condition(Volume key, Volume value, Condition.Operates operate)
 
     public Volume Value { get; } = value;
 
-    public char Operate { get; } = operate switch
+    public Keywords Operate { get; } = operate switch
     {
-        Operates.Equal => SignTable.Equal,
-        Operates.Less => SignTable.Less,
-        Operates.Greater => SignTable.Greater,
-        _ => '\0'
+        Operates.Equal => Keywords.Equal,
+        Operates.Less => Keywords.Less,
+        Operates.Greater => Keywords.Greater,
+        _ => Keywords.Null
     };
 
     public override string ToString()

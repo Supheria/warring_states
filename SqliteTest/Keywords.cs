@@ -33,7 +33,9 @@ public class Keywords
 
     public static Keywords Null { get; } = new();
     public static Keywords Any { get; } = new(SignTable.Asterisk.ToString());
-    public static Keywords Equal { get; } = new Keywords(SignTable.Equal.ToString());
+    public static Keywords Equal { get; } = new("=");
+    public static Keywords Less { get; } = new("<");
+    public static Keywords Greater { get; } = new(">");
     public static Keywords DataSource { get; } = new("Data Source");
     public static Keywords Version { get; } = new(nameof(Version));
     public static Keywords Select { get; } = new(nameof(Select));
@@ -48,5 +50,6 @@ public class Keywords
     public static Keywords And { get;} = new(nameof(And));
     public static Keywords CreateTableNotExists { get; } = new("Create Table If Not Exists");
     public static Keywords Text { get; } = new(nameof(Text));
-    public static Keywords PrimaryKey { get; } = new("Primary Key");
+    public static Keywords Integer { get; } = new(nameof(Integer));
+    public static Keywords Real { get; } = new(nameof(Real));
 }
