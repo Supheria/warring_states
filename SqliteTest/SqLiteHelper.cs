@@ -79,7 +79,7 @@ class SqLiteHelper
 
     public object[] ReadFullTable(Type type)
     {
-        return ReadFullTable(type, null, null);
+        return ReadTable(type, null, null);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ class SqLiteHelper
     /// </summary>
     /// <returns>The full table.</returns>
     /// <param name="tableName">数据表名称</param>
-    private object[] ReadFullTable(Type type, string? tableName, string? stamp)
+    private object[] ReadTable(Type type, string? tableName, string? stamp)
     {
         var objects = new List<object>();
         var table = type.GetCustomAttribute<Table>();
@@ -119,8 +119,9 @@ class SqLiteHelper
                 if (subTable is not null)
                 {
                     stamp = reader.GetInt64(reader.GetOrdinal(subTable.Name ?? property.Name)).ToString();
-                    var subObj = ReadFullTable(property.PropertyType, tableName, stamp);
-                    property.SetValue(obj, subObj[0]);
+                    var subObj = ReadTable(property.PropertyType, tableName, stamp);
+                    if (subObj is not null)
+                        property.SetValue(obj, subObj[0]);
                     continue;
                 }
                 var ordinal = reader.GetOrdinal(property.GetCustomAttribute<TableField>()?.Name ?? property.Name);
@@ -131,7 +132,7 @@ class SqLiteHelper
         return objects.ToArray();
     }
 
-    private object FromSqlType(Type type, SQLiteDataReader reader, int ordinal)
+    private object? FromSqlType(Type type, SQLiteDataReader reader, int ordinal)
     {
         if (type == typeof(short))
             return reader.GetInt16(ordinal);
@@ -143,6 +144,12 @@ class SqLiteHelper
             return reader.GetFloat(ordinal);
         else if (type == typeof(double))
             return reader.GetDouble(ordinal);
+        else if (type == typeof(ISsSerializable))
+        {
+            var obj = Assembly.GetExecutingAssembly().CreateInstance(type.FullName ?? "");
+            (obj as ISsSerializable)?.ParseSs(reader.GetString(ordinal));
+            return obj;
+        }
         else
             return reader.GetString(ordinal);
     }
@@ -231,7 +238,7 @@ class SqLiteHelper
                 fieldValues.Add(stamp);
                 continue;
             }
-            fieldValues.Add(new(subObj?.ToString() ?? ""));
+            fieldValues.Add(new(GetSqlString(subObj)));
         }
         var query = new QueryComposer()
              .Append(Keywords.InsertInto)
@@ -241,9 +248,18 @@ class SqLiteHelper
         return ExecuteQuery(query);
     }
 
-    private Volume GetStamp()
+    private static Volume GetStamp()
     {
         return new(DateTime.Now.ToBinary().ToString());
+    }
+
+    private static string GetSqlString(object? obj)
+    {
+        return obj switch
+        {
+            ISsSerializable iss => iss.ToSsString(),
+            _ => obj?.ToString() ?? ""
+        };
     }
 
     /// <summary>

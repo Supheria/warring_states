@@ -13,9 +13,6 @@ partial class Program
         sql = new SqLiteHelper(new("..\\mydb.db"));
 
         var user = new User(12345, "hello", 3.1415926);
-        user.UserB = new();
-        user.UserB.UserC = new();
-        user.UserB.UserC.Font = new FontData().ToSsString();
         //创建名为table1的数据表
         sql.CreateTable(user.GetType());
         sql.InsertFields(user);
@@ -70,8 +67,8 @@ partial class Program
     [Table]
     class UserB
     {
-        //[Table(Name = "shit")]
-        public UserC UserC { get; set; } = new();
+        [TableField(Name = "shit")]
+        public FontData Font { get; private set; } = new();
     }
 
     [Table]
