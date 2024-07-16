@@ -1,16 +1,12 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral.Convert;
-using LocalUtilities.TypeToolKit.Text;
+﻿using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.Server.User;
 
-internal class ArchiveInfo : ISsSerializable
+internal class ArchiveInfo
 {
     public string Id { get; private set; } = "";
 
     public string RootPath { get; private set; } = "";
-
-    public string LocalName => nameof(ArchiveInfo);
 
     public string WorldName { get; private set; } = "";
 
@@ -34,26 +30,6 @@ internal class ArchiveInfo : ISsSerializable
     public ArchiveInfo()
     {
 
-    }
-
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(WorldName), WorldName);
-        serializer.WriteTag(nameof(WorldSize), WorldSize.ToArrayString());
-        serializer.WriteTag(nameof(CreateTime), CreateTime.ToString());
-        serializer.WriteTag(nameof(LastSaveTime), LastSaveTime.ToString());
-        serializer.WriteTag(nameof(CurrentSpan), CurrentSpan.ToString());
-    }
-
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        WorldName = deserializer.ReadTag(nameof(WorldName));
-        WorldSize = deserializer.ReadTag(nameof(WorldSize), s => s.ToSize());
-        CreateTime = deserializer.ReadTag(nameof(CreateTime), s => s.ToLong());
-        LastSaveTime = deserializer.ReadTag(nameof(LastSaveTime), s => s.ToLong());
-        CurrentSpan = deserializer.ReadTag(nameof(CurrentSpan), s => s.ToInt());
-        Id = (WorldName + CreateTime).ToMd5HashString();
-        RootPath = Path.Combine(LocalArchives.RootPath, Id);
     }
 
     public void UpdateLastSaveTime()

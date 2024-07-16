@@ -15,9 +15,7 @@ public class SingleLand : ILand
 
     public class SingleLandColors : ColorSelector
     {
-        public override string LocalName => nameof(SingleLandColors);
-
-        protected override Dictionary<Enum, Color> Colors { get; } = new()
+        protected override Dictionary<Enum, Color> Colors { get; set; } = new()
         {
             [Types.Plain] = Color.LightYellow,
             [Types.Wood] = Color.LimeGreen,

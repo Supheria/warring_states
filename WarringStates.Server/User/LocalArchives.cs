@@ -1,5 +1,5 @@
 ﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.SimpleScript;
 using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.Server.User;
@@ -31,7 +31,7 @@ internal static class LocalArchives
     {
         try
         {
-            Archives = SerializeTool.LoadFromSimpleScript<ArchiveInfo>(nameof(Archives), RegisterPath).ToList();
+            Archives = SerializeTool.DeserializeFile<List<ArchiveInfo>>(RegisterPath, nameof(Archives)) ?? [];
         }
         catch
         {
@@ -137,6 +137,6 @@ internal static class LocalArchives
 
     private static void Save()
     {
-        Archives.SaveToSimpleScript(nameof(Archives), true, RegisterPath);
+        Archives.SerializeFile(true, RegisterPath, nameof(Archives));
     }
 }

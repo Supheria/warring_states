@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeToolKit.Text;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -61,7 +60,7 @@ partial class ServerService
                 throw new NetException(ServiceCode.CannotAddFileToProcess, filePath);
             HandleUploadStart();
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             CallbackSuccess(sender);
         }
         catch (Exception ex)
@@ -87,7 +86,7 @@ partial class ServerService
             {
                 HandleUploading(fileArgs.FileLength, autoFile.Position);
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
                 CallbackSuccess(sender);
             }
             else
@@ -96,7 +95,7 @@ partial class ServerService
                 HandleUploaded(fileArgs.StartTime);
                 var startTime = BitConverter.GetBytes(fileArgs.StartTime.ToBinary());
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Finish)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
                 CallbackSuccess(sender);
             }
         }
@@ -131,7 +130,7 @@ partial class ServerService
             fileArgs.FileLength = autoFile.Length;
             fileArgs.PacketLength = autoFile.Length > DataLengthMax ? DataLengthMax : autoFile.Length;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             CallbackSuccess(sender);
         }
         catch (Exception ex)
@@ -155,7 +154,7 @@ partial class ServerService
             HandleDownloading(autoFile.Length, autoFile.Position);
             fileArgs.FilePosition = autoFile.Position;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, count)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             CallbackSuccess(sender);
         }
         catch (Exception ex)

@@ -1,17 +1,14 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeToolKit.Text;
+﻿using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
 
-public class UserInfo(string name, string password) : ISsSerializable
+public class UserInfo(string name, string password)
 {
     public string Name { get; private set; } = name;
 
-    public string Id { get; private set; } = name.ToMd5HashString();
+    public string Id => Name.ToMd5HashString();
 
     public string Password { get; private set; } = password.ToMd5HashString();
-
-    public string LocalName => nameof(UserInfo);
 
     public UserInfo() : this("", "")
     {
@@ -45,18 +42,5 @@ public class UserInfo(string name, string password) : ISsSerializable
     public override int GetHashCode()
     {
         throw new NotImplementedException();
-    }
-
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(Name), Name);
-        serializer.WriteTag(nameof(Password), Password);
-    }
-
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        Name = deserializer.ReadTag(nameof(Name));
-        Password = deserializer.ReadTag(nameof(Password));
-        Id = Name.ToMd5HashString();
     }
 }

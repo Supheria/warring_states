@@ -10,13 +10,15 @@ namespace WarringStates.Client.UI.Component;
 
 partial class GamePlane
 {
+    public delegate void DrawImageHandler();
+
     bool DoDragGraph { get; set; } = false;
 
     Point DragStartPoint { get; set; } = new();
 
     static int DragMoveSensibility => LatticeGrid.CellEdgeLength;
 
-    public OnComponentRunning? OnDragImage { get; set; }
+    public DrawImageHandler? OnDragImage { get; set; }
 
     private void AddOperations()
     {

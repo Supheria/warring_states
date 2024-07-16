@@ -7,11 +7,13 @@ namespace WarringStates.Client.UI.Component;
 
 partial class Overview
 {
+    public delegate void DrawImageHandler();
+
     bool DoDragFocus { get; set; } = false;
 
     Point DragStartPoint { get; set; } = new();
 
-    public OnComponentRunning? OnDragImage { get; set; }
+    public DrawImageHandler? OnDragImage { get; set; }
 
     private void AddOperations()
     {

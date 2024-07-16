@@ -130,8 +130,8 @@ internal class Server : INetLogger
         {
             var userName = (OperateCode)receiver.OperateCode switch
             {
-                OperateCode.Request => receiver.GetArgs(ServiceKey.ReceiveUser),
-                OperateCode.Callback => receiver.GetArgs(ServiceKey.SendUser),
+                OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceiveUser),
+                OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendUser),
                 _ => "",
             };
             if (!UserMap.TryGetValue(userName, out var user))

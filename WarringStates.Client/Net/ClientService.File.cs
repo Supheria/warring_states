@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeToolKit.Text;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -26,7 +25,7 @@ partial class ClientService
             };
             HandleUploadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Request)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -51,7 +50,7 @@ partial class ClientService
             };
             HandleDownloadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Request)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -103,7 +102,7 @@ partial class ClientService
             fileArgs.FileLength = autoFile.Length;
             fileArgs.PacketLength = autoFile.Length > DataLengthMax ? DataLengthMax : autoFile.Length;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -125,7 +124,7 @@ partial class ClientService
             fileArgs.FileLength = autoFile.Length;
             fileArgs.FilePosition = autoFile.Position;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue, data, 0, count)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -163,7 +162,7 @@ partial class ClientService
             if (!AutoFiles.TryAdd(autoFile))
                 throw new NetException(ServiceCode.CannotAddFileToProcess, filePath);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -188,7 +187,7 @@ partial class ClientService
             {
                 HandleDownloading(fileArgs.FileLength, autoFile.Position);
                 var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
                 SendCommand(sender);
             }
             else
@@ -197,7 +196,7 @@ partial class ClientService
                 HandleDownloaded(fileArgs.StartTime);
                 var startTime = BitConverter.GetBytes(fileArgs.StartTime.ToBinary());
                 var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Finish)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs.ToSsString());
+                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
                 SendCommand(sender);
             }
         }

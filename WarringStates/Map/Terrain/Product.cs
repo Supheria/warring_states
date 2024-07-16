@@ -1,12 +1,7 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral.Convert;
+﻿namespace WarringStates.Map.Terrain;
 
-namespace WarringStates.Map.Terrain;
-
-public class Product : ISsSerializable
+public class Product
 {
-    public string LocalName => nameof(Product);
-
     public enum Types
     {
         None,
@@ -45,20 +40,4 @@ public class Product : ISsSerializable
     //        CurrentTickOnTimes = 0;
     //    }
     //}
-
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(Type), Type.ToString());
-        serializer.WriteTag(nameof(Amount), Amount.ToString());
-        serializer.WriteTag(nameof(Increment), Increment.ToString());
-        serializer.WriteTag(nameof(CurrentTickOnTimes), CurrentTickOnTimes.ToString());
-    }
-
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        Type = deserializer.ReadTag(nameof(Type), s => s.ToEnum<Types>());
-        Amount = deserializer.ReadTag(nameof(Amount), long.Parse);
-        Increment = deserializer.ReadTag(nameof(Increment), int.Parse);
-        CurrentTickOnTimes = deserializer.ReadTag(nameof(CurrentTickOnTimes), int.Parse);
-    }
 }

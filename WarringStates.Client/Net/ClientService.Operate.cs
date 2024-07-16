@@ -1,9 +1,9 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral;
 using WarringStates.Client.User;
 using WarringStates.Net.Common;
 using WarringStates.User;
+using LocalUtilities.SimpleScript.Data.Convert;
+using LocalUtilities.SimpleScript;
 
 namespace WarringStates.Client.Net;
 
@@ -35,8 +35,8 @@ partial class ClientService
             HandleMessage(receiver);
             var message = receiver.Data;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Callback)
@@ -49,8 +49,8 @@ partial class ClientService
             HandleMessage(receiver);
             var message = receiver.Data;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
             CallbackSuccess(sender);
         }
     }
@@ -82,8 +82,8 @@ partial class ClientService
         if (operateCode is OperateCode.Fetch)
         {
             ReceiveCallback(receiver);
-            var archiveInfoList = SerializeTool.ParseSs<PlayerArchiveInfo>(ServiceKey.ArchiveList, receiver.Data, 0, receiver.Data.Length);
-            LocalArchives.ReLocate(archiveInfoList);
+            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(receiver.Data, 0, receiver.Data.Length, ServiceKey.ArchiveList);
+            LocalArchives.ReLocate(archiveInfoList ?? []);
         }
     }
 }

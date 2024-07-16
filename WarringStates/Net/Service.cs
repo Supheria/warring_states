@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.IocpNet;
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeGeneral.Convert;
 using System.Text;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -156,7 +155,7 @@ public abstract class Service : INetLogger
 
     public void CallbackSuccess(CommandSender sender)
     {
-        sender.AppendArgs(ServiceKey.CallbackCode, ServiceCode.Success.ToString());
+        sender.AppendArgs(ServiceKey.CallbackCode, ServiceCode.Success);
         SendAsync(sender);
     }
 
@@ -167,7 +166,7 @@ public abstract class Service : INetLogger
             NetException iocp => iocp.ErrorCode,
             _ => ServiceCode.UnknowError,
         };
-        sender.AppendArgs(ServiceKey.CallbackCode, errorCode.ToString());
+        sender.AppendArgs(ServiceKey.CallbackCode, errorCode);
         sender.AppendArgs(ServiceKey.ErrorMessage, ex.Message);
         SendAsync(sender);
     }
@@ -183,10 +182,10 @@ public abstract class Service : INetLogger
         if (!CommandsWaitingCallback.TryGetValue(receiver.TimeStamp, out var commandSend))
             throw new NetException(ServiceCode.CannotFindSourceSendCommand);
         commandSend.Dispose();
-        var callbackCode = receiver.GetArgs(ServiceKey.CallbackCode).ToEnum<ServiceCode>();
+        var callbackCode = receiver.GetArgs<ServiceCode>(ServiceKey.CallbackCode);
         if (callbackCode is ServiceCode.Success)
             return;
-        var errorMessage = receiver.GetArgs(ServiceKey.ErrorMessage);
+        var errorMessage = receiver.GetArgs<string>(ServiceKey.ErrorMessage);
         throw new NetException(callbackCode, errorMessage);
     }
 
@@ -274,10 +273,10 @@ public abstract class Service : INetLogger
     protected void HandleMessage(CommandReceiver receiver)
     {
         var str = new StringBuilder()
-            .Append(receiver.GetArgs(ServiceKey.SendUser))
+            .Append(receiver.GetArgs<string>(ServiceKey.SendUser))
             .Append(SignTable.Sub)
             .Append(SignTable.Greater)
-            .Append(receiver.GetArgs(ServiceKey.ReceiveUser))
+            .Append(receiver.GetArgs<string>(ServiceKey.ReceiveUser))
             .Append(SignTable.Colon)
             .Append(SignTable.Space)
             .Append(ReadU8Buffer(receiver.Data))

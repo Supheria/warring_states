@@ -1,10 +1,10 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
+﻿namespace WarringStates.Client.Graph;
 
-namespace WarringStates.Client.Graph;
-
-public class CellData : ISsSerializable
+public class CellData
 {
-    public string LocalName => nameof(CellData);
+    public int EdgeLengthMin { get; set; } = 25;
+
+    public int EdgeLengthMax { get; set; } = 125;
 
     public int EdgeLength
     {
@@ -13,9 +13,9 @@ public class CellData : ISsSerializable
     }
     int _edgeLength = 30;
 
-    public int EdgeLengthMin { get; set; } = 25;
+    public double CenterPaddingFactorMin { get; set; } = 0.01;
 
-    public int EdgeLengthMax { get; set; } = 125;
+    public double CenterPaddingFactorMax { get; set; } = 0.4;
 
     public double CenterPaddingFactor
     {
@@ -23,26 +23,4 @@ public class CellData : ISsSerializable
         set => _centerPaddingFactor = value < CenterPaddingFactorMin || value > CenterPaddingFactorMax ? _centerPaddingFactor : value;
     }
     double _centerPaddingFactor = 0.2;
-
-    public double CenterPaddingFactorMin { get; set; } = 0.01;
-
-    public double CenterPaddingFactorMax { get; set; } = 0.4;
-
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(EdgeLengthMin), EdgeLengthMin.ToString());
-        serializer.WriteTag(nameof(EdgeLengthMax), EdgeLengthMax.ToString());
-        serializer.WriteTag(nameof(CenterPaddingFactorMin), CenterPaddingFactorMin.ToString());
-        serializer.WriteTag(nameof(CenterPaddingFactorMax), CenterPaddingFactorMax.ToString());
-        serializer.WriteTag(nameof(CenterPaddingFactor), CenterPaddingFactor.ToString());
-    }
-
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        EdgeLengthMin = deserializer.ReadTag(nameof(EdgeLengthMin), int.Parse);
-        EdgeLengthMax = deserializer.ReadTag(nameof(EdgeLengthMax), int.Parse);
-        CenterPaddingFactorMin = deserializer.ReadTag(nameof(CenterPaddingFactorMin), double.Parse);
-        CenterPaddingFactorMax = deserializer.ReadTag(nameof(CenterPaddingFactorMax), double.Parse);
-        CenterPaddingFactor = deserializer.ReadTag(nameof(CenterPaddingFactor), double.Parse);
-    }
 }

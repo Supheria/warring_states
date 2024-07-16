@@ -8,7 +8,7 @@ namespace WarringStates.Server.UI;
 
 internal class ServerForm : ResizeableForm
 {
-    public override string LocalName => nameof(ServerForm);
+    public override string InitializeName => nameof(ServerForm);
 
     Net.Server Server { get; set; } = new();
 

@@ -1,7 +1,8 @@
 ﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript.Serialization;
+using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Map;
+using WarringStates.Map.Terrain;
 
 namespace WarringStates.Server.User;
 
@@ -13,7 +14,7 @@ internal class Archive
 
     public AltitudeMap AltitudeMap { get; private set; } = new();
 
-    public SourceLandsOwnerMap SourceLands { get; private set; } = [];
+    public Dictionary<string, List<SourceLand>> SourceLands { get; private set; } = [];
 
     public PlayerRoster Players { get; private set; } = [];
 
@@ -54,10 +55,10 @@ internal class Archive
     {
         Directory.CreateDirectory(Info.RootPath);
         Info.UpdateLastSaveTime();
-        Info.SaveToSimpleScript(false, Info.GetArchiveInfoPath());
-        AltitudeMap.SaveToSimpleScript(false, Info.GetAltitudeMapPath());
-        SourceLands.SaveToSimpleScript(false, Info.GetSourceLandsPath());
-        Players.SaveToSimpleScript(false, Info.GetPlayersPath());
+        Info.SerializeFile(false, Info.GetArchiveInfoPath(), nameof(Info));
+        AltitudeMap.SerializeFile(false, Info.GetAltitudeMapPath(), nameof(AltitudeMap));
+        SourceLands.SerializeFile(false, Info.GetSourceLandsPath(), nameof(SourceLands));
+        Players.SerializeFile(false, Info.GetPlayersPath(), nameof(Players));
     }
 
     public static Archive Load(ArchiveInfo info)
@@ -73,16 +74,16 @@ internal class Archive
 
     public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)
     {
-        return new AltitudeMap().LoadFromSimpleScript(info.GetAltitudeMapPath());
+        return SerializeTool.DeserializeFile<AltitudeMap>(info.GetAltitudeMapPath(), nameof(AltitudeMap)) ?? new();
     }
 
-    public static SourceLandsOwnerMap LoadSourceLands(ArchiveInfo info)
+    public static Dictionary<string, List<SourceLand>> LoadSourceLands(ArchiveInfo info)
     {
-        return new SourceLandsOwnerMap().LoadFromSimpleScript(info.GetSourceLandsPath());
+        return SerializeTool.DeserializeFile<Dictionary<string, List<SourceLand>>>(info.GetSourceLandsPath(), nameof(SourceLands)) ?? [];
     }
 
     public static PlayerRoster LoadPlayers(ArchiveInfo info)
     {
-        return new PlayerRoster().LoadFromSimpleScript(info.GetPlayersPath());
+        return SerializeTool.DeserializeFile<PlayerRoster>(info.GetPlayersPath(), nameof(Players)) ?? [];
     }
 }

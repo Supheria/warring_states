@@ -1,4 +1,5 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
+﻿using LocalUtilities.FileHelper;
+using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Net;
@@ -8,8 +9,6 @@ namespace WarringStates.Client.UI;
 
 public class ClientForm : ResizeableForm
 {
-    public override string LocalName { get; }
-
     ClientService Client { get; } = new();
 
     TextBox HostAddress { get; } = new()
@@ -77,9 +76,11 @@ public class ClientForm : ResizeableForm
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
-    public ClientForm(string localName)
+    public override string InitializeName { get; }
+
+    public ClientForm(string initializeName)
     {
-        LocalName = localName;
+        InitializeName = initializeName;
         Text = "Client";
         Controls.AddRange([
             HostAddress,
@@ -202,24 +203,44 @@ public class ClientForm : ResizeableForm
         //GamePlay.StartGame();
     }
 
-    private void ClientForm_OnSaveForm(SsSerializer serializer)
+    private class ClientData : FormData
     {
-        serializer.WriteTag(nameof(HostAddress), HostAddress.Text);
-        serializer.WriteTag(nameof(HostPort), HostPort.Value.ToString());
-        serializer.WriteTag(nameof(UserName), UserName.Text);
-        serializer.WriteTag(nameof(Password), Password.Text);
-        serializer.WriteTag(nameof(DirName), DirName.Text);
-        serializer.WriteTag(nameof(FilePath), FilePath.Text);
+        public string HostAddress { get; set; } = "127.0.0.1";
+
+        public int HostPort { get; set; } = 60;
+
+        public string UserName { get; set; } = "";
+
+        public string Password { get; set; } = "";
+
+        public string DirName { get; set; } = "";
+
+        public string FilePath { get; set; } = "";
     }
 
-    private void ClientForm_OnLoadForm(SsDeserializer deserializer)
+    private FormData ClientForm_OnLoadForm()
     {
-        HostAddress.Text = deserializer.ReadTag(nameof(HostAddress));
-        HostPort.Value = deserializer.ReadTag(nameof(HostPort), int.Parse);
-        UserName.Text = deserializer.ReadTag(nameof(UserName));
-        Password.Text = deserializer.ReadTag(nameof(Password));
-        DirName.Text = deserializer.ReadTag(nameof(DirName));
-        FilePath.Text = deserializer.ReadTag(nameof(FilePath));
+        var data = SerializeTool.DeserializeFile<ClientData>(this.GetInitializeFilePath(), InitializeName) ?? new();
+        HostAddress.Text = data.HostAddress;
+        HostPort.Value = data.HostPort;
+        UserName.Text = data.UserName;
+        Password.Text = data.Password;
+        DirName.Text = data.DirName;
+        FilePath.Text = data.FilePath;
+        return data;
+    }
+
+    private FormData ClientForm_OnSaveForm()
+    {
+        return new ClientData()
+        {
+            HostAddress = HostAddress.Text,
+            HostPort = (int)HostPort.Value,
+            UserName = UserName.Text,
+            Password = Password.Text,
+            DirName = DirName.Text,
+            FilePath = FilePath.Text,
+        };
     }
 
     private void FilePathButton_Click(object? sender, EventArgs e)

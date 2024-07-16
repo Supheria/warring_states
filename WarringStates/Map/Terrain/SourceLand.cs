@@ -1,9 +1,8 @@
-﻿using LocalUtilities.SimpleScript.Serialization;
-using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.TypeGeneral;
 
 namespace WarringStates.Map.Terrain;
 
-public class SourceLand : ILand, ISsSerializable
+public class SourceLand : ILand
 {
     public string LocalName => nameof(SourceLand);
 
@@ -21,9 +20,7 @@ public class SourceLand : ILand, ISsSerializable
 
     public class SourceLandColors : ColorSelector
     {
-        public override string LocalName => nameof(SourceLandColors);
-
-        protected override Dictionary<Enum, Color> Colors { get; } = new()
+        protected override Dictionary<Enum, Color> Colors { get; set; } = new()
         {
             [Types.HorseLand] = Color.LightSalmon,
             [Types.MineLand] = Color.DarkSlateGray,
@@ -37,13 +34,13 @@ public class SourceLand : ILand, ISsSerializable
 
     public static SourceLandColors Colors { get; set; } = new();
 
-    public Color Color => Colors[Type];
+    public Enum Type { get; private set; }
 
     public Dictionary<Product.Types, Product> Products { get; } = [];
 
-    public Enum Type { get; private set; }
-
     Dictionary<Coordinate, Directions> Points { get; set; }
+
+    public Color Color => Colors[Type];
 
     public SourceLand(Dictionary<Coordinate, Directions> points, Types type, List<Product> products)
     {
@@ -62,17 +59,5 @@ public class SourceLand : ILand, ISsSerializable
     public List<Coordinate> GetPoints()
     {
         return Points.Keys.ToList();
-    }
-
-    public void Serialize(SsSerializer serializer)
-    {
-        serializer.WriteTag(nameof(Type), Type.ToString());
-        serializer.WriteValues(nameof(Points), Points.ToList(), c => c.ToString());
-        serializer.WriteObjects(nameof(Products), Products.Values);
-    }
-
-    public void Deserialize(SsDeserializer deserializer)
-    {
-        throw new NotImplementedException();
     }
 }

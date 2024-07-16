@@ -66,7 +66,7 @@ internal class TestForm : ResizeableForm
         Hide();
     }
 
-    public override string LocalName => nameof(TestForm);
+    public override string InitializeName { get; } = nameof(TestForm);
 
     new RichTextBox Text { get; } = new()
     {

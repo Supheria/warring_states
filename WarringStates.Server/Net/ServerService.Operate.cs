@@ -1,10 +1,10 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeGeneral.Convert;
+using LocalUtilities.SimpleScript.Data.Convert;
 using WarringStates.Net.Common;
 using WarringStates.Server.User;
 using WarringStates.User;
+using LocalUtilities.SimpleScript;
 
 namespace WarringStates.Server.Net;
 
@@ -25,8 +25,8 @@ partial class ServerService
         {
             if (IsLogined)
                 throw new NetException(ServiceCode.UserAlreadyLogined);
-            var name = receiver.GetArgs(ServiceKey.UserName);
-            var password = receiver.GetArgs(ServiceKey.Password);
+            var name = receiver.GetArgs<string>(ServiceKey.UserName) ?? "";
+            var password = receiver.GetArgs<string>(ServiceKey.Password) ?? "";
             // TODO: validate userinfo
             UserInfo = new(name, password);
             IsLogined = true;
@@ -61,13 +61,13 @@ partial class ServerService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.Request)
         {
-            if (UserInfo?.Name == receiver.GetArgs(ServiceKey.ReceiveUser))
+            if (UserInfo?.Name == receiver.GetArgs<string>(ServiceKey.ReceiveUser))
             {
                 HandleMessage(receiver);
                 var message = receiver.Data;
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Request, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
                 SendCommand(sender);
             }
             else
@@ -75,12 +75,12 @@ partial class ServerService
         }
         else if (operateCode is OperateCode.Callback)
         {
-            if (UserInfo?.Name == receiver.GetArgs(ServiceKey.SendUser))
+            if (UserInfo?.Name == receiver.GetArgs<string>(ServiceKey.SendUser))
             {
                 var message = receiver.Data;
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs(ServiceKey.SendUser));
+                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
+                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
                 CallbackSuccess(sender);
             }
             else
@@ -118,7 +118,7 @@ partial class ServerService
                 var archiveInfo = new PlayerArchiveInfo(info.Id, info.WorldName, info.WorldSize, players.Count, ownLands);
                 archiverInfoList.Add(archiveInfo);
             }
-            var data = archiverInfoList.ToSsBuffer(ServiceKey.ArchiveList);
+            var data = archiverInfoList.Serialize(ServiceKey.ArchiveList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
             CallbackSuccess(sender);
         }
