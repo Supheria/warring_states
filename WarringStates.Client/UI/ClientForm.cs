@@ -78,6 +78,8 @@ public class ClientForm : ResizeableForm
 
     public override string InitializeName { get; }
 
+    protected override Type DataType => typeof(ClientData);
+
     public ClientForm(string initializeName)
     {
         InitializeName = initializeName;
@@ -218,16 +220,16 @@ public class ClientForm : ResizeableForm
         public string FilePath { get; set; } = "";
     }
 
-    private FormData ClientForm_OnLoadForm()
+    private void ClientForm_OnLoadForm(object? data)
     {
-        var data = SerializeTool.DeserializeFile<ClientData>(this.GetInitializeFilePath(), InitializeName) ?? new();
-        HostAddress.Text = data.HostAddress;
-        HostPort.Value = data.HostPort;
-        UserName.Text = data.UserName;
-        Password.Text = data.Password;
-        DirName.Text = data.DirName;
-        FilePath.Text = data.FilePath;
-        return data;
+        if (data is not ClientData clientData)
+            return;
+        HostAddress.Text = clientData.HostAddress;
+        HostPort.Value = clientData.HostPort;
+        UserName.Text = clientData.UserName;
+        Password.Text = clientData.Password;
+        DirName.Text = clientData.DirName;
+        FilePath.Text = clientData.FilePath;
     }
 
     private FormData ClientForm_OnSaveForm()

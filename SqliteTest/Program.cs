@@ -1,4 +1,3 @@
-using LocalUtilities.SimpleScript.Serialization;
 using LocalUtilities.TypeGeneral;
 using SqliteTest;
 using System.Data.SQLite;
@@ -69,9 +68,12 @@ partial class Program
     {
         [TableField(Name = "shit")]
         public FontData Font { get; private set; } = new();
+
+        [TableField(Name = "UserC")]
+        public UserC Fuck { get; set; } = new();
     }
 
-    [Table]
+    //[Table]
     class UserC
     {
         //[Table(Name = "shit")]
