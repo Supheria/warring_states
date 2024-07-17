@@ -37,15 +37,15 @@ internal abstract class CommandWaitingHelper() : AutoDisposeItem(ConstTabel.Comm
     private void HandleWaitingFailed()
     {
         var message = new StringBuilder()
-            .Append(SignTable.OpenBracket)
+            .Append(SignCollection.OpenBracket)
             .Append(StringTable.WaitingCallback)
-            .Append(SignTable.Space)
+            .Append(SignCollection.Space)
             .Append(StringTable.Failed)
-            .Append(SignTable.CloseBracket)
-            .Append(SignTable.Space)
+            .Append(SignCollection.CloseBracket)
+            .Append(SignCollection.Space)
             .Append(CommandCode)
-            .Append(SignTable.Comma)
-            .Append(SignTable.Space)
+            .Append(SignCollection.Comma)
+            .Append(SignCollection.Space)
             .Append(OperateCode)
             .ToString();
         this.HandleLog(message);

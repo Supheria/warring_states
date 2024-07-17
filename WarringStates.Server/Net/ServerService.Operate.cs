@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.SimpleScript.Data.Convert;
 using WarringStates.Net.Common;
 using WarringStates.Server.User;
 using WarringStates.User;
@@ -119,7 +118,7 @@ partial class ServerService
                 var archiveInfo = new PlayerArchiveInfo(info.Id, info.WorldName, info.WorldSize, players.Count, ownLands);
                 archiverInfoList.Add(archiveInfo);
             }
-            var data = archiverInfoList.Serialize(ServiceKey.ArchiveList);
+            var data = SerializeTool.Serialize(archiverInfoList, ServiceKey.ArchiveList, null);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
             CallbackSuccess(sender);
         }

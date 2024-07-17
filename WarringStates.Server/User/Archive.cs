@@ -1,6 +1,8 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
+using System;
 using WarringStates.Map;
 using WarringStates.Map.Terrain;
 
@@ -8,23 +10,24 @@ namespace WarringStates.Server.User;
 
 internal class Archive
 {
-    public string LocalName => nameof(Archive);
+    public ArchiveInfo Info { get; private set; }
 
-    public ArchiveInfo Info { get; private set; } = new();
+    public AltitudeMap AltitudeMap { get; private set; }
 
-    public AltitudeMap AltitudeMap { get; private set; } = new();
+    public RandomTable RandomTable { get; private set; }
 
     public Dictionary<string, List<SourceLand>> SourceLands { get; private set; } = [];
 
     public PlayerRoster Players { get; private set; } = [];
 
-    private Archive(ArchiveInfo info, AltitudeMap altitudeMap)
+    private Archive(ArchiveInfo info, AltitudeMap altitudeMap, RandomTable randomTable)
     {
         Info = info;
         AltitudeMap = altitudeMap;
+        RandomTable = randomTable;
     }
 
-    private Archive()
+    private Archive() : this(new(), new(), new())
     {
 
     }
@@ -34,7 +37,8 @@ internal class Archive
         Directory.CreateDirectory(Path.Combine(LocalArchives.RootPath, info.Id));
         var altitudeMap = new AltitudeMap(mapData);
         var landMap = new LandMap();
-        landMap.Relocate(altitudeMap);
+        var randomTable = new RandomTable(1000);
+        landMap.Relocate(altitudeMap, randomTable);
         using var thumbnail = new Bitmap(landMap.Width, landMap.Height);
         var pThumbnail = new PointBitmap(thumbnail);
         pThumbnail.LockBits();
@@ -48,17 +52,18 @@ internal class Archive
         }
         pThumbnail.UnlockBits();
         thumbnail.Save(info.GetThumbnailPath());
-        return new(info, altitudeMap);
+        return new(info, altitudeMap, randomTable);
     }
 
     public void Save()
     {
         Directory.CreateDirectory(Info.RootPath);
         Info.UpdateLastSaveTime();
-        Info.SerializeFile(false, Info.GetArchiveInfoPath(), nameof(Info));
-        AltitudeMap.SerializeFile(false, Info.GetAltitudeMapPath(), nameof(AltitudeMap));
-        SourceLands.SerializeFile(false, Info.GetSourceLandsPath(), nameof(SourceLands));
-        Players.SerializeFile(false, Info.GetPlayersPath(), nameof(Players));
+        SerializeTool.SerializeFile(Info, true, Info.GetArchiveInfoPath(), nameof(Info), null);
+        SerializeTool.SerializeFile(AltitudeMap, false, Info.GetAltitudeMapPath(), nameof(AltitudeMap), null);
+        SerializeTool.SerializeFile(RandomTable, false, Info.GetRandomTablePath(), nameof(RandomTable), null);
+        SerializeTool.SerializeFile(SourceLands, true, Info.GetSourceLandsPath(), nameof(SourceLands), null);
+        SerializeTool.SerializeFile(Players, true, Info.GetPlayersPath(), nameof(Players), null);
     }
 
     public static Archive Load(ArchiveInfo info)
@@ -67,6 +72,7 @@ internal class Archive
         {
             Info = info,
             AltitudeMap = LoadAltitudeMap(info),
+            RandomTable = LoadRandomTable(info),
             SourceLands = LoadSourceLands(info),
             Players = LoadPlayers(info),
         };
@@ -74,16 +80,21 @@ internal class Archive
 
     public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<AltitudeMap>(info.GetAltitudeMapPath(), nameof(AltitudeMap)) ?? new();
+        return SerializeTool.DeserializeFile<AltitudeMap>(info.GetAltitudeMapPath(), nameof(AltitudeMap), null) ?? new();
+    }
+
+    public static RandomTable LoadRandomTable(ArchiveInfo info)
+    {
+        return SerializeTool.DeserializeFile<RandomTable>(info.GetRandomTablePath(), nameof(RandomTable), null) ?? new();
     }
 
     public static Dictionary<string, List<SourceLand>> LoadSourceLands(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<Dictionary<string, List<SourceLand>>>(info.GetSourceLandsPath(), nameof(SourceLands)) ?? [];
+        return SerializeTool.DeserializeFile<Dictionary<string, List<SourceLand>>>(info.GetSourceLandsPath(), nameof(SourceLands), null) ?? [];
     }
 
     public static PlayerRoster LoadPlayers(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<PlayerRoster>(info.GetPlayersPath(), nameof(Players)) ?? [];
+        return SerializeTool.DeserializeFile<PlayerRoster>(info.GetPlayersPath(), nameof(Players), null) ?? [];
     }
 }

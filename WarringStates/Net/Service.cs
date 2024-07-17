@@ -227,7 +227,7 @@ public abstract class Service : INetLogger
         var message = new StringBuilder()
             .Append("uploading")
             .Append(Math.Round(position * 100d / fileLength, 2))
-            .Append(SignTable.Percent)
+            .Append(SignCollection.Percent)
             .ToString();
         OnProcessing?.Invoke(message);
     }
@@ -237,7 +237,7 @@ public abstract class Service : INetLogger
         var message = new StringBuilder()
             .Append("downloading")
             .Append(Math.Round(position * 100d / fileLength, 2))
-            .Append(SignTable.Percent)
+            .Append(SignCollection.Percent)
             .ToString();
         OnProcessing?.Invoke(message);
     }
@@ -247,10 +247,10 @@ public abstract class Service : INetLogger
         var span = DateTime.Now - startTime;
         var message = new StringBuilder()
             .Append("upload file success")
-            .Append(SignTable.OpenParenthesis)
+            .Append(SignCollection.OpenParenthesis)
             .Append(Math.Round(span.TotalMilliseconds, 2))
             .Append("ms")
-            .Append(SignTable.CloseParenthesis)
+            .Append(SignCollection.CloseParenthesis)
             .ToString();
         this.HandleLog(message);
         OnProcessing?.Invoke(message);
@@ -261,10 +261,10 @@ public abstract class Service : INetLogger
         var span = DateTime.Now - startTime;
         var message = new StringBuilder()
             .Append("download file success")
-            .Append(SignTable.OpenParenthesis)
+            .Append(SignCollection.OpenParenthesis)
             .Append(Math.Round(span.TotalMilliseconds, 2))
             .Append("ms")
-            .Append(SignTable.CloseParenthesis)
+            .Append(SignCollection.CloseParenthesis)
             .ToString();
         this.HandleLog(message);
         OnProcessing?.Invoke(message);
@@ -274,11 +274,11 @@ public abstract class Service : INetLogger
     {
         var str = new StringBuilder()
             .Append(receiver.GetArgs<string>(ServiceKey.SendUser))
-            .Append(SignTable.Sub)
-            .Append(SignTable.Greater)
+            .Append(SignCollection.Sub)
+            .Append(SignCollection.Greater)
             .Append(receiver.GetArgs<string>(ServiceKey.ReceiveUser))
-            .Append(SignTable.Colon)
-            .Append(SignTable.Space)
+            .Append(SignCollection.Colon)
+            .Append(SignCollection.Space)
             .Append(ReadU8Buffer(receiver.Data))
             .ToString();
         OnLog?.Invoke(str);

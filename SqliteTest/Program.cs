@@ -1,6 +1,7 @@
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Reflection;
 
 partial class Program
@@ -15,7 +16,11 @@ partial class Program
         //创建名为table1的数据表
         Database.CreateTable(user.GetType());
         Database.InsertFields(user);
+        var watch = new Stopwatch();
+        watch.Start();
         var a = Database.ReadFullTable(user.GetType());
+        watch.Stop();
+        MessageBox.Show(watch.ElapsedMilliseconds.ToString());
         //插入两条数据
         //sql.InsertValues(table, new string[] { "1", "张三", "22", "Zhang@163.com" });
         //sql.InsertValues("table1", new string[] { "2", "李四", "25", "Li4@163.com" });
@@ -77,6 +82,6 @@ partial class Program
     class UserC
     {
         //[Table(Name = "shit")]
-        public string Font { get; set; } = "";
+        public FontData Font { get; set; } = new();
     }
 }

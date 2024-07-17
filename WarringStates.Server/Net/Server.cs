@@ -24,13 +24,13 @@ internal class Server : INetLogger
     public string GetLog(string message)
     {
         return new StringBuilder()
-            .Append(SignTable.OpenParenthesis)
+            .Append(SignCollection.OpenParenthesis)
             .Append(nameof(Server))
-            .Append(SignTable.CloseParenthesis)
-            .Append(SignTable.Space)
+            .Append(SignCollection.CloseParenthesis)
+            .Append(SignCollection.Space)
             .Append(message)
-            .Append(SignTable.Space)
-            .Append(SignTable.At)
+            .Append(SignCollection.Space)
+            .Append(SignCollection.At)
             .Append(DateTime.Now.ToString(DateTimeFormat.Outlook))
             .ToString();
     }
@@ -133,7 +133,7 @@ internal class Server : INetLogger
                 OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceiveUser),
                 OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendUser),
                 _ => "",
-            };
+            } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceiveUser, ServiceKey.SendUser);
             if (!UserMap.TryGetValue(userName, out var user))
                 throw new NetException(ServiceCode.UserNotExist);
             user.DoCommand(receiver);

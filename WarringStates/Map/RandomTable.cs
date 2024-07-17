@@ -1,9 +1,12 @@
-﻿namespace WarringStates.Map;
+﻿using LocalUtilities.SimpleScript;
+
+namespace WarringStates.Map;
 
 public class RandomTable
 {
-    double[] Table { get; set; }
+    public double[] Table { get; private set; } = [];
 
+    [SsIgnore]
     int Index { get; set; } = 0;
 
     public RandomTable(int number)
@@ -14,12 +17,7 @@ public class RandomTable
             Table[i] = random.NextDouble();
     }
 
-    public RandomTable(double[] table)
-    {
-        Table = table;
-    }
-
-    public RandomTable() : this(1)
+    public RandomTable()
     {
 
     }

@@ -82,7 +82,7 @@ partial class ClientService
         if (operateCode is OperateCode.Fetch)
         {
             ReceiveCallback(receiver);
-            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(receiver.Data, 0, receiver.Data.Length, ServiceKey.ArchiveList);
+            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(receiver.Data, 0, receiver.Data.Length, ServiceKey.ArchiveList, null);
             LocalArchives.ReLocate(archiveInfoList ?? []);
         }
     }

@@ -18,7 +18,7 @@ public partial class ArchiveSelector : Displayer
 
     int ButtonHeight { get; set; } = 50;
 
-    FontData ButtonFontData { get; set; } = new(nameof(ButtonFontData))
+    FontData ButtonFontData { get; set; } = new()
     {
         Size = 25f,
         Style = FontStyle.Bold,

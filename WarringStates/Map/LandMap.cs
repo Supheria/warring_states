@@ -43,9 +43,9 @@ public class LandMap()
             return "0";
     }
 
-    public void Relocate(AltitudeMap altitudeMap, List<SourceLand> sourceLands)
+    public void Relocate(AltitudeMap altitudeMap, RandomTable randomTable, List<SourceLand> sourceLands)
     {
-        Relocate(altitudeMap);
+        Relocate(altitudeMap, randomTable);
         foreach (var sourceLand in sourceLands)
         {
             foreach (var point in sourceLand.GetPoints())
@@ -61,15 +61,14 @@ public class LandMap()
         }
     }
 
-    public void Relocate(AltitudeMap altitudeMap)
+    public void Relocate(AltitudeMap altitudeMap, RandomTable randomTable)
     {
         LandPoints.Clear();
         LandCount.Clear();
         Size = altitudeMap.Bounds.Size;
-        var random = new RandomTable(altitudeMap.RandomTable);
         foreach (var point in altitudeMap.AltitudePoints)
         {
-            var singleLand = new SingleLand(point, point.Altitude / altitudeMap.AltitudeMax, random.Next());
+            var singleLand = new SingleLand(point, point.Altitude / altitudeMap.AltitudeMax, randomTable.Next());
             LandPoints[point] = singleLand;
             if (LandCount.ContainsKey(singleLand.Type))
                 LandCount[singleLand.Type]++;
@@ -78,7 +77,7 @@ public class LandMap()
         }
         foreach (var point in altitudeMap.RiverPoints)
         {
-            if (random.Next().ApproxLessThan(0.25))
+            if (randomTable.Next().ApproxLessThan(0.25))
                 continue;
             if (LandPoints.TryGetValue(point, out var land) && land is SingleLand singleLand)
                 LandCount[singleLand.Type]--;

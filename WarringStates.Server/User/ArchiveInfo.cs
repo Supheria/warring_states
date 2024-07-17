@@ -1,12 +1,14 @@
-﻿using LocalUtilities.TypeToolKit.Text;
+﻿using LocalUtilities.SQLiteHelper;
+using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.Server.User;
 
+[Table]
 internal class ArchiveInfo
 {
-    public string Id { get; private set; } = "";
+    public string RootPath => Path.Combine(LocalArchives.RootPath, Id);
 
-    public string RootPath { get; private set; } = "";
+    public string Id { get; private set; } = "";
 
     public string WorldName { get; private set; } = "";
 
@@ -24,7 +26,6 @@ internal class ArchiveInfo
         WorldSize = worldSize;
         LastSaveTime = CreateTime = DateTime.Now.ToBinary();
         Id = (WorldName + CreateTime).ToMd5HashString();
-        RootPath = Path.Combine(LocalArchives.RootPath, Id);
     }
 
     public ArchiveInfo()
@@ -50,6 +51,11 @@ internal class ArchiveInfo
     public string GetAltitudeMapPath()
     {
         return Path.Combine(RootPath, "altitude map");
+    }
+
+    public string GetRandomTablePath()
+    {
+        return Path.Combine(RootPath, "random table");
     }
 
     public string GetSourceLandsPath()

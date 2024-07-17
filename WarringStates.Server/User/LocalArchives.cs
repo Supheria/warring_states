@@ -1,5 +1,6 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.SQLiteHelper;
 using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.Server.User;
@@ -8,9 +9,11 @@ internal static class LocalArchives
 {
     public static string RootPath { get; } = Directory.CreateDirectory(nameof(Archives)).FullName;
 
-    static string RegisterPath { get; } = Path.Combine(RootPath, nameof(Archives));
+    static string RegisterPath { get; } = Path.Combine(RootPath, nameof(Archives) + ".db");
 
     static List<ArchiveInfo> Archives { get; set; } = [];
+
+    static DatabaseOperation Database { get; } = new();
     //[
     //new("测试存档中文1"),
     //];
@@ -31,7 +34,13 @@ internal static class LocalArchives
     {
         try
         {
-            Archives = SerializeTool.DeserializeFile<List<ArchiveInfo>>(RegisterPath, nameof(Archives)) ?? [];
+            Database.Connect(RegisterPath);
+            foreach (var obj in Database.ReadFullTable(typeof(ArchiveInfo)))
+            {
+                if (obj is ArchiveInfo info)
+                    Archives.Add(info);
+            }
+            Database.Close();
         }
         catch
         {
@@ -137,6 +146,14 @@ internal static class LocalArchives
 
     private static void Save()
     {
-        Archives.SerializeFile(true, RegisterPath, nameof(Archives));
+        // TODO: use update other than delete
+        if (File.Exists(RegisterPath))
+            File.Delete(RegisterPath);
+        Database.Connect(RegisterPath);
+        Database.CreateTable(typeof(ArchiveInfo));
+        foreach (var info in Archives)
+        {
+            Database.InsertFields(info);
+        }
     }
 }

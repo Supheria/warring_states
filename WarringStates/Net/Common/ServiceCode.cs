@@ -7,6 +7,7 @@ public enum ServiceCode
     UnknowError,
     UnknownCommand,
     UnknownOperate,
+    MissingCommandArgs,
     WrongCommandFormat,
     NotLogined,
     UserAlreadyLogined,

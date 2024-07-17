@@ -93,7 +93,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var autoFile = new AutoDisposeFileStream(fileStream, fileArgs.StartTime);
@@ -115,7 +115,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, GetFileRepoPath(fileArgs.DirName, fileArgs.FileName));
             var data = new byte[fileArgs.PacketLength];
@@ -137,7 +137,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, GetFileRepoPath(fileArgs.DirName, fileArgs.FileName));
             autoFile.Dispose();
@@ -153,7 +153,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             var filePath = GetFileRepoPath(fileArgs.DirName, fileArgs.FileName);
             File.Delete(filePath);
             var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
@@ -175,7 +175,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs);
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, GetFileRepoPath(fileArgs.DirName, fileArgs.FileName));
             autoFile.Write(receiver.Data);

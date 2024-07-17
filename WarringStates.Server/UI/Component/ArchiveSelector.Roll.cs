@@ -42,7 +42,7 @@ partial class ArchiveSelector
 
     int SelectedItemIndex { get; set; } = -1;
 
-    FontData ItemFontData { get; set; } = new(nameof(ItemFontData))
+    FontData ItemFontData { get; set; } = new()
     {
         Size = 35f,
         Style = FontStyle.Bold,

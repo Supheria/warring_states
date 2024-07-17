@@ -50,15 +50,15 @@ public partial class ClientService : Service
     {
         return new StringBuilder()
             .Append(UserInfo?.Name)
-            .Append(SignTable.Colon)
-            .Append(SignTable.Space)
-            .Append(SignTable.OpenBracket)
+            .Append(SignCollection.Colon)
+            .Append(SignCollection.Space)
+            .Append(SignCollection.OpenBracket)
             .Append(Protocol.SocketInfo.LocalEndPoint)
-            .Append(SignTable.CloseBracket)
-            .Append(SignTable.Space)
+            .Append(SignCollection.CloseBracket)
+            .Append(SignCollection.Space)
             .Append(message)
-            .Append(SignTable.Space)
-            .Append(SignTable.At)
+            .Append(SignCollection.Space)
+            .Append(SignCollection.At)
             .Append(DateTime.Now.ToString(DateTimeFormat.Outlook))
             .ToString();
     }
