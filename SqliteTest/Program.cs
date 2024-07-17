@@ -1,21 +1,21 @@
+using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
-using SqliteTest;
 using System.Data.SQLite;
 using System.Reflection;
 
 partial class Program
 {
-    private static SqLiteHelper sql;
+    private static DatabaseOperation Database;
 
     static void Main(string[] args)
     {
-        sql = new SqLiteHelper(new("..\\mydb.db"));
+        Database = new(new("..\\mydb.db"));
 
         var user = new User(12345, "hello", 3.1415926);
         //创建名为table1的数据表
-        sql.CreateTable(user.GetType());
-        sql.InsertFields(user);
-        var a = sql.ReadFullTable(user.GetType());
+        Database.CreateTable(user.GetType());
+        Database.InsertFields(user);
+        var a = Database.ReadFullTable(user.GetType());
         //插入两条数据
         //sql.InsertValues(table, new string[] { "1", "张三", "22", "Zhang@163.com" });
         //sql.InsertValues("table1", new string[] { "2", "李四", "25", "Li4@163.com" });

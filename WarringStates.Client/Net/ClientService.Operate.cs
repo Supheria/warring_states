@@ -2,8 +2,8 @@
 using WarringStates.Client.User;
 using WarringStates.Net.Common;
 using WarringStates.User;
-using LocalUtilities.SimpleScript.Data.Convert;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.TypeToolKit.Convert;
 
 namespace WarringStates.Client.Net;
 

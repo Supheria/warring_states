@@ -5,6 +5,7 @@ using WarringStates.Net.Common;
 using WarringStates.Server.User;
 using WarringStates.User;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.TypeToolKit.Convert;
 
 namespace WarringStates.Server.Net;
 
