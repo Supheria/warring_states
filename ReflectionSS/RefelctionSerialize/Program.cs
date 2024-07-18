@@ -40,25 +40,23 @@ public class Program
         var a = new A()
         {
             Id = 1020324,
-            Name = "shitss",
+            Name = "你好世界",
             Ints = [0, 1, 2, 3],
             Map = new() { ["1"] = new(1), ["shit"] = new(2) },
             Bs = [new(), new()]
         };
-        var buff = a.Serialize(null);
-        var str = Encoding.UTF8.GetString(buff);
-        var st2 = 2.Serialize(null);
-        var buff3 = new Dictionary<string, List<B>>() { ["raht"] = [new(1024), new(20022)], ["SSS"] = [new()] }.Serialize("shit");
-        var st3 = Encoding.UTF8.GetString(buff3);
-        //SerializeTool.Deserialize(a.GetType(), str, null);
-        var buff4 = new List<Coordinate>() { new(1, 1), new(2, 1), new(2, 2) }.Serialize("shit");
-        var st4 = Encoding.UTF8.GetString(buff4);
-        var strt = SerializeTool.Deserialize<A>(buff, 0, buff.Length, null);
-        var dic = SerializeTool.Deserialize<Dictionary<string, List<B>>>(buff3, 0, buff3.Length, "shit");
-        var _4 = SerializeTool.Deserialize<List<Coordinate>>(buff4, 0, buff4.Length, "shit");
-        var cc = Color.Aquamarine.Serialize(null);
-        var ccStr = Encoding.UTF8.GetString(cc);
-        var color = SerializeTool.Deserialize<Color>(cc, 0, cc.Length, null);
+        var str1 = SerializeTool.Serialize(a, new(), false, null);
+        var buff1 = SerializeTool.Serialize(a, new(), null, null);
+        var __1 = SerializeTool.Deserialize<A>(new(), buff1, 0, buff1.Length, null, null);
+        var str2 = SerializeTool.Serialize(2, new(), true, null);
+        var str3 = SerializeTool.Serialize(new Dictionary<string, List<B>>() { ["raht"] = [new(1024), new(20022)], ["SSS"] = [new()] }, new("shit"), true, null);
+        var str4 = SerializeTool.Serialize(new List<Coordinate>() { new(1, 1), new(2, 1), new(2, 2) }, new("shit"), true, null);
+        var _1 = SerializeTool.Deserialize<A>(new(), str1, null);
+        var _2 = SerializeTool.Deserialize<int>(new(), str2, null);
+        var _3 = SerializeTool.Deserialize<Dictionary<string, List<B>>>(new("shit"), str3, null);
+        var _4 = SerializeTool.Deserialize<List<Coordinate>>(new("shit"), str4, null);
+        var cc = SerializeTool.Serialize(Color.Aquamarine, new(), true, null);
+        var color = SerializeTool.Deserialize<Color>(new(), cc, null);
         Application.Run(new TestForm());
     }
 }

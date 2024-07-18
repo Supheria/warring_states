@@ -13,7 +13,7 @@ internal static class LocalArchives
 
     static List<ArchiveInfo> Archives { get; set; } = [];
 
-    static DatabaseOperation Database { get; } = new();
+    static DatabaseQuery Database { get; } = new();
     //[
     //new("测试存档中文1"),
     //];
@@ -153,7 +153,7 @@ internal static class LocalArchives
         Database.CreateTable(typeof(ArchiveInfo));
         foreach (var info in Archives)
         {
-            Database.InsertFields(info);
+            Database.InsertFieldsValue(info);
         }
     }
 }

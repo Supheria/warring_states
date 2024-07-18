@@ -1,4 +1,6 @@
+using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
+using LocalUtilities.SQLiteHelper.Data;
 using LocalUtilities.TypeGeneral;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -6,21 +8,36 @@ using System.Reflection;
 
 partial class Program
 {
-    private static DatabaseOperation Database;
+    private static DatabaseQuery Database { get; } = new();
 
     static void Main(string[] args)
     {
-        Database = new(new("..\\mydb.db"));
+        Database.Connect("..\\mydb.db");
 
-        var user = new User(12345, "hello", 3.1415926);
+        var user = new User(12345.00000002, "Shit3", 3.1415926);
+        var name = "name";
+        var fields = new Field[] { new("Id", user.Id, true), new("Name", user.Name), new("Age", user.Age), new("UserB", user.UserB) };
         //创建名为table1的数据表
-        Database.CreateTable(user.GetType());
-        Database.InsertFields(user);
+        //Database.CreateTable(name, fields);
+        //Database.InsertFieldsValue(name, fields);
         var watch = new Stopwatch();
         watch.Start();
-        var a = Database.ReadFullTable(user.GetType());
+        var a = Database.SelectFieldsValue(name, [new("Id", 12345.00000001, Condition.Operates.GreaterOrEqual)], fields);
         watch.Stop();
         MessageBox.Show(watch.ElapsedMilliseconds.ToString());
+        var assignments = new Field[] { new("Id", 12345), new("Name", "waht fuch"), new("UserB", new UserB() { WahtFcuh = 1022 }) };
+        var conditions = new Condition[]
+        {
+            new("Name", user.Name, Condition.Operates.Equal),
+            new("Id", user.Id, Condition.Operates.Equal),
+        };
+        Database.UpdateFieldsValues(name, new(Conditions.Combos.Or, conditions), assignments);
+        conditions = new Condition[]
+        {
+            new("Name","waht fuch", Condition.Operates.Equal),
+            new("Id", 12345, Condition.Operates.Equal),
+        };
+        //Database.DeleteFields(name, new(Conditions.Combos.And, conditions));
         //插入两条数据
         //sql.InsertValues(table, new string[] { "1", "张三", "22", "Zhang@163.com" });
         //sql.InsertValues("table1", new string[] { "2", "李四", "25", "Li4@163.com" });
@@ -47,17 +64,14 @@ partial class Program
         //}
     }
 
-    [Table]
-    class User(int id, string name, double age)
+    class User(double id, string name, double age)
     {
-        [TableField(Name = "UID")]
-        public int Id { get; private set; } = id;
+        public double Id { get; private set; } = id;
 
         public string Name { get; private set; } = name;
 
         public double Age { get; private set; } = age;
 
-        [TableFieldIgnore]
         public string Email { get; private set; } = "xx@xx";
 
         public UserB UserB { get; set; } = new();
@@ -68,20 +82,17 @@ partial class Program
         }
     }
 
-    [Table]
     class UserB
     {
-        [TableField(Name = "shit")]
         public FontData Font { get; private set; } = new();
 
-        [TableField(Name = "UserC")]
         public UserC Fuck { get; set; } = new();
+
+        public long WahtFcuh { get; set; } = 0;
     }
 
-    //[Table]
     class UserC
     {
-        //[Table(Name = "shit")]
         public FontData Font { get; set; } = new();
     }
 }
