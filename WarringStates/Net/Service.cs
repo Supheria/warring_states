@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.IocpNet;
 using LocalUtilities.IocpNet.Common;
+using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
 using System.Text;
 using WarringStates.Net.Common;
@@ -41,6 +42,8 @@ public abstract class Service : INetLogger
     protected Protocol Protocol { get; }
 
     protected Dictionary<CommandCode, CommandHandler> DoCommands { get; } = [];
+
+    protected static SsSignTable SignTable { get; } = new();
 
     public Service(Protocol protocol)
     {

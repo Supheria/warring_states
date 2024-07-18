@@ -64,15 +64,15 @@ internal class ServerForm : ResizeableForm
         Server.OnLog += UpdateMessage;
         Server.OnConnectionCountChange += Host_OnParallelRemainChange;
         //Host.Start((int)Port.Value);
-        LocalEvents.TryAddListener<Archive>(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveSelected, LoadArchive);
         ArchiveSelector.EnableListener();
         LocalArchives.ReLocate();
     }
 
-    private void LoadArchive(Archive archive)
+    private void LoadArchive()
     {
         //Atlas.Relocate(archive);
-        SpanFlow.Relocate(archive.Info.CurrentSpan);
+        SpanFlow.Relocate(LocalArchives.CurrentArchive?.CurrentSpan ?? 0);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
         LocalEvents.TryBroadcast(LocalEvents.Flow.SwichFlowState);
         //ArchiveSelector.DisableListener();

@@ -46,9 +46,9 @@ partial class ArchiveSelector
             RollReDraw();
             ThumbnailRedraw();
         }
-        else if (LoadButton.Rect.Contains(e.Location) && LocalArchives.LoadArchive(SelectedItemIndex, out var archive))
+        else if (LoadButton.Rect.Contains(e.Location) && LocalArchives.LoadArchive(SelectedItemIndex))
         {
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected, archive);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected);
             LocalArchives.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();

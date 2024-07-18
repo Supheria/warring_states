@@ -56,7 +56,7 @@ internal class AltiteudeForm : ResizeableForm
     {
         var data = new AltitudeMapData(new(300, 300), new(2, 2), new(6, 6), RiverLayout.Types.BackwardSlash, 2.25, 50000, 0.66f);
         Atlas = new(data);
-        SerializeTool.SerializeFile(Atlas, true, "ini.test.ss", null, null);
+        SerializeTool.SerializeFile(Atlas, new(), "ini.test.ss", true, SignTable);
         MakeMap();
     }
 
@@ -65,7 +65,7 @@ internal class AltiteudeForm : ResizeableForm
         var openFile = new OpenFileDialog();
         if (openFile.ShowDialog() == DialogResult.Cancel)
             return;
-        Atlas = SerializeTool.DeserializeFile<AltitudeMap>(openFile.FileName, null, null);
+        Atlas = SerializeTool.DeserializeFile<AltitudeMap>(new(), openFile.FileName, SignTable);
         MakeMap();
     }
 

@@ -1,6 +1,7 @@
 using AltitudeMapGenerator.Layout;
 using AltitudeMapGenerator.Test;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
 using System.Diagnostics;
 
@@ -18,13 +19,14 @@ public class Program
 
         //var data = new AltitudeMapData(new(200, 300), new(2, 3), new(6, 3), RiverLayout.Types.BackwardSlash, 1, 30000, 0.5f);
         var atl = new AltitudeMap(data);
-        SerializeTool.SerializeFile(atl, false, "test.ss", "test", null);
+        var signTable = new SsSignTable();
+        SerializeTool.SerializeFile(atl, new(), "test.ss", false, signTable);
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var atlas = SerializeTool.DeserializeFile<AltitudeMap>("test.ss", "test", null);
+        var atlas = SerializeTool.DeserializeFile<AltitudeMap>(new(), "test.ss", signTable);
         stopwatch.Stop();
         var time = stopwatch.ElapsedMilliseconds;
-        SerializeTool.SerializeFile(atlas, false, "test1.ss", "test", null);
+        SerializeTool.SerializeFile(atlas, new(), "test1.ss", false, signTable);
         MessageBox.Show(time.ToString());
         Bitmap image;
         try

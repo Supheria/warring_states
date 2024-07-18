@@ -4,6 +4,7 @@ using WarringStates.Net.Common;
 using WarringStates.User;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeToolKit.Convert;
+using LocalUtilities.SimpleScript.Common;
 
 namespace WarringStates.Client.Net;
 
@@ -82,7 +83,7 @@ partial class ClientService
         if (operateCode is OperateCode.Fetch)
         {
             ReceiveCallback(receiver);
-            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(receiver.Data, 0, receiver.Data.Length, ServiceKey.ArchiveList, null);
+            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(new(ServiceKey.ArchiveList), receiver.Data, 0, receiver.Data.Length, SignTable, null);
             LocalArchives.ReLocate(archiveInfoList ?? []);
         }
     }

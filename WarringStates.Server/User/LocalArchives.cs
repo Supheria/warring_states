@@ -1,5 +1,6 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using System.Diagnostics.CodeAnalysis;
 
@@ -14,37 +15,30 @@ internal static class LocalArchives
     static List<ArchiveInfo> Archives { get; set; } = [];
 
     static DatabaseQuery Database { get; } = new();
-    //[
-    //new("测试存档中文1"),
-    //];
-    //[];
-    //[
-    //new ("测试存档中文1"),
-    //new ("测试存档中文20A"),
-    //new ("测试存档中文300B"),
-    //new ("测试存档中文4"),
-    //new ("测试存档中文5"),
-    //new ("测试存档中文6"),
-    //new ("测试存档中文7"),
-    //new ("测试存档中文8"),
-    //new ("测试存档中文9"),
-    //];
+
+    static string TableName { get; } = nameof(Archives);
+
+    public static Archive? CurrentArchive { get; private set; } = null;
+
+    //static int CurrentLoadIndex { get; set; } = -1;
 
     public static List<ArchiveInfo> ReLocate()
     {
         try
         {
+            Archives.Clear();
             Database.Connect(RegisterPath);
-            foreach (var obj in Database.ReadFullTable(typeof(ArchiveInfo)))
+            foreach (var fields in Database.SelectFieldsValue(TableName, [], TableTool.GetFieldsName<ArchiveInfo>()))
             {
-                if (obj is ArchiveInfo info)
-                    Archives.Add(info);
+                var info = new ArchiveInfo();
+                TableTool.SetFieldsValue(info, fields);
+                Archives.Add(info);
             }
-            Database.Close();
         }
-        catch
+        catch { }
+        finally
         {
-            Save();
+            Database.Close();
         }
         return Archives;
     }
@@ -67,7 +61,7 @@ internal static class LocalArchives
             return false;
         try
         {
-            archive = Archive.Load(info);
+            archive = info.Load();
             return true;
         }
         catch
@@ -76,15 +70,15 @@ internal static class LocalArchives
         }
     }
 
-    public static bool LoadArchive(int index, [NotNullWhen(true)] out Archive? archive)
+    public static bool LoadArchive(int index/*, [NotNullWhen(true)] out Archive? archive*/)
     {
-        archive = null;
+        //archive = null;
         if (!TryGetArchiveInfo(index, out var info))
             return false;
         try
         {
-            archive = Archive.Load(info);
-            UserException.ThrowIfNotUseable(archive);
+            CurrentArchive = info.Load();
+            UserException.ThrowIfNotUseable(info);
             return true;
         }
         catch (Exception ex)
@@ -97,35 +91,32 @@ internal static class LocalArchives
     public static ArchiveInfo CreateArchive(this AltitudeMapData mapData, string worldName)
     {
         var info = new ArchiveInfo(worldName, mapData.Size);
-        Archive.Create(info, mapData).Save();
+        Directory.CreateDirectory(info.RootPath);
+        var archive = info.Create(mapData);
+        info.Save(archive);
         var saves = new List<ArchiveInfo>() { info };
         saves.AddRange(Archives);
         Archives = saves;
-        Save();
+        //Save();
+        var fields = TableTool.GetFieldsValue(info);
+        Database.Connect(RegisterPath);
+        Database.CreateTable(TableName, fields);
+        Database.InsertFieldsValue(TableName, fields);
+        Database.Close();
         return info;
     }
 
-    public static void Update(this Archive archive)
-    {
-        Archives.Remove(archive.Info);
-        archive.Save();
-        var saves = new List<ArchiveInfo>() { archive.Info };
-        saves.AddRange(Archives);
-        Archives = saves;
-    }
-
-#if DEBUG
     public static void Update(int index)
     {
-        if (!TryGetArchiveInfo(index, out var info))
+        if (!TryGetArchiveInfo(index, out var info) || CurrentArchive is null)
             return;
+        info.Save(CurrentArchive);
         Archives.Remove(info);
         info.UpdateLastSaveTime();
         var saves = new List<ArchiveInfo>() { info };
         saves.AddRange(Archives);
         Archives = saves;
     }
-#endif
 
     public static bool Delete(int index)
     {
@@ -146,14 +137,21 @@ internal static class LocalArchives
 
     private static void Save()
     {
-        // TODO: use update other than delete
-        if (File.Exists(RegisterPath))
-            File.Delete(RegisterPath);
-        Database.Connect(RegisterPath);
-        Database.CreateTable(typeof(ArchiveInfo));
-        foreach (var info in Archives)
+        try
         {
-            Database.InsertFieldsValue(info);
+            Database.Connect(RegisterPath);
+            var fields = TableTool.GetFieldsName<ArchiveInfo>();
+            Database.CreateTable(TableName, fields);
+            foreach (var info in Archives)
+            {
+                fields = TableTool.GetFieldsValue(info);
+                Database.UpdateFieldsValues(TableName, [], fields);
+            }
+        }
+        catch { }
+        finally
+        {
+            Database.Close();
         }
     }
 }

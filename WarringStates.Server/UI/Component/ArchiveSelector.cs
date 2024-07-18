@@ -143,7 +143,7 @@ public partial class ArchiveSelector : Displayer
             }
             catch { }
             var stepper = new DateStepper();
-            stepper.SetStartSpan(info.CurrentSpan);
+            stepper.SetStartSpan(info.LoadCurrentSpan());
             g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
         }
 

@@ -111,14 +111,14 @@ partial class ServerService
             var archiverInfoList = new List<PlayerArchiveInfo>();
             foreach (var info in LocalArchives.ReLocate())
             {
-                var players = Archive.LoadPlayers(info);
-                var sourceLands = Archive.LoadSourceLands(info);
+                var players = info.LoadPlayers();
+                var sourceLands = info.LoadSourceLands();
                 if (!sourceLands.TryGetValue(UserInfo.Id, out var ownLands))
                     ownLands = [];
                 var archiveInfo = new PlayerArchiveInfo(info.Id, info.WorldName, info.WorldSize, players.Count, ownLands);
                 archiverInfoList.Add(archiveInfo);
             }
-            var data = SerializeTool.Serialize(archiverInfoList, ServiceKey.ArchiveList, null);
+            var data = SerializeTool.Serialize(archiverInfoList, new(ServiceKey.ArchiveList), SignTable, null);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
             CallbackSuccess(sender);
         }

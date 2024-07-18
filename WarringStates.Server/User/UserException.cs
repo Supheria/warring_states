@@ -1,12 +1,12 @@
-﻿using System.Text;
+﻿using AltitudeMapGenerator;
+using System.Text;
 
 namespace WarringStates.Server.User;
 
 internal class UserException(string message) : Exception(message)
 {
-    public static void ThrowIfNotUseable(Archive archive)
+    public static void ThrowIfNotUseable(ArchiveInfo info)
     {
-        var info = archive.Info;
         var sb = new StringBuilder();
         if (info.WorldName is "")
             sb.Append(nameof(info.WorldName)).Append(' ');
@@ -14,9 +14,9 @@ internal class UserException(string message) : Exception(message)
             sb.Append(nameof(info.CreateTime)).Append(' ');
         if (info.LastSaveTime is 0)
             sb.Append(nameof(info.LastSaveTime)).Append(' ');
-        var map = archive.AltitudeMap;
+        var map = info.LoadAltitudeMap();
         if (map.OriginPoints.Count < 1 || map.Width is 0 || map.Height is 0)
-            sb.Append(nameof(archive.AltitudeMap)).Append(' ');
+            sb.Append(nameof(AltitudeMap)).Append(' ');
         if (sb.Length is 0)
             return;
         sb.Append("did not find in save file");

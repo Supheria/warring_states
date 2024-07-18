@@ -2,7 +2,7 @@
 
 namespace WarringStates.Server.User;
 
-internal class PlayerRoster : Roster<string, Player>
+internal class Players : Roster<string, Player>
 {
 
 }

@@ -14,15 +14,16 @@ partial class Program
     {
         Database.Connect("..\\mydb.db");
 
-        var user = new User(12345.00000002, "Shit3", 3.1415926);
+        var user = new User(DateTime.Now.ToBinary(), "Shit3", 3.1415926);
         var name = "name";
-        var fields = new Field[] { new("Id", user.Id, true), new("Name", user.Name), new("Age", user.Age), new("UserB", user.UserB) };
+        var fields = TableTool.GetFieldsName<User>();
         //创建名为table1的数据表
-        //Database.CreateTable(name, fields);
-        //Database.InsertFieldsValue(name, fields);
+        Database.CreateTable(name, fields);
+        fields = TableTool.GetFieldsValue(user);
+        Database.InsertFieldsValue(name, fields);
         var watch = new Stopwatch();
         watch.Start();
-        var a = Database.SelectFieldsValue(name, [new("Id", 12345.00000001, Condition.Operates.GreaterOrEqual)], fields);
+        var a = Database.SelectFieldsValue(name, [new("Id", 12345.00000001, Condition.Operates.LessOrEqual)], fields);
         watch.Stop();
         MessageBox.Show(watch.ElapsedMilliseconds.ToString());
         var assignments = new Field[] { new("Id", 12345), new("Name", "waht fuch"), new("UserB", new UserB() { WahtFcuh = 1022 }) };
@@ -64,14 +65,18 @@ partial class Program
         //}
     }
 
-    class User(double id, string name, double age)
+    [Table]
+    class User(long id, string name, double age)
     {
-        public double Id { get; private set; } = id;
+        [TableField(IsPrimaryKey = true)]
+        public long Id { get; private set; } = id;
 
         public string Name { get; private set; } = name;
 
+        [TableField(Name = "fuck")]
         public double Age { get; private set; } = age;
 
+        [TableIgnore]
         public string Email { get; private set; } = "xx@xx";
 
         public UserB UserB { get; set; } = new();
