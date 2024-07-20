@@ -59,7 +59,7 @@ partial class ClientService
         }
     }
 
-    private void DoUploadFile(CommandReceiver receiver)
+    private void HandleUploadFile(CommandReceiver receiver)
     {
         ReceiveCallback(receiver);
         switch ((OperateCode)receiver.OperateCode)
@@ -75,7 +75,7 @@ partial class ClientService
                 break;
         }
     }
-    private void DoDownloadFile(CommandReceiver receiver)
+    private void HandleDownloadFile(CommandReceiver receiver)
     {
         ReceiveCallback(receiver);
         switch ((OperateCode)receiver.OperateCode)

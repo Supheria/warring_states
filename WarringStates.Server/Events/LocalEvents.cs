@@ -141,11 +141,13 @@ internal static class LocalEvents
 
     public enum UserInterface
     {
+        ArchiveListRefreshed,
+
         MainFormOnDraw,
         SettingsOnSetBounds,
         ToolBarOnSetBounds,
         InfoBarOnSetBounds,
-        ArchiveSelected,
+        ArchiveToLoad,
         StartGamePlay,
         FinishGamePlay,
         KeyPressed,

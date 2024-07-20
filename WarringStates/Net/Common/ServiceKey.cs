@@ -13,8 +13,8 @@ public class ServiceKey
     public const string CallbackCode = nameof(CallbackCode);
     public const string ErrorMessage = nameof(ErrorMessage);
     public const string TimeStamp = nameof(TimeStamp);
-    public const string ReceiveUser = nameof(ReceiveUser);
-    public const string SendUser = nameof(SendUser);
+    public const string ReceivePlayer = nameof(ReceivePlayer);
+    public const string SendPlayer = nameof(SendPlayer);
     public const string StartTime = nameof(StartTime);
     public const string ArchiveList = nameof(ArchiveList);
 }

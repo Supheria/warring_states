@@ -4,6 +4,7 @@ using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Net;
 using WarringStates.Client.User;
+using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 
@@ -21,7 +22,7 @@ public class ClientForm : ResizeableForm
         Value = 60,
     };
 
-    TextBox UserName { get; } = new()
+    TextBox PlayerName { get; } = new()
     {
         Text = "admin"
     };
@@ -29,11 +30,6 @@ public class ClientForm : ResizeableForm
     TextBox Password { get; } = new()
     {
         Text = "password"
-    };
-
-    Button SwitchButton { get; } = new()
-    {
-        Text = "Connect",
     };
 
     RichTextBox MessageBox { get; } = new();
@@ -87,9 +83,8 @@ public class ClientForm : ResizeableForm
         Controls.AddRange([
             HostAddress,
             HostPort,
-            UserName,
+            PlayerName,
             Password,
-            SwitchButton,
             MessageBox,
             UserList,
             SendBox,
@@ -105,7 +100,6 @@ public class ClientForm : ResizeableForm
         OnSaveForm += ClientForm_OnSaveForm;
         FormClosing += (_, _) => Client.Dispose();
         OnDrawClient += ClientForm_OnDrawClient;
-        SwitchButton.Click += SwitchButton_Click;
         SendButton.Click += SendButton_Click;
         FilePathButton.Click += FilePathButton_Click;
         UploadButton.Click += UploadButton_Click;
@@ -114,17 +108,16 @@ public class ClientForm : ResizeableForm
         Client.OnLogined += Client_OnConnected;
         Client.OnClosed += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
-        Client.OnUpdateUserList += Client_OnUpdateUserList;
+        Client.OnUpdatePlayerList += Client_OnUpdateUserList;
 
         LocalEvents.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.FetchArchiveList, RefreshArchiveList);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.Login, Login);
         LocalEvents.TryAddListener(LocalEvents.UserInterface.LogoutPlayer, Logout);
     }
 
-    private void RefreshArchiveList()
+    private void Login()
     {
-        Client.Login(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
-        Client.FetchArchiveList();
+        Client.Login(HostAddress.Text, (int)HostPort.Value, PlayerName.Text, Password.Text);
     }
 
     private void Logout()
@@ -156,15 +149,15 @@ public class ClientForm : ResizeableForm
             Client.SendMessage(SendBox.Text, (string)item);
     }
 
-    private void Client_OnUpdateUserList(string[] userList)
+    private void Client_OnUpdateUserList(string[] playersName)
     {
         BeginInvoke(() =>
         {
             UserList.Items.Clear();
-            foreach (var user in userList)
+            foreach (var player in playersName)
             {
-                if (user != UserName.Text)
-                    UserList.Items.Add(user);
+                if (player != PlayerName.Text)
+                    UserList.Items.Add(player);
             }
             Update();
         });
@@ -174,10 +167,9 @@ public class ClientForm : ResizeableForm
     {
         BeginInvoke(() =>
         {
-            SwitchButton.Text = "Connect";
             HostAddress.Enabled = true;
             HostPort.Enabled = true;
-            UserName.Enabled = true;
+            PlayerName.Enabled = true;
             Password.Enabled = true;
             Update();
         });
@@ -188,10 +180,9 @@ public class ClientForm : ResizeableForm
     {
         BeginInvoke(() =>
         {
-            SwitchButton.Text = "Disconnect";
             HostAddress.Enabled = false;
             HostPort.Enabled = false;
-            UserName.Enabled = false;
+            PlayerName.Enabled = false;
             Password.Enabled = false;
             Update();
         });
@@ -226,7 +217,7 @@ public class ClientForm : ResizeableForm
             return;
         HostAddress.Text = clientData.HostAddress;
         HostPort.Value = clientData.HostPort;
-        UserName.Text = clientData.UserName;
+        PlayerName.Text = clientData.UserName;
         Password.Text = clientData.Password;
         DirName.Text = clientData.DirName;
         FilePath.Text = clientData.FilePath;
@@ -238,7 +229,7 @@ public class ClientForm : ResizeableForm
         {
             HostAddress = HostAddress.Text,
             HostPort = (int)HostPort.Value,
-            UserName = UserName.Text,
+            UserName = PlayerName.Text,
             Password = Password.Text,
             DirName = DirName.Text,
             FilePath = FilePath.Text,
@@ -251,14 +242,6 @@ public class ClientForm : ResizeableForm
         if (file.ShowDialog() is DialogResult.Cancel)
             return;
         FilePath.Text = file.FileName;
-    }
-
-    private void SwitchButton_Click(object? sender, EventArgs e)
-    {
-        if (Client.IsLogined)
-            Client.Dispose();
-        else
-            Client.Login(HostAddress.Text, (int)HostPort.Value, UserName.Text, Password.Text);
     }
 
     private void UpdateMessage(string message)
@@ -281,7 +264,7 @@ public class ClientForm : ResizeableForm
 
     private void ClientForm_OnDrawClient()
     {
-        var width = (ClientWidth - Padding * 7) / 5;
+        var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
         //
         HostAddress.Left = ClientLeft + Padding;
@@ -292,17 +275,13 @@ public class ClientForm : ResizeableForm
         HostPort.Top = top;
         HostPort.Width = width;
         //
-        UserName.Left = HostPort.Right + Padding;
-        UserName.Top = top;
-        UserName.Width = width;
+        PlayerName.Left = HostPort.Right + Padding;
+        PlayerName.Top = top;
+        PlayerName.Width = width;
         //
-        Password.Left = UserName.Right + Padding;
+        Password.Left = PlayerName.Right + Padding;
         Password.Top = top;
         Password.Width = width;
-        //
-        SwitchButton.Left = Password.Right + Padding;
-        SwitchButton.Top = top;
-        SwitchButton.Width = width;
         //
         width = (ClientWidth - Padding * 5) / 5;
         top = Password.Bottom + Padding;

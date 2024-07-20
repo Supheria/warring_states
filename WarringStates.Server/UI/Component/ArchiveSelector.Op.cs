@@ -41,14 +41,14 @@ partial class ArchiveSelector
             //var data = new AltitudeMapData(new(1000, 1000), new(8, 8), new(8, 8), RiverLayout.Types.ForwardSlash, 7, 650000, 0.75f);
             //var data = new AltitudeMapData(new(500, 500), new(5, 5), new(8, 8), RiverLayout.Types.Horizontal, 2.25, 180000, 0.66f);
             var data = new AltitudeMapData(new(300, 300), new(3, 3), new(8, 8), RiverLayout.Types.Horizontal, 2.25, 60000, 0.66f);
-            data.CreateArchive("new world");
+            LocalArchives.CreateArchive(data, "new world");
             SelectedItemIndex = 0;
             RollReDraw();
             ThumbnailRedraw();
         }
         else if (LoadButton.Rect.Contains(e.Location) && LocalArchives.LoadArchive(SelectedItemIndex))
         {
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveSelected);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveToLoad);
             LocalArchives.Update(SelectedItemIndex);
             SelectedItemIndex = 0;
             RollReDraw();

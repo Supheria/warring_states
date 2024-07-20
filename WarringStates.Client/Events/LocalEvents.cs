@@ -141,8 +141,8 @@ public class LocalEvents
 
     public enum UserInterface
     {
-        FetchArchiveList,
-        RelocateArchiveList,
+        Login,
+        ArchiveListRefreshed,
         LogoutPlayer,
 
         GamePlayControlOnDraw,

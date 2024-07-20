@@ -8,7 +8,7 @@ using System.Reflection;
 
 partial class Program
 {
-    private static DatabaseQuery Database { get; } = new();
+    private static SQLiteQuery Database { get; } = new();
 
     static void Main(string[] args)
     {

@@ -60,6 +60,7 @@ public partial class ArchiveSelector : Displayer
     {
         //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
         //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RollReDraw);
     }
 
     public void DisableListener()
@@ -133,7 +134,7 @@ public partial class ArchiveSelector : Displayer
             ThumbnailRect = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - Padding.Height);
             try
             {
-                var thumbnail = (Bitmap)Image.FromFile(info.GetThumbnailPath());
+                var thumbnail = (Bitmap)Image.FromFile(LocalArchives.GetThumbnailPath(info));
                 var size = thumbnail.Size.ScaleSizeOnRatio(ThumbnailRect.Size);
                 thumbnail = thumbnail.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
                 ThumbnailRect = new Rectangle(ThumbnailRect.Left + (ThumbnailRect.Width - thumbnail.Width) / 2, ThumbnailRect.Top + (ThumbnailRect.Height - thumbnail.Height) / 2, thumbnail.Width, thumbnail.Height);
@@ -143,7 +144,7 @@ public partial class ArchiveSelector : Displayer
             }
             catch { }
             var stepper = new DateStepper();
-            stepper.SetStartSpan(info.LoadCurrentSpan());
+            stepper.SetStartSpan(LocalArchives.LoadCurrentSpan(info));
             g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
         }
 

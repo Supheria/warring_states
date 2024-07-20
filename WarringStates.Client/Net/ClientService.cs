@@ -22,21 +22,21 @@ public partial class ClientService : Service
     public ClientService() : base(new ClientProtocol())
     {
         DaemonThread = new(ConstTabel.HeartBeatsInterval, HeartBeats);
-        DoCommands[CommandCode.HeartBeats] = ReceiveCallback;
-        DoCommands[CommandCode.Login] = DoLogin;
-        DoCommands[CommandCode.UploadFile] = DoUploadFile;
-        DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
-        DoCommands[CommandCode.Message] = DoMessage;
-        DoCommands[CommandCode.UpdateUserList] = DoUpdateUserList;
-        DoCommands[CommandCode.Archive] = DoArchive;
+        HandleCommands[CommandCode.HeartBeats] = ReceiveCallback;
+        HandleCommands[CommandCode.Login] = HandleLogin;
+        HandleCommands[CommandCode.UploadFile] = HandleUploadFile;
+        HandleCommands[CommandCode.DownloadFile] = HandleDownloadFile;
+        HandleCommands[CommandCode.Message] = HandleMessage;
+        HandleCommands[CommandCode.Player] = HandlePlayer;
+        HandleCommands[CommandCode.Archive] = HandleArchive;
     }
 
-    public override void DoCommand(CommandReceiver receiver)
+    public override void HandleCommand(CommandReceiver receiver)
     {
         try
         {
             var commandCode = (CommandCode)receiver.CommandCode;
-            if (!DoCommands.TryGetValue(commandCode, out var doCommand))
+            if (!HandleCommands.TryGetValue(commandCode, out var doCommand))
                 throw new NetException(ServiceCode.UnknownCommand, commandCode.ToString());
             doCommand(receiver);
         }
@@ -49,7 +49,7 @@ public partial class ClientService : Service
     public override string GetLog(string message)
     {
         return new StringBuilder()
-            .Append(UserInfo?.Name)
+            .Append(Player.Name)
             .Append(SignCollection.Colon)
             .Append(SignCollection.Space)
             .Append(SignCollection.OpenBracket)
@@ -83,12 +83,12 @@ public partial class ClientService : Service
             if (IsLogined)
                 return;
             var host = new IPEndPoint(IPAddress.Parse(address), port);
-            UserInfo = new(name, password);
+            Player = new(name, password);
             if (!((ClientProtocol)Protocol).Connect(host))
                 throw new NetException(ServiceCode.NoConnection);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
-                .AppendArgs(ServiceKey.UserName, UserInfo.Name)
-                .AppendArgs(ServiceKey.Password, UserInfo.Password);
+                .AppendArgs(ServiceKey.UserName, Player.Name)
+                .AppendArgs(ServiceKey.Password, Player.Password);
             SendCommand(sender);
             LoginDone?.WaitOne(ConstTabel.BlockkMilliseconds);
         }
@@ -99,7 +99,7 @@ public partial class ClientService : Service
         }
     }
 
-    private void DoLogin(CommandReceiver receiver)
+    private void HandleLogin(CommandReceiver receiver)
     {
         ReceiveCallback(receiver);
         IsLogined = true;

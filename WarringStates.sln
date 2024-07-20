@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarringStates.Client", "War
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarringStates.Server", "WarringStates.Server\WarringStates.Server.csproj", "{912E398E-3562-4121-942B-0CEAD5668658}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqliteTest", "SqliteTest\SqliteTest.csproj", "{E9300911-D1C9-4EE1-B473-E3916FE44399}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqliteTest", "SqliteTest\SqliteTest.csproj", "{E9300911-D1C9-4EE1-B473-E3916FE44399}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

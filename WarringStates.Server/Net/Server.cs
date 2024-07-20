@@ -5,7 +5,10 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using WarringStates.Net;
 using WarringStates.Net.Common;
+using WarringStates.Server.Events;
+using WarringStates.Server.User;
 
 namespace WarringStates.Server.Net;
 
@@ -48,6 +51,7 @@ internal class Server : INetLogger
             Socket.Listen();
             AcceptAsync(null);
             IsStart = true;
+            EnableListener();
             this.HandleLog("start");
         }
         catch (Exception ex)
@@ -66,12 +70,31 @@ internal class Server : INetLogger
                 service.Dispose();
             Socket?.Close();
             IsStart = false;
+            DisableListener();
             this.HandleLog("close");
         }
         catch (Exception ex)
         {
             this.HandleException(ex);
         }
+    }
+
+    private void EnableListener()
+    {
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
+    }
+
+    private void DisableListener()
+    {
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
+    }
+
+    private void BroadcastArchiveList()
+    {
+        Parallel.ForEach(UserMap.Values, service =>
+        {
+            service.UpdateArchiveList();
+        });
     }
 
     private void AcceptAsync(SocketAsyncEventArgs? acceptArgs)
@@ -106,8 +129,8 @@ internal class Server : INetLogger
 
     private void AddService(ServerService service)
     {
-        if (service.UserInfo.Name is "" ||
-            !UserMap.TryAdd(service.UserInfo.Name, service))
+        if (service.Player.Name is "" ||
+            !UserMap.TryAdd(service.Player.Name, service))
         {
             service.Dispose();
             return;
@@ -117,10 +140,10 @@ internal class Server : INetLogger
 
     private void RemoveService(ServerService service)
     {
-        if (service.UserInfo.Name is "" ||
-            !(UserMap.TryGetValue(service.UserInfo.Name, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
+        if (service.Player.Name is "" ||
+            !(UserMap.TryGetValue(service.Player.Name, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
-        UserMap.TryRemove(service.UserInfo.Name, out _);
+        UserMap.TryRemove(service.Player.Name, out _);
         HandleUpdateConnection();
     }
 
@@ -130,13 +153,13 @@ internal class Server : INetLogger
         {
             var userName = (OperateCode)receiver.OperateCode switch
             {
-                OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceiveUser),
-                OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendUser),
+                OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
+                OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendPlayer),
                 _ => "",
-            } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceiveUser, ServiceKey.SendUser);
+            } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
             if (!UserMap.TryGetValue(userName, out var user))
                 throw new NetException(ServiceCode.UserNotExist);
-            user.DoCommand(receiver);
+            user.HandleCommand(receiver);
         }
         catch (Exception ex)
         {
@@ -146,15 +169,17 @@ internal class Server : INetLogger
 
     public void BroadcastMessage(string message)
     {
-        foreach (var service in UserMap.Values)
+        Parallel.ForEach(UserMap.Values, service => 
+        {
             service.SendMessage(message);
+        });
     }
 
     public void BroadcastUserList()
     {
         var users = UserMap.Keys.ToArray();
         foreach (var service in UserMap.Values)
-            service.UpdateUserList(users);
+            service.UpdatePlayerList(users);
     }
 
     public void HandleUpdateConnection()

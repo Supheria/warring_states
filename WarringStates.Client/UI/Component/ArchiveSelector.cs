@@ -56,7 +56,7 @@ public partial class ArchiveSelector : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.RelocateArchiveList, RelocateArchiveList);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RelocateArchiveList);
         LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
@@ -70,7 +70,7 @@ public partial class ArchiveSelector : Displayer
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.RelocateArchiveList, RelocateArchiveList);
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RelocateArchiveList);
         LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
@@ -112,7 +112,7 @@ public partial class ArchiveSelector : Displayer
     {
         //Thumbnail?.Dispose();
         //Thumbnail = null;
-        if (!LocalArchives.TryGetArchiveInfo(SelectedItemIndex, out var info))
+        if (!LocalArchives.TryGetArchiveId(SelectedItemIndex, out var info))
         {
             using var g = Graphics.FromImage(Image);
             var random = new Random();

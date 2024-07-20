@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.IocpNet;
 using LocalUtilities.IocpNet.Common;
+using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
 using System.Text;
@@ -31,7 +32,7 @@ public abstract class Service : INetLogger
 
     public bool IsLogined { get; protected set; } = false;
 
-    public UserInfo UserInfo { get; protected set; } = new();
+    public Player Player { get; protected set; } = new();
 
     protected abstract string RepoPath { get; set; }
 
@@ -41,7 +42,7 @@ public abstract class Service : INetLogger
 
     protected Protocol Protocol { get; }
 
-    protected Dictionary<CommandCode, CommandHandler> DoCommands { get; } = [];
+    protected Dictionary<CommandCode, CommandHandler> HandleCommands { get; } = [];
 
     protected static SsSignTable SignTable { get; } = new();
 
@@ -58,11 +59,10 @@ public abstract class Service : INetLogger
             this.HandleLog("close");
             OnClosed?.Invoke();
         };
-        Protocol.OnReceiveCommand += Protocol_OnReceiveCommand;
-        DoCommands[CommandCode.CommandError] = DoCommandError;
+        Protocol.OnReceiveCommand += ReceiveCommand;
     }
 
-    private void Protocol_OnReceiveCommand(CommandReceiver receiver)
+    private void ReceiveCommand(CommandReceiver receiver)
     {
         try
         {
@@ -89,7 +89,7 @@ public abstract class Service : INetLogger
                     throw new NetException(ServiceCode.CannotFindSourceCommandToCompose);
                 var commandReceive = waitingCompose.GetCommand();
                 waitingCompose.Dispose();
-                DoCommand(commandReceive);
+                HandleCommand(commandReceive);
             }
             else
                 throw new NetException(ServiceCode.UnknownOperate);
@@ -100,19 +100,7 @@ public abstract class Service : INetLogger
         }
     }
 
-    public abstract void DoCommand(CommandReceiver receiver);
-
-    private void DoCommandError(CommandReceiver receiver)
-    {
-        try
-        {
-            ReceiveCallback(receiver);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
+    public abstract void HandleCommand(CommandReceiver receiver);
 
     public abstract string GetLog(string message);
 
@@ -273,28 +261,16 @@ public abstract class Service : INetLogger
         OnProcessing?.Invoke(message);
     }
 
-    protected void HandleMessage(CommandReceiver receiver)
+    protected static string FormatMessage(CommandReceiver receiver)
     {
-        var str = new StringBuilder()
-            .Append(receiver.GetArgs<string>(ServiceKey.SendUser))
+        return new StringBuilder()
+            .Append(receiver.GetArgs<string>(ServiceKey.SendPlayer))
             .Append(SignCollection.Sub)
             .Append(SignCollection.Greater)
-            .Append(receiver.GetArgs<string>(ServiceKey.ReceiveUser))
+            .Append(receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
             .Append(SignCollection.Colon)
             .Append(SignCollection.Space)
-            .Append(ReadU8Buffer(receiver.Data))
+            .Append(SerializeTool.Deserialize<string>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null))
             .ToString();
-        OnLog?.Invoke(str);
-    }
-
-    protected static int WriteU8Buffer(string str, out byte[] buffer)
-    {
-        buffer = Encoding.UTF8.GetBytes(str);
-        return buffer.Length;
-    }
-
-    protected static string ReadU8Buffer(byte[] buffer)
-    {
-        return Encoding.UTF8.GetString(buffer);
     }
 }

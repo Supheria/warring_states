@@ -21,23 +21,23 @@ internal partial class ServerService : Service
     public ServerService() : base(new ServerProtocol())
     {
         DaemonThread = new(ConstTabel.SocketTimeoutMilliseconds, CheckTimeout);
-        DoCommands[CommandCode.HeartBeats] = DoHeartBeats;
-        DoCommands[CommandCode.Login] = DoLogin;
-        DoCommands[CommandCode.UploadFile] = DoUploadFile;
-        DoCommands[CommandCode.DownloadFile] = DoDownloadFile;
-        DoCommands[CommandCode.Message] = DoMessage;
-        DoCommands[CommandCode.UpdateUserList] = ReceiveCallback;
-        DoCommands[CommandCode.Archive] = DoArchive;
+        HandleCommands[CommandCode.HeartBeats] = HandleHeartBeats;
+        HandleCommands[CommandCode.Login] = HandleLogin;
+        HandleCommands[CommandCode.UploadFile] = HandleUploadFile;
+        HandleCommands[CommandCode.DownloadFile] = HandleDownloadFile;
+        HandleCommands[CommandCode.Message] = HandleMessage;
+        HandleCommands[CommandCode.Player] = ReceiveCallback;
+        HandleCommands[CommandCode.Archive] = HandleArchive;
     }
 
-    public override void DoCommand(CommandReceiver receiver)
+    public override void HandleCommand(CommandReceiver receiver)
     {
         try
         {
             var commandCode = (CommandCode)receiver.CommandCode;
             if (commandCode is not CommandCode.Login && !IsLogined)
                 throw new NetException(ServiceCode.NotLogined);
-            if (!DoCommands.TryGetValue(commandCode, out var doCommand))
+            if (!HandleCommands.TryGetValue(commandCode, out var doCommand))
                 throw new NetException(ServiceCode.UnknownCommand, commandCode.ToString());
             doCommand(receiver);
         }
@@ -50,7 +50,7 @@ internal partial class ServerService : Service
     public override string GetLog(string message)
     {
         return new StringBuilder()
-            .Append(UserInfo?.Name)
+            .Append(Player.Name)
             .Append(SignCollection.Colon)
             .Append(SignCollection.Space)
             .Append(SignCollection.OpenBracket)

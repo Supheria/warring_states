@@ -7,7 +7,7 @@ namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    private void DoUploadFile(CommandReceiver receiver)
+    private void HandleUploadFile(CommandReceiver receiver)
     {
         switch ((OperateCode)receiver.OperateCode)
         {
@@ -20,7 +20,7 @@ partial class ServerService
         }
     }
 
-    private void DoDownloadFile(CommandReceiver receiver)
+    private void HandleDownloadFile(CommandReceiver receiver)
     {
         switch ((OperateCode)receiver.OperateCode)
         {

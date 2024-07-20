@@ -10,16 +10,16 @@ namespace WarringStates.Client.Net;
 
 partial class ClientService
 {
-    public event NetEventHandler<string[]>? OnUpdateUserList;
+    public event NetEventHandler<string[]>? OnUpdatePlayerList;
 
-    public void SendMessage(string message, string sendUser)
+    public void SendMessage(string message, string receivePlayerName)
     {
         try
         {
-            var count = WriteU8Buffer(message, out var data);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, count)
-                .AppendArgs(ServiceKey.ReceiveUser, sendUser)
-                .AppendArgs(ServiceKey.SendUser, UserInfo.Name);
+            var data = SerializeTool.Serialize(message, new(), SignTable, null);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, data.Length)
+                .AppendArgs(ServiceKey.ReceivePlayer, receivePlayerName)
+                .AppendArgs(ServiceKey.SendPlayer, Player.Name);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -28,63 +28,63 @@ partial class ClientService
         }
     }
 
-    private void DoMessage(CommandReceiver receiver)
+    private void HandleMessage(CommandReceiver receiver)
     {
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.Request)
         {
-            HandleMessage(receiver);
-            var message = receiver.Data;
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
+            var message = FormatMessage(receiver);
+            this.HandleLog(message);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, receiver.Data, 0, receiver.Data.Length)
+                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
+                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Callback)
         {
             ReceiveCallback(receiver);
-            HandleMessage(receiver);
+            var message = FormatMessage(receiver);
+            this.HandleLog(message);
         }
         else if (operateCode is OperateCode.Broadcast)
         {
-            HandleMessage(receiver);
-            var message = receiver.Data;
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, message, 0, message.Length)
-                    .AppendArgs(ServiceKey.ReceiveUser, receiver.GetArgs<string>(ServiceKey.ReceiveUser))
-                    .AppendArgs(ServiceKey.SendUser, receiver.GetArgs<string>(ServiceKey.SendUser));
+            var message = FormatMessage(receiver);
+            this.HandleLog(message);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, receiver.Data, 0, receiver.Data.Length)
+                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
+                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
             CallbackSuccess(sender);
         }
     }
 
-    private void DoUpdateUserList(CommandReceiver receiver)
+    private void HandlePlayer(CommandReceiver receiver)
     {
-        var userList = ReadU8Buffer(receiver.Data).ToArray();
-        OnUpdateUserList?.Invoke(userList);
-        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.None);
-        CallbackSuccess(sender);
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.List)
+        {
+            var nameList = SerializeTool.Deserialize<string[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? [];
+            OnUpdatePlayerList?.Invoke(nameList);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            CallbackSuccess(sender);
+        }
     }
 
-    public void FetchArchiveList()
+    private void HandleArchive(CommandReceiver receiver)
     {
-        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Fetch);
-        SendCommand(sender);
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.List)
+        {
+            var infoList = SerializeTool.Deserialize<ArchiveInfo[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null);
+            LocalArchives.ReLocate(infoList ?? []);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.CommandCode);
+            CallbackSuccess(sender);
+        }
     }
 
     public void JoinArchive(string id)
     {
-        var count = WriteU8Buffer(id, out var data);
-        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join, data, 0, count);
+        var data = SerializeTool.Serialize(id, new(), SignTable, null);
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join, data, 0, data.Length);
         SendCommand(sender);
-    }
-
-    private void DoArchive(CommandReceiver receiver)
-    {
-        var operateCode = (OperateCode)receiver.OperateCode;
-        if (operateCode is OperateCode.Fetch)
-        {
-            ReceiveCallback(receiver);
-            var archiveInfoList = SerializeTool.Deserialize<List<PlayerArchiveInfo>>(new(ServiceKey.ArchiveList), receiver.Data, 0, receiver.Data.Length, SignTable, null);
-            LocalArchives.ReLocate(archiveInfoList ?? []);
-        }
     }
 }

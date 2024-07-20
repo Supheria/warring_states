@@ -74,7 +74,7 @@ partial class ArchiveSelector
             var y = top + i * RollItemHeight;
             var rect = new Rectangle(RollItemsRect.Left, y, RollItemsRect.Width, RollItemHeight - RollPadding);
             var index = showStartItemIndex + i;
-            if (!LocalArchives.TryGetArchiveInfo(index, out var info))
+            if (!LocalArchives.TryGetArchiveId(index, out var info))
                 continue;
             if (index == SelectedItemIndex)
                 brush.Color = Color.Gold;

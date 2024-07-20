@@ -6,7 +6,9 @@ namespace WarringStates.Client.User;
 
 internal static class LocalArchives
 {
-    static List<PlayerArchiveInfo> Archives { get; set; } = [];
+    static ArchiveInfo[] ArchiveInfoList { get; set; } = [];
+
+    static PlayerArchive CurrentArchive { get; set; } = new();
     //[
     //new("测试存档中文1"),
     //];
@@ -23,20 +25,20 @@ internal static class LocalArchives
     //new ("测试存档中文9"),
     //];
 
-    public static void ReLocate(List<PlayerArchiveInfo> infos)
+    public static void ReLocate(ArchiveInfo[] infoList)
     {
-        Archives = infos;
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.RelocateArchiveList);
+        ArchiveInfoList = infoList;
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
 
-    public static int Count => Archives.Count;
+    public static int Count => ArchiveInfoList.Length;
 
-    public static bool TryGetArchiveInfo(int index, [NotNullWhen(true)] out PlayerArchiveInfo? info)
+    public static bool TryGetArchiveId(int index, [NotNullWhen(true)] out ArchiveInfo? id)
     {
-        info = null;
+        id = null;
         if (index < 0 || index >= Count)
             return false;
-        info = Archives[index];
+        id = ArchiveInfoList[index];
         return true;
     }
 }

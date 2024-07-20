@@ -36,9 +36,9 @@ partial class ArchiveSelector
         }
         else if (RefreshButton.Rect.Contains(e.Location))
         {
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.FetchArchiveList);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.Login);
         }
-        else if (JoinButton.Rect.Contains(e.Location) && LocalArchives.TryGetArchiveInfo(SelectedItemIndex, out var archive))
+        else if (JoinButton.Rect.Contains(e.Location) && LocalArchives.TryGetArchiveId(SelectedItemIndex, out var archive))
         {
 
         }
