@@ -20,9 +20,7 @@ internal class LocalArchives
 
     static string RegisterPath { get; } = Path.Combine(RootPath, nameof(ArchiveInfoList) + ".db");
 
-    public static ArchiveInfo[] ArchiveInfoList { get; set; } = [];
-
-    public static int Count => ArchiveInfoList.Length;
+    public static ArchiveInfoList ArchiveInfoList { get; } = [];
 
     static string TableName { get; } = nameof(ArchiveInfoList);
 
@@ -34,15 +32,14 @@ internal class LocalArchives
     {
         try
         {
-            var archiveInfos = new List<ArchiveInfo>();
+            ArchiveInfoList.Clear();
             using var query = new SQLiteQuery(RegisterPath);
             foreach (var fields in query.SelectFieldsValue(TableName, TableTool.GetFieldsName<ArchiveInfo>(), null)) 
             {
                 var info = new ArchiveInfo();
                 TableTool.SetFieldsValue(info, fields);
-                archiveInfos.Add(info);
+                ArchiveInfoList.Add(info);
             }
-            ArchiveInfoList = archiveInfos.ToArray();
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
         }
         catch(Exception ex)
@@ -51,20 +48,11 @@ internal class LocalArchives
         }
     }
 
-    public static bool TryGetArchiveInfo(int index, [NotNullWhen(true)] out ArchiveInfo? info)
-    {
-        info = null;
-        if (index < 0 || index >= Count)
-            return false;
-        info = ArchiveInfoList[index];
-        return true;
-    }
-
     public static bool LoadArchive(int intdex)
     {
         try
         {
-            if (!TryGetArchiveInfo(intdex, out var info))
+            if (!ArchiveInfoList.TryGetValue(intdex, out var info))
                 return false;
             CurrentArchive = LoadArchive(info);
             //UserException.ThrowIfNotUseable(info);
@@ -104,7 +92,7 @@ internal class LocalArchives
     {
         try
         {
-            if (!TryGetArchiveInfo(index, out var info) || CurrentArchive is null)
+            if (!ArchiveInfoList.TryGetValue(index, out var info) || CurrentArchive is null)
                 return;
             SaveArchive(info, CurrentArchive);
             info.UpdateLastSaveTime();
@@ -126,7 +114,7 @@ internal class LocalArchives
     {
         try
         {
-            if (!TryGetArchiveInfo(index, out var info))
+            if (!ArchiveInfoList.TryGetValue(index, out var info))
                 return false;
             if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                 return false;
@@ -178,6 +166,11 @@ internal class LocalArchives
     public static string GetCurrentSpanPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "current span");
+    }
+
+    public static Bitmap LoadThumbnail(ArchiveInfo info)
+    {
+        return (Bitmap)Image.FromFile(GetThumbnailPath(info));
     }
 
     public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)

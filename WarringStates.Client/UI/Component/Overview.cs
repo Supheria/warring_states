@@ -51,16 +51,16 @@ public partial class Overview : Displayer
         Range = rect;
         if (FullScreen)
         {
-            Size = Atlas.Size.ScaleSizeOnRatio(Range.Size);
+            Size = Atlas.Size.ScaleSizeWithinRatio(Range.Size);
             Location = new(Range.Left + (Range.Width - Width) / 2, Range.Top + (Range.Height - Height) / 2);
         }
         else
         {
             var size = new Size((int)(Range.Width * 0.25), (int)(Range.Height * 0.25));
-            Size = Atlas.Size.ScaleSizeOnRatio(size);
+            Size = Atlas.Size.ScaleSizeWithinRatio(size);
             Location = new(Range.Right - Width, Range.Top);
         }
-        Relocate();
+        //Relocate();
     }
 
     private void Relocate(GridRelocatedArgs args)
@@ -100,7 +100,9 @@ public partial class Overview : Displayer
             }
         }
         pOverview.UnlockBits();
-        OverviewCache = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
+        var temp = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
+        OverviewCache.Dispose();
+        OverviewCache = temp;
         Image = OverviewCache.Clone() as Bitmap;
         void drawUnit(int col, int row, Color color)
         {

@@ -27,7 +27,7 @@ public partial class GamePlane : Displayer
     private void SetBounds(Rectangle rect)
     {
         Bounds = rect;
-        base.Relocate();
+        //base.Relocate();
         Relocate();
     }
 

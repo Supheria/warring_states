@@ -40,7 +40,7 @@ partial class ServerService
             var data = SerializeTool.Serialize(message, new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Broadcast, data, 0, data.Length)
                 .AppendArgs(ServiceKey.ReceivePlayer, Player.Name)
-                .AppendArgs(ServiceKey.SendPlayer, nameof(Server));
+                .AppendArgs(ServiceKey.SendPlayer, nameof(ServiceManager));
             SendCommand(sender);
         }
         catch (Exception ex)

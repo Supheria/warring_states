@@ -28,7 +28,7 @@ public class InfoBar : Displayer
     private void SetBounds(Rectangle rect)
     {
         Bounds = new(rect.Left, rect.Bottom - Height, rect.Width, Height);
-        Relocate();
+        //Relocate();
         using var g = Graphics.FromImage(Image);
         g.Clear(Color.Gray);
         var info = $"\n水源{SingleLand.Types.Stream.GetLandTypeCount()}\n平原{SingleLand.Types.Plain.GetLandTypeCount()}\n树林{SingleLand.Types.Wood.GetLandTypeCount()}\n山地{SingleLand.Types.Hill.GetLandTypeCount()}";

@@ -36,7 +36,7 @@ public class ToolBar : Displayer
     {
         Range = rect;
         Width = rect.Width;
-        Relocate();
+        //Relocate();
         DrawDate();
         rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);

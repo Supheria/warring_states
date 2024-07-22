@@ -85,7 +85,7 @@ public partial class ArchiveSelector : Displayer
     private void SetBounds(Rectangle rect)
     {
         Bounds = rect;
-        Relocate();
+        //Relocate();
         using var g = Graphics.FromImage(Image);
         g.FillRectangle(new SolidBrush(BackColor), Bounds);
         var colWidth = (Width - Padding.Width * 3) / 3;

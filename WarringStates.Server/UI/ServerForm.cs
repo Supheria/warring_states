@@ -3,6 +3,7 @@ using WarringStates.Flow;
 using WarringStates.Server.Events;
 using WarringStates.Server.UI.Component;
 using WarringStates.Server.User;
+using WarringStates.Server.Net;
 
 namespace WarringStates.Server.UI;
 
@@ -10,7 +11,7 @@ internal class ServerForm : ResizeableForm
 {
     public override string InitializeName => nameof(ServerForm);
 
-    Net.Server Server { get; set; } = new();
+    ServiceManager Server { get; set; } = new();
 
     NumericUpDown Port { get; } = new()
     {
@@ -127,42 +128,62 @@ internal class ServerForm : ResizeableForm
     {
         var width = (ClientWidth - Padding * 5) / 3;
         var top = ClientTop + Padding;
+        var height = Port.Height;
         //
-        Port.Left = ClientLeft + Padding;
-        Port.Top = top;
-        Port.Width = width;
+        Port.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width,
+            height
+            );
         //
-        SwitchButton.Left = Port.Right + Padding;
-        SwitchButton.Top = top;
-        SwitchButton.Width = width;
+        SwitchButton.Bounds = new(
+            Port.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        ParallelCount.Left = SwitchButton.Right + Padding;
-        ParallelCount.Top = top;
-        ParallelCount.Width = width;
+        ParallelCount.Bounds = new(
+            SwitchButton.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
         width = (ClientWidth - Padding * 3) / 5;
         top = SwitchButton.Bottom + Padding;
-        var height = ClientHeight - Port.Height - SendButton.Height - Padding * 4;
+        height = ClientHeight - Port.Height - SendButton.Height - Padding * 4;
         //
-        ArchiveSelector.Left = ClientLeft + Padding;
-        ArchiveSelector.Top = top;
-        ArchiveSelector.Width = width * 4;
-        ArchiveSelector.Height = height;
+        ArchiveSelector.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width * 4,
+            height
+            );
         //
-        MessageBox.Left = ArchiveSelector.Right + Padding;
-        //MessageBox.Left = ClientLeft + Padding;
-        MessageBox.Top = top;
-        MessageBox.Width = width;
-        MessageBox.Height = height;
+        MessageBox.Bounds = new(
+            ArchiveSelector.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
         top = MessageBox.Bottom + Padding;
+        height = SendBox.Height;
         //
-        SendBox.Left = ClientLeft + Padding;
-        SendBox.Top = top;
-        SendBox.Width = width * 2 + Padding;
+        SendBox.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width * 2 + Padding,
+            height
+            );
         //
-        SendButton.Left = SendBox.Right + Padding;
-        SendButton.Top = top;
-        SendButton.Width = width;
+        SendButton.Bounds = new(
+            SendBox.Right + Padding,
+            top,
+            width,
+            height
+            );
     }
 }

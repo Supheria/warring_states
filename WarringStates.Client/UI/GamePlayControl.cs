@@ -29,7 +29,7 @@ public partial class GamePlayControl : UserControl
         //LocalEvents.TryAddListener(LocalEvents.UserInterface.FinishGamePlay, FinishGame);
         //ArchiveManager.ReLocate();
         Controls.Add(ArchiveSelector);
-        ArchiveSelector.EnableListener();
+        //ArchiveSelector.EnableListener();
     }
 
     public void StartGame()
@@ -85,6 +85,6 @@ public partial class GamePlayControl : UserControl
     {
         if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
             return;
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.GamePlayControlOnDraw, ClientRectangle);
+        //LocalEvents.TryBroadcast(LocalEvents.UserInterface.GamePlayControlOnDraw, ClientRectangle);
     }
 }

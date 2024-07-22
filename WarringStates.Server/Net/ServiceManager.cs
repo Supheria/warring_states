@@ -12,7 +12,7 @@ using WarringStates.Server.User;
 
 namespace WarringStates.Server.Net;
 
-internal class Server : INetLogger
+internal class ServiceManager : INetLogger
 {
     public event NetEventHandler<int>? OnConnectionCountChange;
 
@@ -28,7 +28,7 @@ internal class Server : INetLogger
     {
         return new StringBuilder()
             .Append(SignCollection.OpenParenthesis)
-            .Append(nameof(Server))
+            .Append(nameof(ServiceManager))
             .Append(SignCollection.CloseParenthesis)
             .Append(SignCollection.Space)
             .Append(message)
