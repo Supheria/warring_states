@@ -3,6 +3,7 @@
 public class ServiceKey
 {
     public const string None = nameof(None);
+    public const string Id = nameof(Id);
     public const string Command = nameof(Command);
     public const string CommandCode = nameof(CommandCode);
     public const string OperateCode = nameof(OperateCode);
@@ -16,5 +17,7 @@ public class ServiceKey
     public const string ReceivePlayer = nameof(ReceivePlayer);
     public const string SendPlayer = nameof(SendPlayer);
     public const string StartTime = nameof(StartTime);
-    public const string ArchiveList = nameof(ArchiveList);
+    public const string List = nameof(List);
+    public const string Size = nameof(Size);
+    public const string Span = nameof(Span);
 }

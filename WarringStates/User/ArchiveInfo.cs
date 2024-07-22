@@ -12,7 +12,7 @@ using LocalUtilities.TypeGeneral;
 
 namespace WarringStates.User;
 
-public class ArchiveInfo
+public class ArchiveInfo : RosterItem<string>
 {
     [TableField(IsPrimaryKey = true)]
     public string Id { get; private set; } = "";
@@ -24,6 +24,8 @@ public class ArchiveInfo
     public DateTime CreateTime { get; private set; }
 
     public DateTime LastSaveTime { get; private set; }
+
+    public override string Signature => Id;
 
     public ArchiveInfo(string worldName, Size worldSize)
     {

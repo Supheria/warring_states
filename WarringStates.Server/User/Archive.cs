@@ -6,6 +6,7 @@ using LocalUtilities.TypeGeneral;
 using System;
 using WarringStates.Map;
 using WarringStates.Map.Terrain;
+using WarringStates.Server.Map;
 using WarringStates.User;
 
 namespace WarringStates.Server.User;
@@ -16,7 +17,7 @@ internal class Archive
 
     public RandomTable RandomTable { get; set; }
 
-    public Dictionary<string, List<SourceLand>> SourceLands { get; set; } = [];
+    public SourceLands SourceLands { get; set; } = new();
 
     public Players Players { get; set; } = [new()];
 

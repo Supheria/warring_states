@@ -69,7 +69,8 @@ public class Thumbnail : Displayer
     public void SetThumbnail(Bitmap thumbnail, int currentSpan)
     {
         ThumbnailSource?.Dispose();
-        ThumbnailSource = thumbnail;
+        ThumbnailSource = (Bitmap)thumbnail.Clone();
+        thumbnail.Dispose();
         CurrentSpan = currentSpan;
     }
 

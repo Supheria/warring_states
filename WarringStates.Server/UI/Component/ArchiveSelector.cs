@@ -20,12 +20,19 @@ public partial class ArchiveSelector : Control
 
     public static Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
 
-    public int ButtonHeight { get; set; } = 50;
+    public static int ButtonHeight { get; set; } = 50;
 
     Selector Selector { get; } = new()
     {
-        BackColor = BackColor,
         FrontColor = FrontColor,
+        BackColor = BackColor,
+    };
+
+    Thumbnail Thumbnail { get; } = new()
+    {
+        FrontColor = FrontColor,
+        BackColor = BackColor,
+        Padding = Padding,
     };
 
     ImageButton BuildButton { get; } = new()
@@ -48,13 +55,6 @@ public partial class ArchiveSelector : Control
         Text = "删除",
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
-    };
-
-    Thumbnail Thumbnail { get; } = new()
-    {
-        BackColor = BackColor,
-        FrontColor = FrontColor,
-        Padding= Padding,
     };
 
     public ArchiveSelector()
@@ -100,7 +100,7 @@ public partial class ArchiveSelector : Control
     protected override void OnResize(EventArgs e)
     {
         base.OnResize(e);
-        BeginInvoke(() => SetSize());
+        BeginInvoke(SetSize);
     }
 
     private void SetSize()
@@ -118,11 +118,13 @@ public partial class ArchiveSelector : Control
         Thumbnail.Bounds = new(left, padding.Height, colWidth, height - Padding.Height / 2);
         //
         var buttonPadding = (height - ButtonHeight * 3) / 4;
+        //
         BuildButton.Bounds = new(left, Thumbnail.Bottom + buttonPadding, colWidth, ButtonHeight);
         //
         LoadButton.Bounds = new(left, BuildButton.Bottom + buttonPadding, colWidth, ButtonHeight);
         //
         var buttonWidth = colWidth - Padding.Width * 2;
+        //
         DeleteButton.Bounds = new(left + Padding.Width, LoadButton.Bottom + buttonPadding, buttonWidth, ButtonHeight);
     }
 }

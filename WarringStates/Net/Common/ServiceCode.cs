@@ -26,4 +26,5 @@ public enum ServiceCode
     CannotAddCommandWaitingForCompose,
     EmptyUserInfo,
     NoConnection,
+    NoMatchArchiveId,
 }

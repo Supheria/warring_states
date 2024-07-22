@@ -122,7 +122,7 @@ partial class ServerService
             //var data = SerializeTool.Serialize(playerArchiveInfoList, new(ServiceKey.ArchiveList), SignTable, null);
             //var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
             //SendCommand(sender);
-            var data = SerializeTool.Serialize(LocalArchives.ArchiveInfoList, new(), SignTable, null);
+            var data = SerializeTool.Serialize(LocalArchives.ArchiveInfoList.ToArray(), new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
             SendCommand(sender);
         }
@@ -135,9 +135,22 @@ partial class ServerService
     private void HandleArchive(CommandReceiver receiver)
     {
         var operateCode = (OperateCode)receiver.OperateCode;
-        if (operateCode == OperateCode.List)
+        if (operateCode is OperateCode.List)
         {
             ReceiveCallback(receiver);
+        }
+        else if (operateCode is OperateCode.Request)
+        {
+            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ?? "";
+            if (!LocalArchives.ArchiveInfoList.TryGetValue(archiveId, out var info))
+                throw new NetException(ServiceCode.NoMatchArchiveId);
+            var ownership = LocalArchives.LoadSourceLands(info).GetOwnership(Player.Id);
+            var currentSpan = LocalArchives.LoadCurrentSpan(info);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
+                .AppendArgs(ServiceKey.List, ownership)
+                .AppendArgs(ServiceKey.Size, info.WorldSize)
+                .AppendArgs(ServiceKey.Span, currentSpan);
+            CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Join)
         {

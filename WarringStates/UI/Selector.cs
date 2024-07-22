@@ -41,7 +41,16 @@ public partial class Selector : Displayer
 
     int ItemShowCount { get; set; } = 0;
 
-    public int SelectedIndex { get; private set; } = -1;
+    public int SelectedIndex
+    {
+        get => _selectedIndex;
+        set
+        {
+            _selectedIndex = value < 0 ? -1 : value;
+            SelectedChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+    int _selectedIndex = -1;
 
     FontData ItemFontData { get; set; } = new()
     {

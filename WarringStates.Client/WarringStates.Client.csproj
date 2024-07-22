@@ -18,23 +18,18 @@
     <Compile Update="UI\ClientForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="UI\Component\ArchiveSelector.Roll.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="UI\Component\GamePlane.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="UI\Component\GamePlane.Op.cs" />
-    <Compile Update="UI\GamePlayControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Update="UI\Component\GamePlane.Operate.cs" />
+    <Compile Update="UI\GamePlayControl.cs" />
     <Compile Update="UI\Component\InfoBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="UI\Component\Overview.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="UI\Component\Overview.Op.cs" />
+    <Compile Update="UI\Component\Overview.Operate.cs" />
     <Compile Update="UI\Component\Settings.cs">
       <SubType>Component</SubType>
     </Compile>

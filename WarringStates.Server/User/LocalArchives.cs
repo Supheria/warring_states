@@ -11,6 +11,7 @@ using WarringStates.Map.Terrain;
 using WarringStates.Map;
 using WarringStates.Server.Events;
 using WarringStates.User;
+using WarringStates.Server.Map;
 
 namespace WarringStates.Server.User;
 
@@ -170,7 +171,8 @@ internal class LocalArchives
 
     public static Bitmap LoadThumbnail(ArchiveInfo info)
     {
-        return (Bitmap)Image.FromFile(GetThumbnailPath(info));
+        using var stream = File.OpenRead(GetThumbnailPath(info));
+        return new(stream);
     }
 
     public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)
@@ -183,9 +185,9 @@ internal class LocalArchives
         return SerializeTool.DeserializeFile<RandomTable>(new(nameof(Archive.RandomTable)), GetRandomTablePath(info), SignTable) ?? new();
     }
 
-    public static Dictionary<string, List<SourceLand>> LoadSourceLands(ArchiveInfo info)
+    public static SourceLands LoadSourceLands(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<Dictionary<string, List<SourceLand>>>(new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), SignTable) ?? [];
+        return SerializeTool.DeserializeFile<SourceLands>(new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), SignTable) ?? new();
     }
 
     public static Players LoadPlayers(ArchiveInfo info)

@@ -143,7 +143,9 @@ public class LocalEvents
     {
         Login,
         ArchiveListRefreshed,
-        LogoutPlayer,
+        Logout,
+        RequestFetchThumbnail,
+        ResponseFetchThumbnail,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

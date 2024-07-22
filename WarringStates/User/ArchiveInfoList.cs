@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LocalUtilities.TypeGeneral;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,13 +10,9 @@ using WarringStates.User;
 
 namespace WarringStates.User;
 
-public class ArchiveInfoList : IList<ArchiveInfo>
+public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
 {
     List<ArchiveInfo> InfoList { get; } = [];
-
-    public int Count => InfoList.Count;
-
-    public bool IsReadOnly => true;
 
     public ArchiveInfo this[int index] { get => InfoList[index]; set => InfoList[index] = value; }
 
@@ -48,29 +45,30 @@ public class ArchiveInfoList : IList<ArchiveInfo>
         InfoList.RemoveAt(index);
     }
 
-    public void Add(ArchiveInfo item)
+    public new void Add(ArchiveInfo item)
     {
         InfoList.Add(item);
+        base.Add(item);
     }
 
-    public void Clear()
+    public void AddRange(ArchiveInfo[] items)
+    {
+        foreach (var item in items)
+        {
+            InfoList.Add(item);
+            base.Add(item);
+        }
+    }
+
+    public new void Clear()
     {
         InfoList.Clear();
+        base.Clear();
     }
 
-    public bool Contains(ArchiveInfo item)
-    {
-        return InfoList.Contains(item);
-    }
-
-    public void CopyTo(ArchiveInfo[] array, int arrayIndex)
+    public new void CopyTo(ArchiveInfo[] array, int arrayIndex)
     {
         InfoList.CopyTo(array, arrayIndex);
-    }
-
-    public bool Remove(ArchiveInfo item)
-    {
-        return InfoList.Remove(item);
     }
 
     public IEnumerator<ArchiveInfo> GetEnumerator()

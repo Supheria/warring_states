@@ -1,78 +1,115 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
+using System.Drawing;
 using WarringStates.Client.Events;
 using WarringStates.Client.User;
+using WarringStates.Map.Terrain;
+using WarringStates.UI;
 
 namespace WarringStates.Client.UI.Component;
 
-public partial class ArchiveSelector : Displayer
+public partial class ArchiveSelector : Control
 {
-    private class Button(string name)
+    public static new Size Padding { get; } = new(30, 30);
+
+    public static Color FrontColor { get; set; } = Color.White;
+
+    public static new Color BackColor { get; set; } = Color.Teal;
+
+    public static int ButtonHeight { get; set; } = 50;
+
+    public static Color ButtonBackColor { get; set; } = Color.LightYellow;
+
+    public static Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
+
+    Selector Selector { get; } = new()
     {
-        public string Name { get; } = name;
-
-        public Rectangle Rect { get; set; } = new();
-
-        public bool Selected { get; set; } = false;
-    }
-
-    int ButtonHeight { get; set; } = 50;
-
-    FontData ButtonFontData { get; set; } = new()
-    {
-        Size = 25f,
-        Style = FontStyle.Bold,
-
+        FrontColor = FrontColor,
+        BackColor = BackColor,
     };
 
-    Color ButtonBackColor { get; set; } = Color.LightYellow;
+    Thumbnail Thumbnail { get; } = new()
+    {
+        FrontColor = FrontColor,
+        BackColor = BackColor,
+        Padding = Padding,
+    };
 
-    Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
+    ImageButton LoginButton { get; } = new()
+    {
+        Text = "登入",
+        FrontColor = ButtonFrontColor,
+        BackColor = ButtonBackColor,
+        CanSelect = true,
+    };
 
-    Button RefreshButton { get; } = new("刷新");
+    ImageButton JoinButton { get; } = new()
+    {
+        Text = "加入",
+        FrontColor = ButtonFrontColor,
+        BackColor = ButtonBackColor,
+    };
 
-    Button JoinButton { get; } = new("加入");
-
-    Button LogoutButton { get; } = new("登出");
-
-    new Size Padding { get; } = new(30, 30);
-
-    Color FrontColor { get; set; } = Color.White;
-
-    Color SelectedColor { get; set; } = Color.Gold;
-
-    //Bitmap? Thumbnail { get; set; } = null;
-
-    Rectangle OverviewRect { get; set; } = new();
-
-    Rectangle ThumbnailRect { get; set; } = new();
+    ImageButton LogoutButton { get; } = new()
+    {
+        Text = "登出",
+        FrontColor = ButtonFrontColor,
+        BackColor = ButtonBackColor,
+    };
 
     public ArchiveSelector()
     {
-        BackColor = Color.Teal;
+        base.BackColor = BackColor;
         AddOperations();
-        SizeChanged += (_, _) => SetBounds(Bounds);
+        Controls.AddRange([
+            Selector,
+            Thumbnail,
+            LoginButton,
+            JoinButton,
+            LogoutButton,
+            ]);
     }
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RelocateArchiveList);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
         LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryAddListener<ThumbnailInfo>(LocalEvents.UserInterface.ResponseFetchThumbnail, SetThumbnail);
         //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
-    private void RelocateArchiveList()
+    private void SetThumbnail(ThumbnailInfo info)
     {
-        if (LocalArchives.Count is 0)
-            SelectedItemIndex = -1;
-        RollReDraw();
+        var thumbnail = new Bitmap(info.Width, info.Height);
+        var g = Graphics.FromImage(thumbnail);
+        g.Clear(Color.White);
+        var pThumbnail = new PointBitmap(thumbnail);
+        pThumbnail.LockBits();
+        foreach (var land in info.OwnerShip)
+        {
+            foreach (var point in land.GetPoints())
+            {
+                pThumbnail.SetPixel(point.X, point.Y, land.Color);
+            }
+        }
+        pThumbnail.UnlockBits();
+        Thumbnail.SetThumbnail(thumbnail, info.CurrentSpan);
+        Thumbnail.Redraw();
+        Thumbnail.Invalidate();
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RelocateArchiveList);
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
         LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+    }
+
+    private void RefreshSelector()
+    {
+        Selector.ArchiveInfoList = LocalArchives.ArchiveInfoList;
+        Selector.Redraw();
+        Selector.Invalidate();
     }
 
     private new void KeyPress(Keys key)
@@ -85,97 +122,35 @@ public partial class ArchiveSelector : Displayer
     private void SetBounds(Rectangle rect)
     {
         Bounds = rect;
-        //Relocate();
-        using var g = Graphics.FromImage(Image);
-        g.FillRectangle(new SolidBrush(BackColor), Bounds);
+    }
+
+    protected override void OnResize(EventArgs e)
+    {
+        base.OnResize(e);
+        BeginInvoke(SetSize);
+    }
+
+    private void SetSize()
+    {
         var colWidth = (Width - Padding.Width * 3) / 3;
         var height = Height - Padding.Height * 2;
-        RollRect = new Rectangle(Padding.Width, Padding.Height, colWidth * 2, height);
-        RollReDraw();
+        //
+        Selector.Bounds = new(Padding.Width, Padding.Height, colWidth * 2, height);
+        //
         var padding = Padding + Padding / 4;
-        var left = RollRect.Right + padding.Width;
+        var left = Selector.Right + padding.Width;
         colWidth -= Padding.Width / 2;
         height /= 2;
-        OverviewRect = new(left, padding.Height, colWidth, height - Padding.Height / 2); ThumbnailRedraw();
+        //
+        Thumbnail.Bounds = new(left, padding.Height, colWidth, height - Padding.Height / 2); 
+        //
         var buttonPadding = (height - ButtonHeight * 3) / 4;
-        RefreshButton.Rect = new(left, OverviewRect.Bottom + buttonPadding, colWidth, ButtonHeight);
-        ButtonRedraw(RefreshButton);
-        JoinButton.Rect = new(left, RefreshButton.Rect.Bottom + buttonPadding, colWidth, ButtonHeight);
-        ButtonRedraw(JoinButton);
+        //
+        LoginButton.Bounds = new(left, Thumbnail.Bottom + buttonPadding, colWidth, ButtonHeight);
+        //
+        JoinButton.Bounds = new(left, LoginButton.Bottom + buttonPadding, colWidth, ButtonHeight);
+        //
         var buttonWidth = colWidth - Padding.Width * 2;
-        LogoutButton.Rect = new(left + Padding.Width, JoinButton.Rect.Bottom + buttonPadding, buttonWidth, ButtonHeight);
-        ButtonRedraw(LogoutButton);
-        Invalidate();
-    }
-
-    private void ThumbnailRedraw()
-    {
-        //Thumbnail?.Dispose();
-        //Thumbnail = null;
-        if (!LocalArchives.TryGetArchiveId(SelectedItemIndex, out var info))
-        {
-            using var g = Graphics.FromImage(Image);
-            var random = new Random();
-            var pImage = new PointBitmap((Bitmap)Image);
-            pImage.LockBits();
-            for (var i = 0; i < OverviewRect.Width; i++)
-            {
-                for (var j = 0; j < OverviewRect.Height; j++)
-                {
-                    Color color;
-                    if (random.Next() < random.Next())
-                        color = BackColor;
-                    else
-                        color = FrontColor;
-                    pImage.SetPixel(i + OverviewRect.Left, j + OverviewRect.Top, color);
-                }
-            }
-            pImage.UnlockBits();
-        }
-        // TODO: draw thumbnail for player
-        else
-        {
-            //var rect = OverviewRect;
-            //using var g = Graphics.FromImage(Image);
-            //g.FillRectangle(new SolidBrush(FrontColor), rect);
-            //ThumbnailRect = new Rectangle(rect.Left, rect.Top, rect.Width, rect.Height - Padding.Height);
-            //try
-            //{
-            //    var thumbnail = (Bitmap)Image.FromFile(info.GetThumbnailPath());
-            //    var size = thumbnail.Size.ScaleSizeOnRatio(ThumbnailRect.Size);
-            //    thumbnail = thumbnail.CopyToNewSize(size, System.Drawing.Drawing2D.InterpolationMode.Low);
-            //    ThumbnailRect = new Rectangle(ThumbnailRect.Left + (ThumbnailRect.Width - thumbnail.Width) / 2, ThumbnailRect.Top + (ThumbnailRect.Height - thumbnail.Height) / 2, thumbnail.Width, thumbnail.Height);
-            //    thumbnail.TemplateDrawOntoPart((Bitmap)Image, ThumbnailRect, true);
-            //    thumbnail.Dispose();
-            //    rect = new(rect.Left, rect.Bottom - Padding.Height, rect.Width, Padding.Height);
-            //}
-            //catch { }
-            //var stepper = new DateStepper();
-            //stepper.SetStartSpan(info.CurrentSpan);
-            //g.DrawString(stepper.GetDate().ToString(), new FontData(), new SolidBrush(Color.Black), rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
-        }
-
-        Invalidate();
-    }
-
-    private void ButtonRedraw(Button button)
-    {
-        ButtonRedraw(button, button.Selected);
-    }
-
-    private void ButtonRedraw(Button button, bool selected)
-    {
-        using var g = Graphics.FromImage(Image);
-        if (selected)
-        {
-            g.FillRectangle(new SolidBrush(ButtonFrontColor), button.Rect);
-            g.DrawUniformString(button.Rect, button.Name, ButtonHeight * 0.618f, ButtonBackColor, ButtonFontData);
-        }
-        else
-        {
-            g.FillRectangle(new SolidBrush(ButtonBackColor), button.Rect);
-            g.DrawUniformString(button.Rect, button.Name, ButtonHeight * 0.618f, ButtonFrontColor, ButtonFontData);
-        }
-        Invalidate();
+        LogoutButton.Bounds = new(left + Padding.Width, JoinButton.Bottom + buttonPadding, buttonWidth, ButtonHeight);
     }
 }

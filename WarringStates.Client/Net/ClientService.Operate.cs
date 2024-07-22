@@ -5,6 +5,9 @@ using WarringStates.User;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeToolKit.Convert;
 using LocalUtilities.SimpleScript.Common;
+using WarringStates.Map.Terrain;
+using WarringStates.Client.Events;
+using LocalUtilities.TypeGeneral;
 
 namespace WarringStates.Client.Net;
 
@@ -69,6 +72,20 @@ partial class ClientService
         }
     }
 
+    public void FetchThumbnail(string archiveId)
+    {
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Request)
+            .AppendArgs(ServiceKey.Id, archiveId);
+        SendCommand(sender);
+    }
+
+    public void JoinArchive(string id)
+    {
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join)
+            .AppendArgs(ServiceKey.Id, id);
+        SendCommand(sender);
+    }
+
     private void HandleArchive(CommandReceiver receiver)
     {
         var operateCode = (OperateCode)receiver.OperateCode;
@@ -79,12 +96,16 @@ partial class ClientService
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.CommandCode);
             CallbackSuccess(sender);
         }
-    }
-
-    public void JoinArchive(string id)
-    {
-        var data = SerializeTool.Serialize(id, new(), SignTable, null);
-        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join, data, 0, data.Length);
-        SendCommand(sender);
+        else if (operateCode is OperateCode.Request)
+        {
+            ReceiveCallback(receiver);
+            var info = new ThumbnailInfo()
+            {
+                OwnerShip = receiver.GetArgs<List<SourceLand>>(ServiceKey.List) ?? [],
+                WorldSize = receiver.GetArgs<Size>(ServiceKey.Size),
+                CurrentSpan = receiver.GetArgs<int>(ServiceKey.Span),
+            };
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ResponseFetchThumbnail, info);
+        }
     }
 }

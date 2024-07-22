@@ -8,7 +8,7 @@ using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 
-public class ClientForm : ResizeableForm
+public partial class ClientForm : ResizeableForm
 {
     ClientService Client { get; } = new();
 
@@ -109,21 +109,7 @@ public class ClientForm : ResizeableForm
         Client.OnClosed += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
         Client.OnUpdatePlayerList += Client_OnUpdateUserList;
-
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.Login, Login);
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.LogoutPlayer, Logout);
-    }
-
-    private void Login()
-    {
-        Client.Login(HostAddress.Text, (int)HostPort.Value, PlayerName.Text, Password.Text);
-    }
-
-    private void Logout()
-    {
-        Client.Dispose();
-        LocalArchives.ReLocate([]);
+        EnableListener();
     }
 
     private void UploadButton_Click(object? sender, EventArgs e)
