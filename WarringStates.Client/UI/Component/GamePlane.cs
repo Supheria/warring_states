@@ -14,26 +14,31 @@ public partial class GamePlane : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginSet, Relocate);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
+        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginSet, GridRedraw);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginSet, Relocate);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
+        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginSet, GridRedraw);
     }
 
-    private void SetBounds(Rectangle rect)
+    private void GridRedraw()
     {
-        Bounds = rect;
-        //base.Relocate();
-        Relocate();
-    }
-
-    private new void Relocate()
-    {
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
+        Redraw();
         Invalidate();
+    }
+    //private void SetBounds(Rectangle rect)
+    //{
+    //    Bounds = rect;
+    //    //base.Relocate();
+    //    Relocate();
+    //}
+
+    public override void Redraw()
+    {
+        base.Redraw();
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
     }
 }

@@ -59,7 +59,6 @@ internal class ServerForm : ResizeableForm
             SendButton,
             ArchiveSelector
             ]);
-        OnDrawClient += DrawClient;
         SwitchButton.Click += SwitchButton_Click;
         SendButton.Click += SendButton_Click;
         Server.OnLog += UpdateMessage;
@@ -78,7 +77,7 @@ internal class ServerForm : ResizeableForm
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
         LocalEvents.TryBroadcast(LocalEvents.Flow.SwichFlowState);
         //ArchiveSelector.DisableListener();
-        DrawClient();
+        //DrawClient();
     }
 
     private void SendButton_Click(object? sender, EventArgs e)
@@ -124,8 +123,9 @@ internal class ServerForm : ResizeableForm
         }
     }
 
-    private void DrawClient()
+    protected override void Redraw()
     {
+        base.Redraw(); 
         var width = (ClientWidth - Padding * 5) / 3;
         var top = ClientTop + Padding;
         var height = Port.Height;

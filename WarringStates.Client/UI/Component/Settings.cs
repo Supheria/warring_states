@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
+using WarringStates.UI;
 
 namespace WarringStates.Client.UI.Component;
 
@@ -11,31 +12,31 @@ public class Settings : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryAddListener<KeyPressArgs>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryRemoveListener<KeyPressArgs>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
-    private void SetBounds(Rectangle rect)
-    {
-        if (DoSetting)
-        {
+    //private void SetBounds(Rectangle rect)
+    //{
+    //    if (DoSetting)
+    //    {
 
-        }
-        else
-            Bounds = new(0, 0, 0, 0);
-        Range = rect;
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.SettingsOnSetBounds, rect);
-    }
+    //    }
+    //    else
+    //        Bounds = new(0, 0, 0, 0);
+    //    Range = rect;
+    //    LocalEvents.TryBroadcast(LocalEvents.UserInterface.SettingsOnSetBounds, rect);
+    //}
 
-    private new void KeyPress(Keys key)
+    private new void KeyPress(KeyPressArgs args)
     {
-        if (key is not Keys.Escape)
+        if (args.Value is not Keys.Escape)
             return;
         if (DoSetting)
         {

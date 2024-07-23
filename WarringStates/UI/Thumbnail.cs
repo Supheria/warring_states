@@ -21,6 +21,7 @@ public class Thumbnail : Displayer
 
     public override void Redraw()
     {
+        base.Redraw();
         using var g = Graphics.FromImage(Image);
         if (ThumbnailSource is null)
         {

@@ -4,13 +4,13 @@ using WarringStates.Client.Events;
 
 namespace WarringStates.Client.Graph;
 
-public partial class LatticeGrid
+public partial class GridDrawer
 {
     static GridData GridData { get; set; } = new();
 
     static CellData CellData { get; set; } = new();
 
-    public LatticeGrid(GridData gridData, CellData cellData)
+    public GridDrawer(GridData gridData, CellData cellData)
     {
         GridData = gridData;
         CellData = cellData;
@@ -18,7 +18,7 @@ public partial class LatticeGrid
         EnableListner();
     }
 
-    public LatticeGrid()
+    public GridDrawer()
     {
         EnableListner();
     }
@@ -47,17 +47,17 @@ public partial class LatticeGrid
 
     private void EnableListner()
     {
-        LocalEvents.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToReset, SetOrigin);
-        LocalEvents.TryAddListener<Coordinate>(LocalEvents.Graph.GridOriginToOffset, OffsetOrigin);
+        LocalEvents.TryAddListener<GridOriginOperateArgs>(LocalEvents.Graph.OperateGridOrigin, OperateOrigin);
         LocalEvents.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
-        LocalEvents.TryAddListener<Point>(LocalEvents.Graph.GridCellToPointOn, GetLatticeCell);
+        LocalEvents.TryAddListener<PointOnGridCellArgs>(LocalEvents.Graph.PointOnGridCell, ConvertToCell);
     }
 
-    public void GetLatticeCell(Point realPoint)
+    private void ConvertToCell(PointOnGridCellArgs args)
     {
-        var latticeCell = RealPointToLatticePoint(realPoint);
+        var latticeCell = RealPointToLatticePoint(args.RealPoint);
         var cell = new Cell(latticeCell);
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridCellPointedOn, new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint)));
+        var sendArgs = new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(args.RealPoint));
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridCellFromPoint, sendArgs);
     }
 
     public Coordinate RealPointToLatticePoint(Point realPoint)

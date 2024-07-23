@@ -20,4 +20,5 @@ public class ServiceKey
     public const string List = nameof(List);
     public const string Size = nameof(Size);
     public const string Span = nameof(Span);
+    public const string Count = nameof(Count);
 }

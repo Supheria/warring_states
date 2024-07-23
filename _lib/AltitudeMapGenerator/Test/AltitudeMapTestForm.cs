@@ -33,7 +33,6 @@ internal class AltiteudeForm : ResizeableForm
 
     public AltiteudeForm()
     {
-        OnDrawClient += DrawCilent;
         OpenFile.Click += OpenFile_Click;
         GenerateNew.Click += GenerateNew_Click;
 
@@ -46,8 +45,9 @@ internal class AltiteudeForm : ResizeableForm
         Name = "AltiteudeForm";
     }
 
-    private void DrawCilent()
+    protected override void Redraw()
     {
+        base.Redraw();
         AltitudeMap.Bounds = new(Left + 100, Top, ClientSize.Width - 100, ClientSize.Height);
         MakeMap();
     }

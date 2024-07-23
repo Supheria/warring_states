@@ -45,10 +45,10 @@ public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
         InfoList.RemoveAt(index);
     }
 
-    public new void Add(ArchiveInfo item)
+    public new void TryAdd(ArchiveInfo item)
     {
         InfoList.Add(item);
-        base.Add(item);
+        base.TryAdd(item);
     }
 
     public void AddRange(ArchiveInfo[] items)
@@ -56,7 +56,7 @@ public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
         foreach (var item in items)
         {
             InfoList.Add(item);
-            base.Add(item);
+            base.TryAdd(item);
         }
     }
 
@@ -64,11 +64,6 @@ public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
     {
         InfoList.Clear();
         base.Clear();
-    }
-
-    public new void CopyTo(ArchiveInfo[] array, int arrayIndex)
-    {
-        InfoList.CopyTo(array, arrayIndex);
     }
 
     public IEnumerator<ArchiveInfo> GetEnumerator()

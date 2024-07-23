@@ -26,6 +26,7 @@ public class ImageButton : Displayer
 
     public override void Redraw()
     {
+        base.Redraw();
         using var g = Graphics.FromImage(Image);
         var rect = new Rectangle(0, 0, Width, Height);
         if (CanSelect && Focused)

@@ -10,13 +10,15 @@ using WarringStates.Net.Utilities;
 
 namespace WarringStates.Server.Net;
 
-internal partial class ServerService : Service
+internal partial class ServerService : Service, IRosterItem<string>
 {
     protected override string RepoPath { get; set; } = @"repo\server";
 
     public string TimeStamp { get; } = DateTime.Now.ToString(DateTimeFormat.Data);
 
     protected override DaemonThread DaemonThread { get; init; }
+
+    public string Signature => Player.Id;
 
     public ServerService() : base(new ServerProtocol())
     {

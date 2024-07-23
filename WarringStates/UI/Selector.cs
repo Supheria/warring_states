@@ -71,6 +71,7 @@ public partial class Selector : Displayer
 
     public override void Redraw()
     {
+        base.Redraw();
         using var g = Graphics.FromImage(Image);
         SetSize();
         g.Clear(FrontColor);

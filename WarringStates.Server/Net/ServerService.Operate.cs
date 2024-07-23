@@ -5,12 +5,13 @@ using WarringStates.Server.User;
 using WarringStates.User;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeToolKit.Convert;
+using WarringStates.Server.Events;
 
 namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    public NetEventHandler<CommandReceiver>? OnRelayCommand;
+    //public NetEventHandler<CommandReceiver>? OnRelayCommand;
 
     private void HandleHeartBeats(CommandReceiver receiver)
     {
@@ -64,7 +65,10 @@ partial class ServerService
                 SendCommand(sender);
             }
             else
-                OnRelayCommand?.Invoke(receiver);
+            {
+                var args = new CommandRelayArgs(receiver);
+                LocalEvents.TryBroadcast(LocalEvents.NetService.RelayCommand, args);
+            }
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -78,7 +82,8 @@ partial class ServerService
             else
             {
                 ReceiveCallback(receiver);
-                OnRelayCommand?.Invoke(receiver);
+                var args = new CommandRelayArgs(receiver);
+                LocalEvents.TryBroadcast(LocalEvents.NetService.RelayCommand, args);
             }
         }
         else if (operateCode is OperateCode.Broadcast)
@@ -146,15 +151,21 @@ partial class ServerService
                 throw new NetException(ServiceCode.NoMatchArchiveId);
             var ownership = LocalArchives.LoadSourceLands(info).GetOwnership(Player.Id);
             var currentSpan = LocalArchives.LoadCurrentSpan(info);
+            var playerCount = LocalArchives.LoadPlayers(info).Count;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.List, ownership)
                 .AppendArgs(ServiceKey.Size, info.WorldSize)
-                .AppendArgs(ServiceKey.Span, currentSpan);
+                .AppendArgs(ServiceKey.Span, currentSpan)
+                .AppendArgs(ServiceKey.Count, playerCount);
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Join)
         {
-            // TODO: join archive
+            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ?? "";
+            if (!LocalArchives.ArchiveInfoList.TryGetValue(archiveId, out var info))
+                throw new NetException(ServiceCode.NoMatchArchiveId);
+            var args = new PlayerJoinArgs();
+            LocalEvents.TryBroadcast(LocalEvents.NetService.JoinArchive, args);
         }
     }
 }

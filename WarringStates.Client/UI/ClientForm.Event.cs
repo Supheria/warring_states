@@ -15,12 +15,12 @@ partial class ClientForm
         LocalEvents.TryAddListener(LocalEvents.UserInterface.MainFormToClose, Close);
         LocalEvents.TryAddListener(LocalEvents.UserInterface.Login, Login);
         LocalEvents.TryAddListener(LocalEvents.UserInterface.Logout, Logout);
-        LocalEvents.TryAddListener<string>(LocalEvents.UserInterface.RequestFetchThumbnail, FetchThumbnail);
+        LocalEvents.TryAddListener<ArchiveIdArgs>(LocalEvents.UserInterface.RequestFetchThumbnail, FetchThumbnail);
     }
 
-    private void FetchThumbnail(string archiveId)
+    private void FetchThumbnail(ArchiveIdArgs id)
     {
-        Client.FetchThumbnail(archiveId);
+        Client.FetchThumbnail(id.Value);
     }
 
     private void Login()

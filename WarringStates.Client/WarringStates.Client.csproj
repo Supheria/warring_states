@@ -22,7 +22,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="UI\Component\GamePlane.Operate.cs" />
-    <Compile Update="UI\GamePlayControl.cs" />
+    <Compile Update="UI\GamePlayer.cs" />
     <Compile Update="UI\Component\InfoBar.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -1,6 +1,8 @@
-﻿namespace WarringStates.Client.Events;
+﻿using WarringStates.Events;
 
-public class GridToRelocateArgs(Image source, Color backColor)
+namespace WarringStates.Client.Events;
+
+public class GridToRelocateArgs(Image source, Color backColor) : ICallbackArgs
 {
     public Image Source { get; } = source;
 

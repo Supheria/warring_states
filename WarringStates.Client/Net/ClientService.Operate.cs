@@ -15,14 +15,14 @@ partial class ClientService
 {
     public event NetEventHandler<string[]>? OnUpdatePlayerList;
 
-    public void SendMessage(string message, string receivePlayerName)
+    public void SendMessage(string message, string receivePlayerId)
     {
         try
         {
             var data = SerializeTool.Serialize(message, new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, data.Length)
-                .AppendArgs(ServiceKey.ReceivePlayer, receivePlayerName)
-                .AppendArgs(ServiceKey.SendPlayer, Player.Name);
+                .AppendArgs(ServiceKey.ReceivePlayer, receivePlayerId)
+                .AppendArgs(ServiceKey.SendPlayer, Player.Id);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -79,10 +79,10 @@ partial class ClientService
         SendCommand(sender);
     }
 
-    public void JoinArchive(string id)
+    public void JoinArchive(string archiveId)
     {
         var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join)
-            .AppendArgs(ServiceKey.Id, id);
+            .AppendArgs(ServiceKey.Id, archiveId);
         SendCommand(sender);
     }
 
@@ -99,11 +99,12 @@ partial class ClientService
         else if (operateCode is OperateCode.Request)
         {
             ReceiveCallback(receiver);
-            var info = new ThumbnailInfo()
+            var info = new ThumbnailRedrawArgs()
             {
                 OwnerShip = receiver.GetArgs<List<SourceLand>>(ServiceKey.List) ?? [],
                 WorldSize = receiver.GetArgs<Size>(ServiceKey.Size),
                 CurrentSpan = receiver.GetArgs<int>(ServiceKey.Span),
+                PlayerCount = receiver.GetArgs<int>(ServiceKey.Count),
             };
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.ResponseFetchThumbnail, info);
         }

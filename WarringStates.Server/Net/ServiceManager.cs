@@ -22,7 +22,9 @@ internal class ServiceManager : INetLogger
 
     public bool IsStart { get; private set; } = false;
 
-    ConcurrentDictionary<string, ServerService> UserMap { get; } = [];
+    ServiceGroup PlayerMap { get; } = [];
+
+    ConcurrentDictionary<string, ServiceGroup> PlayerGroup { get; } = [];
 
     public string GetLog(string message)
     {
@@ -66,7 +68,7 @@ internal class ServiceManager : INetLogger
         {
             if (!IsStart)
                 throw new NetException(ServiceCode.ServerNotStartYet);
-            foreach (var service in UserMap.Values)
+            foreach (var service in PlayerMap)
                 service.Dispose();
             Socket?.Close();
             IsStart = false;
@@ -82,16 +84,18 @@ internal class ServiceManager : INetLogger
     private void EnableListener()
     {
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
+        LocalEvents.TryAddListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
     }
 
     private void DisableListener()
     {
         LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
+        LocalEvents.TryRemoveListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
     }
 
     private void BroadcastArchiveList()
     {
-        Parallel.ForEach(UserMap.Values, service =>
+        Parallel.ForEach(PlayerMap, service =>
         {
             service.UpdateArchiveList();
         });
@@ -120,7 +124,6 @@ internal class ServiceManager : INetLogger
         service.OnLog += this.HandleLog;
         service.OnLogined += () => AddService(service);
         service.OnClosed += () => RemoveService(service);
-        service.OnRelayCommand += RelayCommand;
         service.Accept(acceptArgs.AcceptSocket);
     ACCEPT:
         if (acceptArgs.SocketError is SocketError.Success)
@@ -129,8 +132,8 @@ internal class ServiceManager : INetLogger
 
     private void AddService(ServerService service)
     {
-        if (service.Player.Name is "" ||
-            !UserMap.TryAdd(service.Player.Name, service))
+        if (string.IsNullOrEmpty(service.Signature) ||
+            !PlayerMap.TryAdd(service)) 
         {
             service.Dispose();
             return;
@@ -140,26 +143,26 @@ internal class ServiceManager : INetLogger
 
     private void RemoveService(ServerService service)
     {
-        if (service.Player.Name is "" ||
-            !(UserMap.TryGetValue(service.Player.Name, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
+        if (string.IsNullOrEmpty(service.Signature) ||
+            !(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp)) 
             return;
-        UserMap.TryRemove(service.Player.Name, out _);
+        PlayerMap.TryRemove(service);
         HandleUpdateConnection();
     }
 
-    private void RelayCommand(CommandReceiver receiver)
+    private void RelayCommand(CommandRelayArgs args)
     {
         try
         {
-            var userName = (OperateCode)receiver.OperateCode switch
+            var userId = (OperateCode)args.Receiver.OperateCode switch
             {
-                OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
-                OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendPlayer),
+                OperateCode.Request => args.Receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
+                OperateCode.Callback => args.Receiver.GetArgs<string>(ServiceKey.SendPlayer),
                 _ => "",
             } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
-            if (!UserMap.TryGetValue(userName, out var user))
+            if (!PlayerMap.TryGetValue(userId, out var user))
                 throw new NetException(ServiceCode.UserNotExist);
-            user.HandleCommand(receiver);
+            user.HandleCommand(args.Receiver);
         }
         catch (Exception ex)
         {
@@ -169,22 +172,23 @@ internal class ServiceManager : INetLogger
 
     public void BroadcastMessage(string message)
     {
-        Parallel.ForEach(UserMap.Values, service => 
+        Parallel.ForEach(PlayerMap, service => 
         {
             service.SendMessage(message);
         });
     }
 
-    public void BroadcastUserList()
+    public void UpdatePlayerGroupList()
     {
-        var users = UserMap.Keys.ToArray();
-        foreach (var service in UserMap.Values)
-            service.UpdatePlayerList(users);
+        var players = new Dictionary<string, string>();
+        //foreach
+        //foreach (var service in PlayerMap.Values)
+        //    service.UpdatePlayerList(players);
     }
 
     public void HandleUpdateConnection()
     {
-        OnConnectionCountChange?.Invoke(UserMap.Count);
-        BroadcastUserList();
+        OnConnectionCountChange?.Invoke(PlayerMap.Count);
+        //BroadcastUserList();
     }
 }

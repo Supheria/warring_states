@@ -29,11 +29,6 @@ public class AutoDisposeItemCollection<T> : ICollection<T> where T : AutoDispose
         return Items.TryGetValue(timeStamp, out item);
     }
 
-    public void Add(T item)
-    {
-        throw new NotImplementedException();
-    }
-
     public void Clear()
     {
         throw new NotImplementedException();
@@ -49,7 +44,7 @@ public class AutoDisposeItemCollection<T> : ICollection<T> where T : AutoDispose
         throw new NotImplementedException();
     }
 
-    public bool Remove(T item)
+    public bool TryRemove(T item)
     {
         throw new NotImplementedException();
     }
@@ -62,5 +57,17 @@ public class AutoDisposeItemCollection<T> : ICollection<T> where T : AutoDispose
     IEnumerator IEnumerable.GetEnumerator()
     {
         return Items.Values.GetEnumerator();
+    }
+
+    [Obsolete]
+    public void Add(T item)
+    {
+        throw new NotImplementedException();
+    }
+
+    [Obsolete]
+    public bool Remove(T item)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -22,13 +22,13 @@ public class ToolBar : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         LocalEvents.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         LocalEvents.TryRemoveListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
@@ -37,19 +37,20 @@ public class ToolBar : Displayer
         Range = rect;
         Width = rect.Width;
         //Relocate();
-        DrawDate();
+        Redraw();
         rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
+        //LocalEvents.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
     }
 
     private void SetDate(SpanFlowTickOnArgs args)
     {
         CurrentDate = args.CurrentDate;
-        DrawDate();
+        Redraw();
     }
 
-    private void DrawDate()
+    public override void Redraw()
     {
+        base.Redraw();
         var dateWidth = (Width * 0.2).ToRoundInt();
         var dateRect = new Rectangle(Right - dateWidth, Top, dateWidth, Height);
         using var g = Graphics.FromImage(Image);
@@ -60,6 +61,5 @@ public class ToolBar : Displayer
             LineAlignment = StringAlignment.Center,
         };
         g.DrawString(CurrentDate.ToString(), LabelFontData, DateBrush, dateRect, format);
-        Invalidate();
     }
 }

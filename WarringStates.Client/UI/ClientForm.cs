@@ -68,18 +68,25 @@ public partial class ClientForm : ResizeableForm
         SelectionMode = SelectionMode.MultiExtended
     };
 
-    GamePlayControl GamePlay { get; } = new();
+    Control OperatePannel { get; set; }
+
+    ArchiveSelector ArchiveSelector { get; } = new();
+
+    GamePlayer GamePlayControl { get; } = new();
+
+    //GamePlayControl GamePlay { get; } = new();
 
     public override Size MinimumSize { get; set; } = new(200, 200);
 
     public override string InitializeName { get; }
 
-    protected override Type DataType => typeof(ClientData);
+    protected override Type FormDataType => typeof(ClientData);
 
     public ClientForm(string initializeName)
     {
         InitializeName = initializeName;
         Text = "Client";
+        OperatePannel = GamePlayControl;
         Controls.AddRange([
             HostAddress,
             HostPort,
@@ -94,12 +101,9 @@ public partial class ClientForm : ResizeableForm
             FilePathButton,
             UploadButton,
             DownloadButton,
-            GamePlay,
+            OperatePannel,
+            //GamePlay,
             ]);
-        OnLoadForm += ClientForm_OnLoadForm;
-        OnSaveForm += ClientForm_OnSaveForm;
-        FormClosing += (_, _) => Client.Dispose();
-        OnDrawClient += ClientForm_OnDrawClient;
         SendButton.Click += SendButton_Click;
         FilePathButton.Click += FilePathButton_Click;
         UploadButton.Click += UploadButton_Click;
@@ -109,6 +113,8 @@ public partial class ClientForm : ResizeableForm
         Client.OnClosed += Client_OnDisconnected;
         Client.OnProcessing += UpdateFormText;
         Client.OnUpdatePlayerList += Client_OnUpdateUserList;
+        //ArchiveSelector.EnableListener();
+        GamePlayControl.EnableListener();
         EnableListener();
     }
 
@@ -197,7 +203,7 @@ public partial class ClientForm : ResizeableForm
         public string FilePath { get; set; } = "";
     }
 
-    private void ClientForm_OnLoadForm(object? data)
+    protected override void OnLoad(object? data)
     {
         if (data is not ClientData clientData)
             return;
@@ -209,7 +215,7 @@ public partial class ClientForm : ResizeableForm
         FilePath.Text = clientData.FilePath;
     }
 
-    private FormData ClientForm_OnSaveForm()
+    protected override FormData OnSave()
     {
         return new ClientData()
         {
@@ -220,6 +226,12 @@ public partial class ClientForm : ResizeableForm
             DirName = DirName.Text,
             FilePath = FilePath.Text,
         };
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        Client.Dispose();
     }
 
     private void FilePathButton_Click(object? sender, EventArgs e)
@@ -248,8 +260,9 @@ public partial class ClientForm : ResizeableForm
         });
     }
 
-    private void ClientForm_OnDrawClient()
+    protected override void Redraw()
     {
+        base.Redraw(); 
         var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
         //
@@ -273,12 +286,12 @@ public partial class ClientForm : ResizeableForm
         top = Password.Bottom + Padding;
         var height = ClientHeight - HostAddress.Height - SendBox.Height - FilePath.Height - Padding * 6;
         //
-        GamePlay.Left = ClientLeft + Padding;
-        GamePlay.Top = top;
-        GamePlay.Width = width * 3;
-        GamePlay.Height = height;
+        OperatePannel.Left = ClientLeft + Padding;
+        OperatePannel.Top = top;
+        OperatePannel.Width = width * 5;
+        OperatePannel.Height = height;
         //
-        MessageBox.Left = GamePlay.Right + Padding;
+        MessageBox.Left = OperatePannel.Right + Padding;
         //MessageBox.Left = ClientLeft + Padding;
         MessageBox.Top = top;
         MessageBox.Width = width;

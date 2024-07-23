@@ -3,7 +3,7 @@ using WarringStates.Client.Map;
 
 namespace WarringStates.Client.Graph;
 
-partial class LatticeGrid
+partial class GridDrawer
 {
     public sealed class Cell
     {

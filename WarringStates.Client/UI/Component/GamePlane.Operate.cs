@@ -16,7 +16,7 @@ partial class GamePlane
 
     Point DragStartPoint { get; set; } = new();
 
-    static int DragMoveSensibility => LatticeGrid.CellEdgeLength;
+    static int DragMoveSensibility { get; set; } = GridDrawer.CellEdgeLength;
 
     public DrawImageHandler? OnDragImage { get; set; }
 
@@ -26,7 +26,7 @@ partial class GamePlane
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellPointedOn, PointOnCell);
+        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellFromPoint, PointOnCell);
     }
 
     private void PointOnCell(GridCellPointedOnArgs args)
@@ -45,6 +45,8 @@ partial class GamePlane
         {
             DoDragGraph = true;
             DragStartPoint = args.Location;
+            var sendArgs = new PointOnGridCellArgs(args.Location);
+            LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnGridCell, sendArgs);
         }
     }
 
@@ -56,7 +58,6 @@ partial class GamePlane
 
     private void OnMouseMove(object? sender, MouseEventArgs args)
     {
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridCellToPointOn, args.Location);
         if (!DoDragGraph)
             return;
         var dX = args.X - DragStartPoint.X;
@@ -68,7 +69,8 @@ partial class GamePlane
             dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
             dY *= DragMoveSensibility;
             DragStartPoint = args.Location;
-            LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
+            var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(dX, dY));
+            LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
         }
     }
 
@@ -76,9 +78,10 @@ partial class GamePlane
     {
         var diffInWidth = args.Location.X - Width / 2;
         var diffInHeight = args.Location.Y - Height / 2;
-        var dX = diffInWidth / LatticeGrid.CellEdgeLength * Width / 200;
-        var dY = diffInHeight / LatticeGrid.CellEdgeLength * Height / 200;
-        LatticeGrid.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginToOffset, new Coordinate(dX, dY));
+        var dX = diffInWidth / GridDrawer.CellEdgeLength * Width / 200;
+        var dY = diffInHeight / GridDrawer.CellEdgeLength * Height / 200;
+        GridDrawer.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
+        var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(dX, dY));
+        LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
     }
 }

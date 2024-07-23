@@ -19,7 +19,7 @@ internal class Archive
 
     public SourceLands SourceLands { get; set; } = new();
 
-    public Players Players { get; set; } = [new()];
+    public Players Players { get; set; } = [];
 
     public int CurrentSpan { get; set; } = 0;
 

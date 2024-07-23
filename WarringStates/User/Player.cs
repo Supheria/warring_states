@@ -3,7 +3,7 @@ using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
 
-public class Player(string name, string password) : RosterItem<string>
+public class Player(string name, string password) : IRosterItem<string>
 {
     public string Name { get; private set; } = name;
 
@@ -11,7 +11,7 @@ public class Player(string name, string password) : RosterItem<string>
 
     public string Password { get; private set; } = password.ToMd5HashString();
 
-    public override string Signature => Id;
+    public string Signature => Id;
 
     public Player() : this("", "")
     {

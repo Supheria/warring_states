@@ -28,7 +28,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback)
+    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
     {
         try
         {
@@ -64,7 +64,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback)
+    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
     {
         try
         {
@@ -97,7 +97,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args)
+    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : ICallbackArgs
     {
         try
         {
@@ -129,10 +129,12 @@ public class LocalEvents
 
     public enum Graph
     {
+        OperateGridOrigin,
+
         GridToRelocate,
-        GridRelocated,
-        GridCellToPointOn,
-        GridCellPointedOn,
+        GridRedraw,
+        PointOnGridCell,
+        GridCellFromPoint,
         GridOriginToOffset,
         GridOriginToReset,
         GridOriginSet,
@@ -184,6 +186,6 @@ public class LocalEvents
                 i++;
             }
         }
-        TryBroadcast(Test.AddInfoList, testinfolist);
+        //TryBroadcast(Test.AddInfoList, testinfolist);
     }
 }

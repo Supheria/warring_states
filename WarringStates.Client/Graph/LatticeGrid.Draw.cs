@@ -7,10 +7,8 @@ using WarringStates.Map.Terrain;
 
 namespace WarringStates.Client.Graph;
 
-partial class LatticeGrid
+partial class GridDrawer
 {
-    Image? Image { get; set; }
-
     Graphics? Graphics { get; set; }
 
     Rectangle LastDrawRect { get; set; } = new();
@@ -27,42 +25,45 @@ partial class LatticeGrid
 
     public Size LatticeOffset { get; set; } = new();
 
-    private void OffsetOrigin(Coordinate offset)
+    private void OperateOrigin(GridOriginOperateArgs args)
     {
-        var lastOrigin = Origin;
-        var width = Atlas.Width * CellEdgeLength;
-        var x = (Origin.X + offset.X) % width;
-        if (x < 0)
-            x += width;
-        var height = Atlas.Height * CellEdgeLength;
-        var y = (Origin.Y + offset.Y) % height;
-        if (y < 0)
-            y += height;
-        Origin = new(x, y);
-        OriginOffset = Origin - lastOrigin;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
-    }
-
-    private void SetOrigin(Coordinate origin)
-    {
-        var lastOrigin = Origin;
-        Origin = origin;
-        OriginOffset = Origin - lastOrigin;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
+        if (args.Operate is GridOriginOperateArgs.OperateTypes.Set)
+        {
+            var lastOrigin = Origin;
+            Origin = args.Value;
+            OriginOffset = Origin - lastOrigin;
+            LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
+        }
+        else if (args.Operate is GridOriginOperateArgs.OperateTypes.Offset)
+        {
+            var lastOrigin = Origin;
+            var width = Atlas.Width * CellEdgeLength;
+            var x = (Origin.X + args.Value.X) % width;
+            if (x < 0)
+                x += width;
+            var height = Atlas.Height * CellEdgeLength;
+            var y = (Origin.Y + args.Value.Y) % height;
+            if (y < 0)
+                y += height;
+            Origin = new(x, y);
+            OriginOffset = Origin - lastOrigin;
+            LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
+        }
     }
 
     private void Relocate(GridToRelocateArgs args)
     {
         DrawRect = new(new(0, 0), args.Source.Size);
-        Image = args.Source;
-        Graphics = Graphics.FromImage(Image);
+        Graphics?.Dispose();
+        Graphics = Graphics.FromImage(args.Source);
         BackColor = args.BackColor;
         DrawGrid();
         Graphics.Flush();
         Graphics.Dispose();
         LastDrawRect = DrawRect;
         LastCellEdgeLength = CellEdgeLength;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridRelocated, new GridRelocatedArgs(DrawRect, Origin));
+        var sendArgs = new GridRelocatedArgs(DrawRect, Origin);
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
     }
 
     private void DrawGrid()
@@ -92,7 +93,7 @@ partial class LatticeGrid
                 }
             }
 #if DEBUG
-            LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
+            //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
 #endif
         }
         //
@@ -119,7 +120,7 @@ partial class LatticeGrid
                 }
             }
 #if DEBUG
-            LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
+            //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
 #endif
         }
         DrawGuideLine();

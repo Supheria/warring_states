@@ -39,7 +39,7 @@ internal class LocalArchives
             {
                 var info = new ArchiveInfo();
                 TableTool.SetFieldsValue(info, fields);
-                ArchiveInfoList.Add(info);
+                ArchiveInfoList.TryAdd(info);
             }
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
         }

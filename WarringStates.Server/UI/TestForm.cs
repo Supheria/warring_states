@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
+using WarringStates.Events;
 using WarringStates.Server.Events;
 
 namespace WarringStates.Server.UI;
@@ -28,11 +29,11 @@ internal class TestForm : ResizeableForm
             InfoMap[info.Name] = info.Info;
             UpdateInfo();
         });
-        LocalEvents.TryAddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
-        {
-            infoList.ForEach(info => InfoMap[info.Name] = info.Info);
-            UpdateInfo();
-        });
+        //LocalEvents.TryAddListener<List<StringInfo>>(LocalEvents.Test.AddInfoList, infoList =>
+        //{
+        //    infoList.ForEach(info => InfoMap[info.Name] = info.Info);
+        //    UpdateInfo();
+        //});
         LocalEvents.TryAddListener<ValueInfo>(LocalEvents.Test.ValueForMax, info =>
         {
             if (ValueMap.TryGetValue(info.Name, out var value))
@@ -53,11 +54,11 @@ internal class TestForm : ResizeableForm
                 ValueMap[info.Name] = value;
             UpdateInfo();
         });
-        LocalEvents.TryAddListener<string>(LocalEvents.Test.ClearValue, name =>
-        {
-            ValueMap[name] = 0;
-            UpdateInfo();
-        });
+        //LocalEvents.TryAddListener<string>(LocalEvents.Test.ClearValue, name =>
+        //{
+        //    ValueMap[name] = 0;
+        //    UpdateInfo();
+        //});
     }
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)
@@ -73,14 +74,14 @@ internal class TestForm : ResizeableForm
         Dock = DockStyle.Fill,
     };
 
-    public class StringInfo(string name, string info)
+    public class StringInfo(string name, string info) : ICallbackArgs
     {
         public string Name { get; } = name;
 
         public string Info { get; } = info;
     }
 
-    public class ValueInfo(string name, int value)
+    public class ValueInfo(string name, int value) : ICallbackArgs
     {
         public string Name { get; } = name;
 

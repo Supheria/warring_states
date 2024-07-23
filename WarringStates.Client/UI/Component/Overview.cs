@@ -16,7 +16,7 @@ public partial class Overview : Displayer
 
     Rectangle Range { get; set; }
 
-    GridRelocatedArgs? GridUpdatedArgs { get; set; }
+    //GridRelocatedArgs? GridUpdatedArgs { get; set; }
 
     (double Width, double Height) FocusScaleRatio { get; set; }
 
@@ -28,6 +28,10 @@ public partial class Overview : Displayer
 
     Color FocusColor { get; set; } = Color.Red;
 
+    Rectangle GridDrawRect { get; set; } = new();
+
+    Coordinate GridOrigin { get; set; } = new();
+
     public Overview()
     {
         AddOperations();
@@ -35,49 +39,57 @@ public partial class Overview : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
-        LocalEvents.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
-        LocalEvents.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRelocated, Relocate);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
+        LocalEvents.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
-
-    private void SetBounds(Rectangle rect)
+    public void SetBounds(Rectangle bounds)
     {
-        Range = rect;
+        Range = bounds;
         if (FullScreen)
         {
-            Size = Atlas.Size.ScaleSizeWithinRatio(Range.Size);
-            Location = new(Range.Left + (Range.Width - Width) / 2, Range.Top + (Range.Height - Height) / 2);
+            var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+            var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
+            Bounds = new(location, size);
         }
         else
         {
-            var size = new Size((int)(Range.Width * 0.25), (int)(Range.Height * 0.25));
-            Size = Atlas.Size.ScaleSizeWithinRatio(size);
-            Location = new(Range.Right - Width, Range.Top);
+            var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
+            size = Atlas.Size.ScaleSizeWithinRatio(size);
+            var location = new Point(Range.Right - size.Width, Range.Top);
+            Bounds = new(location, size);
         }
-        //Relocate();
+        Redraw();
+        Invalidate();
     }
 
     private void Relocate(GridRelocatedArgs args)
     {
         if (Width is 0 || Height is 0)
             return;
-        GridUpdatedArgs = args;
-        RelocateOverview();
-        RelocateFocus(args.DrawRect, args.Origin);
+        GridDrawRect = args.DrawRect;
+        GridOrigin = args.Origin;
+        Redraw();
         Invalidate();
+    }
+
+    public override void Redraw()
+    {
+        RelocateOverview();
+        RelocateFocus();
     }
 
     private void RelocateOverview()
     {
         if (OverviewCache is not null && Size == OverviewCache.Size)
         {
-            OverviewCache.TemplateDrawOntoParts((Bitmap)Image, LastFocusOnRects, true);
+            BitmapTool.DrawTemplateSamePartsOnto(OverviewCache, (Bitmap)Image, LastFocusOnRects, true);
             return;
         }
         OverviewCache?.Dispose();
@@ -118,13 +130,13 @@ public partial class Overview : Displayer
         }
     }
 
-    private void RelocateFocus(Rectangle drawRect, Coordinate origin)
+    private void RelocateFocus()
     {
-        var edgeLength = (double)LatticeGrid.CellEdgeLength;
-        var width = drawRect.Width / edgeLength;
-        var height = drawRect.Height / edgeLength;
-        var x = Atlas.Width - origin.X / edgeLength;
-        var y = Atlas.Height - origin.Y / edgeLength;
+        var edgeLength = (double)GridDrawer.CellEdgeLength;
+        var width = GridDrawRect.Width / edgeLength;
+        var height = GridDrawRect.Height / edgeLength;
+        var x = Atlas.Width - GridOrigin.X / edgeLength;
+        var y = Atlas.Height - GridOrigin.Y / edgeLength;
         var widthRatio = Atlas.Width / (double)Width;
         var heightRatio = Atlas.Height / (double)Height;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
@@ -137,9 +149,10 @@ public partial class Overview : Displayer
         foreach (var rect in FocusRects)
         {
             g.DrawRectangle(pen, rect);
-            foreach (var edge in rect.GetRectEdges())
+            foreach (var edge in EdgeTool.GetRectEdges(rect))
             {
-                if (edge.GetCrossLineRect(pen.Width).CutRectInRange(new(new(0, 0), Size), out var r))
+                var lineRect = EdgeTool.GetCrossLineRect(edge, pen.Width);
+                if (GeometryTool.CutRectInRange(lineRect, new(new(0, 0), Size), out var r))
                     LastFocusOnRects.Add(r.Value);
             }
         }

@@ -6,7 +6,7 @@ using WarringStates.Client.User;
 using WarringStates.Map.Terrain;
 using WarringStates.UI;
 
-namespace WarringStates.Client.UI.Component;
+namespace WarringStates.Client.UI;
 
 public partial class ArchiveSelector : Control
 {
@@ -37,7 +37,7 @@ public partial class ArchiveSelector : Control
 
     ImageButton LoginButton { get; } = new()
     {
-        Text = "登入",
+        Text = "登录",
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
         CanSelect = true,
@@ -73,12 +73,12 @@ public partial class ArchiveSelector : Control
     public void EnableListener()
     {
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.TryAddListener<ThumbnailInfo>(LocalEvents.UserInterface.ResponseFetchThumbnail, SetThumbnail);
+        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        LocalEvents.TryAddListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ResponseFetchThumbnail, SetThumbnail);
         //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
-    private void SetThumbnail(ThumbnailInfo info)
+    private void SetThumbnail(ThumbnailRedrawArgs info)
     {
         var thumbnail = new Bitmap(info.Width, info.Height);
         var g = Graphics.FromImage(thumbnail);
@@ -101,7 +101,7 @@ public partial class ArchiveSelector : Control
     public void DisableListener()
     {
         LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 

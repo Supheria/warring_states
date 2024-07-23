@@ -2,7 +2,7 @@
 using WarringStates.Client.User;
 using WarringStates.User;
 
-namespace WarringStates.Client.UI.Component;
+namespace WarringStates.Client.UI;
 
 partial class ArchiveSelector
 {
@@ -34,7 +34,10 @@ partial class ArchiveSelector
         else
             JoinButton.CanSelect = true;
         if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info))
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.RequestFetchThumbnail, info.Id);
+        {
+            var sendArgs = new ArchiveIdArgs(info.Id);
+            LocalEvents.TryBroadcast<ArchiveIdArgs>(LocalEvents.UserInterface.RequestFetchThumbnail, sendArgs);
+        }
         else
         {
             Thumbnail.SetThumbnailVoid();

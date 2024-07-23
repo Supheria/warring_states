@@ -28,7 +28,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback)
+    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
     {
         try
         {
@@ -64,7 +64,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback)
+    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
     {
         try
         {
@@ -97,7 +97,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args)
+    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : ICallbackArgs
     {
         try
         {
@@ -161,6 +161,12 @@ internal static class LocalEvents
         AnimateFlowTickOn
     }
 
+    public enum NetService
+    {
+        RelayCommand,
+        JoinArchive,
+    }
+
     public static void ForTest()
     {
         var testinfolist = new List<TestForm.StringInfo>();
@@ -180,6 +186,6 @@ internal static class LocalEvents
                 i++;
             }
         }
-        TryBroadcast(Test.AddInfoList, testinfolist);
+        //TryBroadcast(Test.AddInfoList, testinfolist);
     }
 }
