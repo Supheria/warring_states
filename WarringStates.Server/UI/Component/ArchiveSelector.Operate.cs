@@ -49,8 +49,9 @@ partial class ArchiveSelector
             LoadButton.CanSelect = true;
             DeleteButton.CanSelect = true;
         }
-        if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info))
-            Thumbnail.SetThumbnail(LocalArchives.LoadThumbnail(info), LocalArchives.LoadCurrentSpan(info));
+        if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info) &&
+            LocalArchives.LoadThumbnail(info, out var thumbnail))
+            Thumbnail.SetThumbnail(thumbnail, LocalArchives.LoadCurrentSpan(info));
         else
             Thumbnail.SetThumbnailVoid();
         Thumbnail.Redraw();

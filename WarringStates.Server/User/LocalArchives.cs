@@ -139,65 +139,109 @@ internal class LocalArchives
         return Path.Combine(RootPath, info.Id);
     }
 
-    public static string GetThumbnailPath(ArchiveInfo info)
+    private static string GetThumbnailPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "thumbnail");
     }
 
-    public static string GetAltitudeMapPath(ArchiveInfo info)
+    private static string GetAltitudeMapPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "altitude map");
     }
 
-    public static string GetRandomTablePath(ArchiveInfo info)
+    private static string GetRandomTablePath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "random table");
     }
 
-    public static string GetSourceLandsPath(ArchiveInfo info)
+    private static string GetSourceLandsPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "source lands");
     }
 
-    public static string GetPlayersPath(ArchiveInfo info)
+    private static string GetPlayersPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "players");
     }
 
-    public static string GetCurrentSpanPath(ArchiveInfo info)
+    private static string GetCurrentSpanPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "current span");
     }
 
-    public static Bitmap LoadThumbnail(ArchiveInfo info)
+    public static bool LoadThumbnail(ArchiveInfo info, [NotNullWhen(true)] out Bitmap? thumbnail)
     {
-        using var stream = File.OpenRead(GetThumbnailPath(info));
-        return new(stream);
+        try
+        {
+            using var stream = File.OpenRead(GetThumbnailPath(info));
+            thumbnail = new(stream);
+            return true;
+        }
+        catch
+        {
+            thumbnail = null;
+            return false;
+        }
     }
 
     public static AltitudeMap LoadAltitudeMap(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(Archive.AltitudeMap)), GetAltitudeMapPath(info), SignTable) ?? new();
+        try
+        {
+            return SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(Archive.AltitudeMap)), GetAltitudeMapPath(info), SignTable) ?? new();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     public static RandomTable LoadRandomTable(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<RandomTable>(new(nameof(Archive.RandomTable)), GetRandomTablePath(info), SignTable) ?? new();
+        try
+        {
+            return SerializeTool.DeserializeFile<RandomTable>(new(nameof(Archive.RandomTable)), GetRandomTablePath(info), SignTable) ?? new();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     public static SourceLands LoadSourceLands(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<SourceLands>(new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), SignTable) ?? new();
+        try
+        {
+            return SerializeTool.DeserializeFile<SourceLands>(new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), SignTable) ?? new();
+        }
+        catch
+        {
+            return new();
+        }
     }
 
     public static Players LoadPlayers(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<Players>(new(nameof(Archive.Players)), GetPlayersPath(info), SignTable) ?? [];
+        try
+        {
+            return SerializeTool.DeserializeFile<Players>(new(nameof(Archive.Players)), GetPlayersPath(info), SignTable) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
     }
 
     public static int LoadCurrentSpan(ArchiveInfo info)
     {
-        return SerializeTool.DeserializeFile<int>(new(nameof(Archive.CurrentSpan)), GetCurrentSpanPath(info), SignTable);
+        try
+        {
+            return SerializeTool.DeserializeFile<int>(new(nameof(Archive.CurrentSpan)), GetCurrentSpanPath(info), SignTable);
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     public static Archive LoadArchive(ArchiveInfo info)
