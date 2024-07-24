@@ -1,13 +1,16 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.SQLiteHelper;
+using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Convert;
 using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
 
 public class Player(string name, string password) : IRosterItem<string>
 {
-    public string Name { get; private set; } = name;
+    [TableField]
+    public string Id { get; private set; } = (name + DateTime.Now.ToBinary()).ToMd5HashString();
 
-    public string Id => Name.ToMd5HashString();
+    public string Name { get; private set; } = name;
 
     public string Password { get; private set; } = password.ToMd5HashString();
 

@@ -96,14 +96,9 @@ partial class ClientService
         else if (operateCode is OperateCode.Request)
         {
             ReceiveCallback(receiver);
-            var info = new ThumbnailRedrawArgs()
-            {
-                OwnerShip = receiver.GetArgs<List<SourceLand>>(ServiceKey.List) ?? [],
-                WorldSize = receiver.GetArgs<Size>(ServiceKey.Size),
-                CurrentSpan = receiver.GetArgs<int>(ServiceKey.Span),
-                PlayerCount = receiver.GetArgs<int>(ServiceKey.Count),
-            };
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ThumbnailFetched, info);
+            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? new();
+            var args = new FetchPlayerArchiveArgs(playerArchive);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.PlayerAchiveFetched, args);
         }
     }
 }

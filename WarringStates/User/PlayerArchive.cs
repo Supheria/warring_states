@@ -2,20 +2,17 @@
 
 namespace WarringStates.User;
 
-public class PlayerArchive(string id, string worldName, Size worldSize, int playerCount, List<SourceLand> ownSourceLands)
+public class PlayerArchive()
 {
-    public string Id { get; private set; } = id;
+    public string ArchiveId { get; set; } = "";
 
-    public string WorldName { get; private set; } = worldName;
+    public string WorldName { get; set; } = "";
 
-    public Size WorldSize { get; private set; } = worldSize;
+    public Size WorldSize { get; set; } = new();
 
-    public int PlayerCount { get; private set; } = playerCount;
+    public long CurrentSpan { get; set; } = 0;
 
-    public List<SourceLand> OwnLands { get; private set; } = ownSourceLands;
+    public int PlayerCount { get; set; } = 0;
 
-    public PlayerArchive() : this("", "", new(), 0, [])
-    {
-
-    }
+    public List<SourceLand> OwnerShip { get; set; } = [];
 }

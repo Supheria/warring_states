@@ -144,7 +144,7 @@ public class LocalEvents
     public enum UserInterface
     {
         ArchiveListRefreshed,
-        ThumbnailFetched,
+        PlayerAchiveFetched,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

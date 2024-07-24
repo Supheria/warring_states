@@ -17,7 +17,7 @@ public class Product
 
     public static int IncrementTickOnTimes { get; } = 30;
 
-    int CurrentTickOnTimes { get; set; } = 0;
+    long CurrentTickOnTimes { get; set; } = 0;
 
     public Product(Types type, long amount, int increment)
     {

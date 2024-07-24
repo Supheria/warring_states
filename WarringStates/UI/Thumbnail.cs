@@ -10,7 +10,7 @@ public class Thumbnail : Displayer
 {
     Bitmap? ThumbnailSource { get; set; } = null;
 
-    int CurrentSpan { get; set; } = 0;
+    long CurrentSpan { get; set; } = 0;
 
     public override void Redraw()
     {
@@ -60,7 +60,7 @@ public class Thumbnail : Displayer
         }
     }
 
-    public void SetThumbnail(Bitmap thumbnail, int currentSpan)
+    public void SetThumbnail(Bitmap thumbnail, long currentSpan)
     {
         ThumbnailSource?.Dispose();
         ThumbnailSource = (Bitmap)thumbnail.Clone();

@@ -45,6 +45,12 @@ public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
         base.TryAdd(item);
     }
 
+    public new void TryRemove(ArchiveInfo item)
+    {
+        InfoList.Remove(item);
+        base.TryRemove(item);
+    }
+
     public void AddRange(ArchiveInfo[] items)
     {
         foreach (var item in items)
@@ -58,11 +64,6 @@ public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
     {
         InfoList.Clear();
         base.Clear();
-    }
-
-    public IEnumerator<ArchiveInfo> GetEnumerator()
-    {
-        return InfoList.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()

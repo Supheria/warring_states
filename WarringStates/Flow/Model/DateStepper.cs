@@ -18,7 +18,7 @@ public class DateStepper
         DateType = DateType.Monday;
     }
 
-    public void SetStartSpan(int spanTo01_01_01)
+    public void SetStartSpan(long spanTo01_01_01)
     {
         Year = new(1);
         Month = new(Year.IsLeap, 1);

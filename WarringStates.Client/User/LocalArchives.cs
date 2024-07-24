@@ -1,4 +1,6 @@
-﻿using WarringStates.Client.Events;
+﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Client.Events;
+using WarringStates.UI;
 using WarringStates.User;
 
 namespace WarringStates.Client.User;
@@ -7,7 +9,7 @@ internal static class LocalArchives
 {
     public static ArchiveInfoList ArchiveInfoList { get; } = [];
 
-    static PlayerArchive CurrentArchive { get; set; } = new();
+    public static PlayerArchive CurrentArchive { get; set; } = new();
 
     public static void ReLocate(ArchiveInfo[] infoList)
     {

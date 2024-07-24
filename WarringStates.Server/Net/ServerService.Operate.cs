@@ -148,14 +148,17 @@ partial class ServerService
             var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ?? "";
             if (!LocalArchives.ArchiveInfoList.TryGetValue(archiveId, out var info))
                 throw new NetException(ServiceCode.NoMatchArchiveId);
-            var ownership = LocalArchives.LoadSourceLands(info).GetOwnership(Player.Id);
-            var currentSpan = LocalArchives.LoadCurrentSpan(info);
-            var playerCount = LocalArchives.LoadPlayers(info).Count;
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.List, ownership)
-                .AppendArgs(ServiceKey.Size, info.WorldSize)
-                .AppendArgs(ServiceKey.Span, currentSpan)
-                .AppendArgs(ServiceKey.Count, playerCount);
+            var playerArchive = new PlayerArchive()
+            {
+                ArchiveId = archiveId,
+                WorldName = info.WorldName,
+                WorldSize = info.WorldSize,
+                CurrentSpan = LocalArchives.LoadCurrentSpan(info),
+                PlayerCount = LocalArchives.LoadPlayers(info).Count,
+                OwnerShip = LocalArchives.LoadSourceLands(info).GetOwnership(Player.Id)
+            };
+            var data = SerializeTool.Serialize(playerArchive, new(), SignTable, null);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Join)

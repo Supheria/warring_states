@@ -26,7 +26,7 @@ internal class ServiceManager : INetLogger
 
     ServiceGroup PlayerMap { get; } = [];
 
-    ConcurrentDictionary<string, ServiceGroup> PlayerGroup { get; } = [];
+    ConcurrentDictionary<long, ServiceGroup> PlayerGroup { get; } = [];
 
     public string GetLog(string message)
     {
@@ -136,8 +136,7 @@ internal class ServiceManager : INetLogger
 
     private void AddService(ServerService service)
     {
-        if (string.IsNullOrEmpty(service.Signature) ||
-            !PlayerMap.TryAdd(service))
+        if (!PlayerMap.TryAdd(service))
         {
             service.Dispose();
             return;
@@ -147,8 +146,7 @@ internal class ServiceManager : INetLogger
 
     private void RemoveService(ServerService service)
     {
-        if (string.IsNullOrEmpty(service.Signature) ||
-            !(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
+        if (!(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
         PlayerMap.TryRemove(service);
         HandleUpdateConnection();
@@ -162,7 +160,7 @@ internal class ServiceManager : INetLogger
             {
                 OperateCode.Request => args.Receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
                 OperateCode.Callback => args.Receiver.GetArgs<string>(ServiceKey.SendPlayer),
-                _ => "",
+                _ => null,
             } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
             if (!PlayerMap.TryGetValue(userId, out var user))
                 throw new NetException(ServiceCode.UserNotExist);

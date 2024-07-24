@@ -10,9 +10,15 @@ partial class ArchiveSelector
         base.AddOperation();
         LoginButton.Click += (_, _) => LocalNet.Login();
         LogoutButton.Click += (_, _) => LocalNet.Logout();
+        JoinButton.Click += JoinButton_Click;
         Selector.SelectedChanged += Selector_SelectedChanged;
         LocalNet.Service.OnLogined += Service_OnLogined;
         LocalNet.Service.OnClosed += Service_OnClosed;
+    }
+
+    private void JoinButton_Click(object? sender, EventArgs e)
+    {
+        throw new NotImplementedException();
     }
 
     private void Service_OnLogined()

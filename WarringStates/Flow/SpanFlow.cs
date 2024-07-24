@@ -8,7 +8,7 @@ public class SpanFlow : Flower
 
     bool KeepFlow { get; set; } = false;
 
-    public int CurrentSpan { get; private set; } = 0;
+    public long CurrentSpan { get; private set; } = 0;
 
     public Date CurrentDate => DateStepper.GetDate();
 

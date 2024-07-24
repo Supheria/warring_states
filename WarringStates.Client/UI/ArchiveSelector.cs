@@ -2,6 +2,7 @@
 using WarringStates.Client.Events;
 using WarringStates.Client.User;
 using WarringStates.UI;
+using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 
@@ -69,24 +70,26 @@ public partial class ArchiveSelector : Pannel
     {
         base.EnableListener();
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryAddListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ThumbnailFetched, SetThumbnail);
+        LocalEvents.TryAddListener<FetchPlayerArchiveArgs>(LocalEvents.UserInterface.PlayerAchiveFetched, SetPlayerArchive);
     }
 
     public override void DisableListener()
     {
         base.DisableListener();
         LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryRemoveListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ThumbnailFetched, SetThumbnail);
+        LocalEvents.TryRemoveListener<FetchPlayerArchiveArgs>(LocalEvents.UserInterface.PlayerAchiveFetched, SetPlayerArchive);
     }
 
-    private void SetThumbnail(ThumbnailRedrawArgs info)
+    private void SetPlayerArchive(FetchPlayerArchiveArgs args)
     {
-        var thumbnail = new Bitmap(info.Width, info.Height);
+        var archive = args.Archive;
+        LocalArchives.CurrentArchive = archive;
+        var thumbnail = new Bitmap(archive.WorldSize.Width, archive.WorldSize.Height);
         var g = Graphics.FromImage(thumbnail);
         g.Clear(Color.White);
         var pThumbnail = new PointBitmap(thumbnail);
         pThumbnail.LockBits();
-        foreach (var land in info.OwnerShip)
+        foreach (var land in archive.OwnerShip)
         {
             foreach (var point in land.GetPoints())
             {
@@ -94,7 +97,7 @@ public partial class ArchiveSelector : Pannel
             }
         }
         pThumbnail.UnlockBits();
-        Thumbnail.SetThumbnail(thumbnail, info.CurrentSpan);
+        Thumbnail.SetThumbnail(thumbnail, archive.CurrentSpan);
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
     }

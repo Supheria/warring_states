@@ -30,20 +30,35 @@ internal class LocalArchives
     {
         try
         {
-            ArchiveInfoList.Clear();
+            var players = new Players();
+            for (var i = 0; i < 1000; i++)
+            {
+                var player = new Player("test" + i, "13324");
+                players.TryAdd(player);
+            }
+            SerializeTool.SerializeFile(players, new("Players"), SignTable, true, "players");
+            var a = SerializeTool.DeserializeFile<Players>(new("Players"), SignTable, "players").Count;
             using var query = new SQLiteQuery(RegisterPath);
+            ArchiveInfoList.Clear();
+            TableTool.GetFieldName<ArchiveInfo>(nameof(ArchiveInfo.WorldName), out var f);
+            var count = query.Sum(TableName, f, null);
             foreach (var fields in query.SelectFieldsValue(TableName, TableTool.GetFieldsName<ArchiveInfo>(), null))
             {
                 var info = new ArchiveInfo();
                 TableTool.SetFieldsValue(info, fields);
                 ArchiveInfoList.TryAdd(info);
             }
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
+            BroadCastUpdate();
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message);
         }
+    }
+
+    private  static void BroadCastUpdate()
+    {
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
 
     public static bool LoadArchive(int intdex)
@@ -76,7 +91,8 @@ internal class LocalArchives
             using var query = new SQLiteQuery(RegisterPath);
             query.CreateTable(TableName, fields);
             query.InsertFieldsValue(TableName, fields);
-            ReLocate();
+            ArchiveInfoList.TryAdd(info);
+            BroadCastUpdate();
             return true;
         }
         catch (Exception ex)
@@ -99,7 +115,6 @@ internal class LocalArchives
                 return;
             var condition = new Condition(field.Name, info.Id, Condition.Operates.Equal);
             query.UpdateFieldsValues(TableName, TableTool.GetFieldsValue(info), condition);
-            ReLocate();
         }
         catch (Exception ex)
         {
@@ -122,46 +137,48 @@ internal class LocalArchives
                 return false;
             var condition = new Condition(field.Name, info.Id, Condition.Operates.Equal);
             query.DeleteFields(TableName, condition);
-            ReLocate();
+            ArchiveInfoList.TryRemove(info);
+            BroadCastUpdate();
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            MessageBox.Show(ex.Message);
             return false;
         }
     }
 
-    private static string GetArchiveRootPath(ArchiveInfo info)
+    public static string GetArchiveRootPath(ArchiveInfo info)
     {
         return Path.Combine(RootPath, info.Id);
     }
 
-    private static string GetThumbnailPath(ArchiveInfo info)
+    public static string GetThumbnailPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "thumbnail");
     }
 
-    private static string GetAltitudeMapPath(ArchiveInfo info)
+    public static string GetAltitudeMapPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "altitude map");
     }
 
-    private static string GetRandomTablePath(ArchiveInfo info)
+    public static string GetRandomTablePath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "random table");
     }
 
-    private static string GetSourceLandsPath(ArchiveInfo info)
+    public static string GetSourceLandsPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "source lands");
     }
 
-    private static string GetPlayersPath(ArchiveInfo info)
+    public static string GetPlayersPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "players");
     }
 
-    private static string GetCurrentSpanPath(ArchiveInfo info)
+    public static string GetCurrentSpanPath(ArchiveInfo info)
     {
         return Path.Combine(GetArchiveRootPath(info), "current span");
     }
@@ -229,11 +246,11 @@ internal class LocalArchives
         }
     }
 
-    public static int LoadCurrentSpan(ArchiveInfo info)
+    public static long LoadCurrentSpan(ArchiveInfo info)
     {
         try
         {
-            return SerializeTool.DeserializeFile<int>(new(nameof(Archive.CurrentSpan)), SignTable, GetCurrentSpanPath(info));
+            return SerializeTool.DeserializeFile<long>(new(nameof(Archive.CurrentSpan)), SignTable, GetCurrentSpanPath(info));
         }
         catch
         {
@@ -282,6 +299,6 @@ internal class LocalArchives
         }
         pThumbnail.UnlockBits();
         thumbnail.Save(GetThumbnailPath(info));
-        return new(/*info, */altitudeMap, randomTable);
+        return new(altitudeMap, randomTable);
     }
 }
