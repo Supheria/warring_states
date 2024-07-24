@@ -4,6 +4,7 @@ using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.SQLiteHelper.Data;
 using LocalUtilities.TypeGeneral;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
 using WarringStates.Server.Events;
@@ -31,14 +32,28 @@ internal class LocalArchives
         try
         {
             var players = new Players();
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 10000; i++)
             {
                 var player = new Player("test" + i, "13324");
                 players.TryAdd(player);
             }
             SerializeTool.SerializeFile(players, new("Players"), SignTable, true, "players");
             var a = SerializeTool.DeserializeFile<Players>(new("Players"), SignTable, "players").Count;
-            using var query = new SQLiteQuery(RegisterPath);
+            var stop = new Stopwatch();
+            stop.Start();
+            using var query = new SQLiteQuery("test.db");
+            var field = TableTool.GetFieldsName<Player>();
+            var x = query.Sum("test", null, null);
+            stop.Stop();
+            query.CreateTable("test", field);
+            foreach(var p in players)
+            {
+                field = TableTool.GetFieldsValue(p);
+                query.InsertFieldsValue("test", field);
+            }
+            query.Dispose();
+            stop.Stop();
+            //using var query = new SQLiteQuery(RegisterPath);
             ArchiveInfoList.Clear();
             TableTool.GetFieldName<ArchiveInfo>(nameof(ArchiveInfo.WorldName), out var f);
             var count = query.Sum(TableName, f, null);

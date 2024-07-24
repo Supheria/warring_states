@@ -7,7 +7,7 @@ namespace WarringStates.User;
 
 public class Player(string name, string password) : IRosterItem<string>
 {
-    [TableField]
+    [TableField(IsPrimaryKey = true)]
     public string Id { get; private set; } = (name + DateTime.Now.ToBinary()).ToMd5HashString();
 
     public string Name { get; private set; } = name;
