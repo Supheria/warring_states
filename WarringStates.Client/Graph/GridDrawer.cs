@@ -1,27 +1,21 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.FileHelper;
+using LocalUtilities.SimpleScript;
+using LocalUtilities.SimpleScript.Common;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 
 namespace WarringStates.Client.Graph;
 
-public partial class GridDrawer
+public partial class GridDrawer : IInitializeable
 {
-    static GridData GridData { get; set; } = new();
+    static SsSignTable SignTable { get; } = new();
 
-    static CellData CellData { get; set; } = new();
+    static DataCollect Data { get; set; } = LoadData();
 
-    public GridDrawer(GridData gridData, CellData cellData)
-    {
-        GridData = gridData;
-        CellData = cellData;
-        CellEdgeLength = cellData.EdgeLength;
-        EnableListner();
-    }
+    static GridData GridData => Data.GridData;
 
-    public GridDrawer()
-    {
-        EnableListner();
-    }
+    static CellData CellData => Data.CellData;
 
     public static int CellEdgeLength
     {
@@ -43,22 +37,42 @@ public partial class GridDrawer
 
     public static Coordinate Origin { get; private set; } = new();
 
-    private void EnableListner()
+    public string InitializeName => nameof(GridDrawer);
+
+    public string IniFileExtension => ".data";
+
+    class DataCollect
     {
-        //LocalEvents.TryAddListener<GridOriginOperateArgs>(LocalEvents.Graph.OperateGridOrigin, OperateOrigin);
-        //LocalEvents.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
-        LocalEvents.TryAddListener<PointOnGridCellArgs>(LocalEvents.Graph.PointOnGridCell, ConvertToCell);
+        public GridData GridData { get; set; } = new();
+
+        public CellData CellData { get; set; } = new();
     }
 
-    private void ConvertToCell(PointOnGridCellArgs args)
+    private static DataCollect LoadData()
     {
-        var latticeCell = RealPointToLatticePoint(args.RealPoint);
+        var filePath = new GridDrawer().GetInitializeFilePath();
+        DataCollect? data;
+        try
+        {
+            data = SerializeTool.DeserializeFile<DataCollect>(new(), SignTable, filePath);
+            if (data is not null)
+                return data;
+        }
+        catch { }
+        data = new();
+        SerializeTool.SerializeFile(data, new(), SignTable, true, filePath);
+        return data;
+    }
+
+    public static void PointOnCell(Point realPoint)
+    {
+        var latticeCell = RealPointToLatticePoint(realPoint);
         var cell = new Cell(latticeCell);
-        var sendArgs = new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(args.RealPoint));
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridCellFromPoint, sendArgs);
+        var sendArgs = new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint));
+        LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnCell, sendArgs);
     }
 
-    public Coordinate RealPointToLatticePoint(Point realPoint)
+    private static Coordinate RealPointToLatticePoint(Point realPoint)
     {
         var dX = realPoint.X - Origin.X;
         var x = dX / CellEdgeLength;

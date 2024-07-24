@@ -26,7 +26,7 @@ partial class GamePlane
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
         MouseWheel += OnMouseWheel;
-        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.GridCellFromPoint, PointOnCell);
+        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
     }
 
     private void PointOnCell(GridCellPointedOnArgs args)
@@ -45,8 +45,7 @@ partial class GamePlane
         {
             DoDragGraph = true;
             DragStartPoint = args.Location;
-            var sendArgs = new PointOnGridCellArgs(args.Location);
-            LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnGridCell, sendArgs);
+            GridDrawer.PointOnCell(args.Location);
         }
     }
 
@@ -59,15 +58,19 @@ partial class GamePlane
     private void OnMouseMove(object? sender, MouseEventArgs args)
     {
         if (!DoDragGraph)
+        {
+            // HACK: for test
+            GridDrawer.PointOnCell(args.Location);
             return;
+        }
         var dX = args.X - DragStartPoint.X;
         var dY = args.Y - DragStartPoint.Y;
-        if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
+        //if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
         {
-            dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
-            dX *= DragMoveSensibility;
-            dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
-            dY *= DragMoveSensibility;
+            //dX = dX / DragMoveSensibility == 0 ? 0 : dX < 0 ? -1 : 1;
+            //dX *= DragMoveSensibility;
+            //dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
+            //dY *= DragMoveSensibility;
             DragStartPoint = args.Location;
             GridDrawer.OffsetOrigin(new(dX, dY));
         }

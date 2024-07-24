@@ -96,16 +96,19 @@ internal class TestForm : ResizeableForm
 
     private void UpdateInfo()
     {
-        var list = new List<KeyValuePair<string, string>>();
-        list.AddRange(InfoMap);
-        list.AddRange(InfoList);
-        list.AddRange(ValueMap.Select(v => new KeyValuePair<string, string>(v.Key, v.Value.ToString())));
-        Text.Text = new StringBuilder().AppendJoin('\0', list, (sb, s) =>
+        BeginInvoke(() =>
         {
-            sb.Append(s.Key)
-            .Append(": ")
-            .Append(s.Value)
-            .Append('\n');
-        }).ToString();
+            var list = new List<KeyValuePair<string, string>>();
+            list.AddRange(InfoMap);
+            list.AddRange(InfoList);
+            list.AddRange(ValueMap.Select(v => new KeyValuePair<string, string>(v.Key, v.Value.ToString())));
+            Text.Text = new StringBuilder().AppendJoin('\0', list, (sb, s) =>
+            {
+                sb.Append(s.Key)
+                .Append(": ")
+                .Append(s.Value)
+                .Append('\n');
+            }).ToString();
+        });
     }
 }

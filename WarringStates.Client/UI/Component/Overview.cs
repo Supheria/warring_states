@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
@@ -61,25 +62,22 @@ public partial class Overview : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
-    private void Relocate(GridRelocatedArgs args)
+    private void Relocate(GridRedrawArgs args)
     {
         if (Width is 0 || Height is 0)
             return;
-        BeginInvoke(() =>
-        {
-            GridDrawRect = args.DrawRect;
-            GridOrigin = args.Origin;
-            Redraw();
-            Invalidate();
-        });
+        GridDrawRect = args.DrawRect;
+        GridOrigin = args.Origin;
+        Redraw();
+        Invalidate();
     }
 
     public override void Redraw()

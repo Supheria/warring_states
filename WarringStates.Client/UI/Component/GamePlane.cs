@@ -15,26 +15,31 @@ public partial class GamePlane : Displayer
 
     public void EnableListener()
     {
-        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginSet, GridRedrawAsync);
+        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginReset, BeginDrawGrid);
+        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
     }
 
     public void DisableListener()
     {
-        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginSet, GridRedrawAsync);
+        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginReset, BeginDrawGrid);
+        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
     }
 
     public override void Redraw()
     {
         base.Redraw();
-        GridRedrawAsync();
+        BeginDrawGrid();
     }
 
-    private async void GridRedrawAsync()
+    private void BeginDrawGrid()
     {
-        var source = await GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor);
-        if (source is null)
-            return;
+        GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor);
+    }
+
+    private void EndDrawGrid(GridRedrawArgs args)
+    {
         Image?.Dispose();
-        Image = source;
+        Image = args.Source;
+        Update();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Diagnostics;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Client.UI;
@@ -9,17 +10,9 @@ namespace WarringStates.Client.Graph;
 
 partial class GridDrawer
 {
-    static Graphics? Graphics { get; set; }
-
     static Rectangle DrawRect { get; set; }
 
-    static Rectangle LastDrawRect { get; set; } = new();
-
-    static Coordinate OriginOffset { get; set; } = new();
-
     static Rectangle[] LastGuideLineRects { get; } = new Rectangle[2];
-
-    static int LastCellEdgeLength { get; set; } = CellEdgeLength;
 
     static Color BackColor { get; set; }
 
@@ -29,17 +22,10 @@ partial class GridDrawer
 
     static bool IsDrawing { get; set; } = false;
 
-    public static void SetOrigin(Coordinate orgin)
-    {
-        var lastOrigin = Origin;
-        Origin = orgin;
-        OriginOffset = Origin - lastOrigin;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
-    }
+    static bool IsWaiting { get; set; } = false;
 
     public static void OffsetOrigin(Coordinate offset)
     {
-        var lastOrigin = Origin;
         var width = Atlas.Width * CellEdgeLength;
         var x = (Origin.X + offset.X) % width;
         if (x < 0)
@@ -49,137 +35,69 @@ partial class GridDrawer
         if (y < 0)
             y += height;
         Origin = new(x, y);
-        OriginOffset = Origin - lastOrigin;
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginSet);
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginReset);
     }
 
-    public static async Task<Bitmap?> RedrawAsync(int width, int height,/*Image source, */Color backColor)
+    public static async void RedrawAsync(int width, int height, Color backColor)
     {
         if (IsDrawing)
-            return null;
+        {
+            IsWaiting = true;
+            return;
+        }
         IsDrawing = true;
         var source = new Bitmap(width, height);
         var task = Task.Run(() => Redraw(source, backColor));
         await task;
-        var sendArgs = new GridRelocatedArgs(DrawRect, Origin);
+        var sendArgs = new GridRedrawArgs(source, DrawRect, Origin);
         LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
         IsDrawing = false;
-        return source;
+        if (IsWaiting)
+        {
+            RedrawAsync(width, height, backColor);
+            IsWaiting = false;
+        }
     }
 
     private static void Redraw(Image source, Color backColor)
     {
         DrawRect = new(new(0, 0), source.Size);
-        Graphics?.Dispose();
-        Graphics = Graphics.FromImage(source);
+        using var g = Graphics.FromImage(source);
         BackColor = backColor;
-        DrawGrid();
-        Graphics.Flush();
-        Graphics.Dispose();
-        LastDrawRect = DrawRect;
-        LastCellEdgeLength = CellEdgeLength;
+        DrawGrid(g);
     }
 
-    private static void DrawGrid()
+    private static void DrawGrid(Graphics g)
     {
         Cell.GridOrigin = Origin;
         LatticeSize = new(DrawRect.Width / CellEdgeLength + 2, DrawRect.Height / CellEdgeLength + 2);
         LatticeOffset = new(Origin.X / CellEdgeLength + 1, Origin.Y / CellEdgeLength + 1);
-        //
-        // redraw all
-        //
-        //if (DrawRect != LastDrawRect ||
-        //    OriginOffset.X % CellEdgeLength != 0 || OriginOffset.Y % CellEdgeLength != 0 ||
-        //    LastCellEdgeLength != CellEdgeLength)
+        g.Clear(BackColor);
+        for (var i = 0; i < LatticeSize.Width; i++)
         {
-            var count = 0;
-            Graphics?.Clear(BackColor);
-            for (var i = 0; i < LatticeSize.Width; i++)
+            for (var j = 0; j < LatticeSize.Height; j++)
             {
-                for (var j = 0; j < LatticeSize.Height; j++)
-                {
-                    var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
-                    var land = cell.TerrainPoint.GetLand();
-                    if (land is SingleLand singleLand)
-                        count += DrawSingleLand(cell, singleLand, null);
-                    else if (land is SourceLand sourceLand)
-                        count += DrawSourceLand(cell, sourceLand);
-                }
+                var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
+                var land = cell.TerrainPoint.GetLand();
+                DrawLand(g, land, cell);
             }
-            return;
-#if DEBUG
-            //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (all)", count.ToString()));
-#endif
         }
-        //
-        // redraw changed only
-        //
-        //else
-        {
-            var count = 0;
-            GridData.GuideLineBrush.Color = BackColor;
-            Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[0]);
-            Graphics?.FillRectangle(GridData.GuideLineBrush, LastGuideLineRects[1]);
-            var diff = OriginOffset / CellEdgeLength;
-            for (var i = 0; i < LatticeSize.Width; i++)
-            {
-                for (var j = 0; j < LatticeSize.Height; j++)
-                {
-                    var cell = new Cell(new Coordinate(i - LatticeOffset.Width, j - LatticeOffset.Height));
-                    var land = cell.TerrainPoint.GetLand();
-                    var lastLand = new Cell(cell.LatticePoint + diff).TerrainPoint.GetLand();
-                    if (land is SingleLand singleLand)
-                        count += DrawSingleLand(cell, singleLand, lastLand);
-                    else if (land is SourceLand sourceLand)
-                        count += DrawSourceLand(cell, sourceLand);
-                }
-            }
-#if DEBUG
-            //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("redraw cell count (part)", count.ToString()));
-#endif
-        }
-        DrawGuideLine();
+        DrawGuideLine(g);
     }
 
-    private static int DrawSingleLand(Cell cell, SingleLand land, ILand? lastLand)
+    private static void DrawLand(Graphics g, ILand land, Cell cell)
     {
-        if (land.Type.Equals(lastLand?.Type))
-            return 0;
-        var count = 0;
-        if (lastLand is SourceLand)
+        if (land is SingleLand)
         {
-            if (cell.RealRect.CutRectInRange(DrawRect, out var r))
-            {
-                Graphics?.FillRectangle(new SolidBrush(BackColor), r.Value);
-                count++;
-            }
+            if (cell.CenterRealRect.CutRectInRange(DrawRect, out var rect))
+                g.FillRectangle(new SolidBrush(land.Color), rect.Value);
         }
-        if (cell.CenterRealRect.CutRectInRange(DrawRect, out var rect))
+        else if (land is SourceLand sourceLand)
         {
-            Graphics?.FillRectangle(new SolidBrush(land.Color), rect.Value);
-            count++;
+            var direction = sourceLand[cell.TerrainPoint];
+            if (GetSourceLandCellRect(direction, cell).CutRectInRange(DrawRect, out var rect))
+                g.FillRectangle(new SolidBrush(land.Color), rect.Value);
         }
-        return count;
-    }
-
-    private static int DrawSourceLand(Cell cell, SourceLand land)
-    {
-        var count = 0;
-        var direction = land[cell.TerrainPoint];
-        if (direction is not Directions.Center)
-        {
-            if (cell.RealRect.CutRectInRange(DrawRect, out var r))
-            {
-                Graphics?.FillRectangle(new SolidBrush(BackColor), r.Value);
-                count++;
-            }
-        }
-        if (GetSourceLandCellRect(direction, cell).CutRectInRange(DrawRect, out var rect))
-        {
-            Graphics?.FillRectangle(new SolidBrush(land.Color), rect.Value);
-            count++;
-        }
-        return count;
     }
 
     private static Rectangle GetSourceLandCellRect(Directions direction, Cell cell)
@@ -199,15 +117,15 @@ partial class GridDrawer
         };
     }
 
-    private static void DrawGuideLine()
+    private static void DrawGuideLine(Graphics g)
     {
         GridData.GuideLineBrush.Color = GridData.GuideLineColor;
         var lineRect = GetLineRect(new(Origin.X, DrawRect.Top), new(Origin.X, DrawRect.Bottom), GridData.GuideLineWidth);
-        Graphics?.FillRectangle(GridData.GuideLineBrush, lineRect);
+        g.FillRectangle(GridData.GuideLineBrush, lineRect);
         LastGuideLineRects[0] = lineRect;
         lineRect = GetLineRect(new(DrawRect.Left, Origin.Y), new(DrawRect.Right, Origin.Y), GridData.GuideLineWidth);
         LastGuideLineRects[1] = lineRect;
-        Graphics?.FillRectangle(GridData.GuideLineBrush, lineRect);
+        g.FillRectangle(GridData.GuideLineBrush, lineRect);
         static Rectangle GetLineRect(Coordinate p1, Coordinate p2, double lineWidth)
         {
             if (p1.Y == p2.Y)

@@ -14,7 +14,7 @@ namespace WarringStates.Client
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             //new ClientForm("client 1").Show();
-            //new TestForm() { TopMost = true }.Show();
+            new TestForm() { TopMost = true }.Show();
             Application.Run(new ClientForm("client 2"));
         }
     }

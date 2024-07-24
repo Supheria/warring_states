@@ -42,7 +42,7 @@ public partial class GamePlayer : Pannel
 
     private void Fortest()
     {
-        var map = SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(AltitudeMap)), "altitude map", new SsSignTable());
+        var map = SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(AltitudeMap)), new SsSignTable(), "altitude map");
         Atlas.Relocate(map, new(1000));
     }
 

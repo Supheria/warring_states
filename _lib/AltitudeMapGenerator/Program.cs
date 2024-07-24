@@ -20,13 +20,13 @@ public class Program
         //var data = new AltitudeMapData(new(200, 300), new(2, 3), new(6, 3), RiverLayout.Types.BackwardSlash, 1, 30000, 0.5f);
         var atl = new AltitudeMap(data, null);
         var signTable = new SsSignTable();
-        SerializeTool.SerializeFile(atl, new(), "test.ss", false, signTable);
+        SerializeTool.SerializeFile(atl, new(), signTable, false, "test.ss");
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var atlas = SerializeTool.DeserializeFile<AltitudeMap>(new(), "test.ss", signTable);
+        var atlas = SerializeTool.DeserializeFile<AltitudeMap>(new(), signTable, "test.ss");
         stopwatch.Stop();
         var time = stopwatch.ElapsedMilliseconds;
-        SerializeTool.SerializeFile(atlas, new(), "test1.ss", false, signTable);
+        SerializeTool.SerializeFile(atlas, new(), signTable, false, "test1.ss");
         MessageBox.Show(time.ToString());
         Bitmap image;
         try

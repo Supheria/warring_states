@@ -188,7 +188,7 @@ internal class LocalArchives
     {
         try
         {
-            return SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(Archive.AltitudeMap)), GetAltitudeMapPath(info), SignTable) ?? new();
+            return SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(Archive.AltitudeMap)), SignTable, GetAltitudeMapPath(info)) ?? new();
         }
         catch
         {
@@ -200,7 +200,7 @@ internal class LocalArchives
     {
         try
         {
-            return SerializeTool.DeserializeFile<RandomTable>(new(nameof(Archive.RandomTable)), GetRandomTablePath(info), SignTable) ?? new();
+            return SerializeTool.DeserializeFile<RandomTable>(new(nameof(Archive.RandomTable)), SignTable, GetRandomTablePath(info)) ?? new();
         }
         catch
         {
@@ -212,7 +212,7 @@ internal class LocalArchives
     {
         try
         {
-            return SerializeTool.DeserializeFile<SourceLands>(new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), SignTable) ?? new();
+            return SerializeTool.DeserializeFile<SourceLands>(new(nameof(Archive.SourceLands)), SignTable, GetSourceLandsPath(info)) ?? new();
         }
         catch
         {
@@ -224,7 +224,7 @@ internal class LocalArchives
     {
         try
         {
-            return SerializeTool.DeserializeFile<Players>(new(nameof(Archive.Players)), GetPlayersPath(info), SignTable) ?? [];
+            return SerializeTool.DeserializeFile<Players>(new(nameof(Archive.Players)), SignTable, GetPlayersPath(info)) ?? [];
         }
         catch
         {
@@ -236,7 +236,7 @@ internal class LocalArchives
     {
         try
         {
-            return SerializeTool.DeserializeFile<int>(new(nameof(Archive.CurrentSpan)), GetCurrentSpanPath(info), SignTable);
+            return SerializeTool.DeserializeFile<int>(new(nameof(Archive.CurrentSpan)), SignTable, GetCurrentSpanPath(info));
         }
         catch
         {
@@ -258,11 +258,11 @@ internal class LocalArchives
 
     public static void SaveArchive(ArchiveInfo info, Archive archive)
     {
-        SerializeTool.SerializeFile(archive.AltitudeMap, new(nameof(Archive.AltitudeMap)), GetAltitudeMapPath(info), false, SignTable);
-        SerializeTool.SerializeFile(archive.RandomTable, new(nameof(Archive.RandomTable)), GetRandomTablePath(info), false, SignTable);
-        SerializeTool.SerializeFile(archive.SourceLands, new(nameof(Archive.SourceLands)), GetSourceLandsPath(info), true, SignTable);
-        SerializeTool.SerializeFile(archive.Players, new(nameof(Archive.Players)), GetPlayersPath(info), true, SignTable);
-        SerializeTool.SerializeFile(archive.CurrentSpan, new(nameof(Archive.CurrentSpan)), GetCurrentSpanPath(info), true, SignTable);
+        SerializeTool.SerializeFile(archive.AltitudeMap, new(nameof(Archive.AltitudeMap)), SignTable, false, GetAltitudeMapPath(info));
+        SerializeTool.SerializeFile(archive.RandomTable, new(nameof(Archive.RandomTable)), SignTable, false, GetRandomTablePath(info));
+        SerializeTool.SerializeFile(archive.SourceLands, new(nameof(Archive.SourceLands)), SignTable, true, GetSourceLandsPath(info));
+        SerializeTool.SerializeFile(archive.Players, new(nameof(Archive.Players)), SignTable, true, GetPlayersPath(info));
+        SerializeTool.SerializeFile(archive.CurrentSpan, new(nameof(Archive.CurrentSpan)), SignTable, true, GetCurrentSpanPath(info));
     }
 
     public static Archive CreateArchive(ArchiveInfo info, AltitudeMapData mapData, IProgressor progressor)

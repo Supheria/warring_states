@@ -134,10 +134,10 @@ public class LocalEvents
         GridToRelocate,
         GridRedraw,
         PointOnGridCell,
-        GridCellFromPoint,
+        PointOnCell,
         GridOriginToOffset,
         GridOriginToReset,
-        GridOriginSet,
+        GridOriginReset,
 
     }
 
