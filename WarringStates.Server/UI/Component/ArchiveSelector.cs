@@ -10,7 +10,7 @@ namespace WarringStates.Server.UI.Component;
 
 public partial class ArchiveSelector : Pannel
 {
-    public static new Size Padding { get; set; } = new(30, 30);
+    public override Size Padding { get; set; } = new(30, 30);
 
     public static Color FrontColor { get; set; } = Color.White;
 
@@ -32,7 +32,6 @@ public partial class ArchiveSelector : Pannel
     {
         FrontColor = FrontColor,
         BackColor = BackColor,
-        Padding = Padding,
     };
 
     ImageButton SwitchButton { get; } = new()
@@ -65,7 +64,6 @@ public partial class ArchiveSelector : Pannel
     public ArchiveSelector()
     {
         base.BackColor = BackColor;
-        AddOperations();
         Controls.AddRange([
             Selector,
             Thumbnail,
@@ -76,11 +74,16 @@ public partial class ArchiveSelector : Pannel
             ]);
     }
 
-    public void EnableListener()
+    public override void EnableListener()
     {
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+        base.EnableListener();
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
+    }
+
+    public override void DisableListener()
+    {
+        base.DisableListener();
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
     }
 
     private void RefreshSelector()
@@ -90,21 +93,16 @@ public partial class ArchiveSelector : Pannel
         Selector.Invalidate();
     }
 
-    public void DisableListener()
-    {
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.MainFormOnDraw, SetBounds);
-        //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
-    }
 
     private new void KeyPress(Keys key)
     {
-        if (key is not Keys.Escape)
-            return;
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
+        if (key is Keys.Escape)
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
     }
 
     protected override void SetSize()
     {
+        base.SetSize();
         var colWidth = (ClientWidth - Padding.Width * 3) / 3;
         var height = ClientHeight - Padding.Height * 2;
         if (Progressor.Progressing)
@@ -112,7 +110,7 @@ public partial class ArchiveSelector : Pannel
         //
         Selector.Bounds = new(
             ClientLeft + Padding.Width,
-            ClientTop + Padding.Height, 
+            ClientTop + Padding.Height,
             colWidth * 2,
             height);
         //
@@ -123,30 +121,30 @@ public partial class ArchiveSelector : Pannel
         //
         Thumbnail.Bounds = new(
             left,
-            padding.Height, 
+            padding.Height,
             colWidth,
             height - Padding.Height / 2);
         //
         var buttonPadding = (height - ButtonHeight * 3) / 4;
         //
         SwitchButton.Bounds = new(
-            left, 
-            Thumbnail.Bottom + buttonPadding, 
-            colWidth, 
+            left,
+            Thumbnail.Bottom + buttonPadding,
+            colWidth,
             ButtonHeight);
         //
         BuildButton.Bounds = new(
-            left, 
-            SwitchButton.Bottom + buttonPadding, 
-            colWidth, 
+            left,
+            SwitchButton.Bottom + buttonPadding,
+            colWidth,
             ButtonHeight);
         //
         var buttonWidth = colWidth - Padding.Width * 2;
         //
         DeleteButton.Bounds = new(
-            left + Padding.Width, 
-            BuildButton.Bottom + buttonPadding, 
-            buttonWidth, 
+            left + Padding.Width,
+            BuildButton.Bottom + buttonPadding,
+            buttonWidth,
             ButtonHeight);
         //
         if (Progressor.Progressing)

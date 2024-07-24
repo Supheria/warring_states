@@ -19,29 +19,17 @@ public class Settings : Displayer
         DoSetting = false;
     }
 
-    public void EnableListener()
+    public override void EnableListener()
     {
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        base.EnableListener();
         LocalEvents.TryAddListener<KeyPressArgs>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
-    public void DisableListener()
+    public override void DisableListener()
     {
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        base.DisableListener();
         LocalEvents.TryRemoveListener<KeyPressArgs>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
-
-    //private void SetBounds(Rectangle rect)
-    //{
-    //    if (DoSetting)
-    //    {
-
-    //    }
-    //    else
-    //        Bounds = new(0, 0, 0, 0);
-    //    Range = rect;
-    //    LocalEvents.TryBroadcast(LocalEvents.UserInterface.SettingsOnSetBounds, rect);
-    //}
 
     private new void KeyPress(KeyPressArgs args)
     {

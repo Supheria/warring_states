@@ -7,8 +7,9 @@ namespace WarringStates.Client.UI;
 
 partial class ArchiveSelector
 {
-    private void AddOperations()
+    protected override void AddOperation()
     {
+        base.AddOperation();
         LoginButton.Click += (_, _) => LocalNet.Login();
         LogoutButton.Click += (_, _) => LocalNet.Logout();
         Selector.SelectedChanged += Selector_SelectedChanged;

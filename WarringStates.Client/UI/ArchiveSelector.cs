@@ -10,8 +10,6 @@ namespace WarringStates.Client.UI;
 
 public partial class ArchiveSelector : Pannel
 {
-    public static new Size Padding { get; } = new(30, 30);
-
     public static Color FrontColor { get; set; } = Color.White;
 
     public static new Color BackColor { get; set; } = Color.Teal;
@@ -21,6 +19,8 @@ public partial class ArchiveSelector : Pannel
     public static Color ButtonBackColor { get; set; } = Color.LightYellow;
 
     public static Color ButtonFrontColor { get; set; } = Color.DarkSlateGray;
+
+    public override Size Padding { get; set; } = new(30, 30);
 
     Selector Selector { get; } = new()
     {
@@ -32,7 +32,6 @@ public partial class ArchiveSelector : Pannel
     {
         FrontColor = FrontColor,
         BackColor = BackColor,
-        Padding = Padding,
     };
 
     ImageButton LoginButton { get; } = new()
@@ -60,7 +59,6 @@ public partial class ArchiveSelector : Pannel
     public ArchiveSelector()
     {
         base.BackColor = BackColor;
-        AddOperations();
         Controls.AddRange([
             Selector,
             Thumbnail,
@@ -70,12 +68,18 @@ public partial class ArchiveSelector : Pannel
             ]);
     }
 
-    public void EnableListener()
+    public override void EnableListener()
     {
+        base.EnableListener();
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
         LocalEvents.TryAddListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ThumbnailFetched, SetThumbnail);
-        //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
+    }
+
+    public override void DisableListener()
+    {
+        base.DisableListener();
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
+        LocalEvents.TryRemoveListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ThumbnailFetched, SetThumbnail);
     }
 
     private void SetThumbnail(ThumbnailRedrawArgs info)
@@ -98,13 +102,6 @@ public partial class ArchiveSelector : Pannel
         Thumbnail.Invalidate();
     }
 
-    public void DisableListener()
-    {
-        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        //LocalEvents.TryRemoveListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
-    }
-
     private void RefreshSelector()
     {
         Selector.ArchiveInfoList = LocalArchives.ArchiveInfoList;
@@ -114,18 +111,13 @@ public partial class ArchiveSelector : Pannel
 
     private new void KeyPress(Keys key)
     {
-        if (key is not Keys.Escape)
-            return;
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.MainFormToClose);
-    }
-
-    private void SetBounds(Rectangle rect)
-    {
-        Bounds = rect;
+        if (key is Keys.Escape)
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.EndGame);
     }
 
     protected override void SetSize()
     {
+        base.SetSize();
         var colWidth = (ClientWidth - Padding.Width * 3) / 3;
         var height = ClientHeight - Padding.Height * 2;
         //

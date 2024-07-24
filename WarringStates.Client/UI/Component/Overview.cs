@@ -17,8 +17,6 @@ public partial class Overview : Displayer
 
     Rectangle Range { get; set; }
 
-    //GridRelocatedArgs? GridUpdatedArgs { get; set; }
-
     (double Width, double Height) FocusScaleRatio { get; set; }
 
     Rectangle FocusRect { get; set; }
@@ -38,6 +36,7 @@ public partial class Overview : Displayer
         get => base.Bounds;
         set
         {
+            Visible = false;
             Range = value;
             if (FullScreen)
             {
@@ -52,21 +51,19 @@ public partial class Overview : Displayer
                 var location = new Point(Range.Right - size.Width, Range.Top);
                 base.Bounds = new(location, size);
             }
+            Visible = true;
         }
     }
 
-    public Overview()
+    public override void EnableListener()
     {
-        AddOperations();
-    }
-
-    public void EnableListener()
-    {
+        base.EnableListener();
         LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
-    public void DisableListener()
+    public override void DisableListener()
     {
+        base.DisableListener();
         LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 

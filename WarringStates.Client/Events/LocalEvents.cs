@@ -154,7 +154,7 @@ public class LocalEvents
         StartGamePlay,
         FinishGamePlay,
         KeyPressed,
-        MainFormToClose,
+        EndGame,
     }
 
     public enum Flow

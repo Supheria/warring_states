@@ -7,7 +7,7 @@ using WarringStates.Server.Net;
 
 namespace WarringStates.Server.UI;
 
-internal class ServerForm : ResizeableForm
+internal partial class ServerForm : ResizeableForm
 {
     public override string InitializeName => nameof(ServerForm);
 
@@ -51,50 +51,7 @@ internal class ServerForm : ResizeableForm
             SendButton,
             ArchiveSelector
             ]);
-        SendButton.Click += SendButton_Click;
-        Port.ValueChanged += (_, _) => LocalNet.Port = (int)Port.Value;
-        LocalNet.Server.OnLog += UpdateMessage;
-        LocalNet.Server.OnConnectionCountChange += Host_OnParallelRemainChange;
-        LocalNet.Server.OnStart += () => Port.Enabled = false;
-        LocalNet.Server.OnClose += () => Port.Enabled = true;
-        //Host.Start((int)Port.Value);
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveToLoad, LoadArchive);
         ArchiveSelector.EnableListener();
-        LocalArchives.ReLocate();
-    }
-
-    private void LoadArchive()
-    {
-        if (LocalArchives.CurrentArchive is null)
-            return;
-        SpanFlow.Relocate(LocalArchives.CurrentArchive.CurrentSpan);
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
-        LocalEvents.TryBroadcast(LocalEvents.Flow.SwichFlowState);
-        //ArchiveSelector.DisableListener();
-        //DrawClient();
-    }
-
-    private void SendButton_Click(object? sender, EventArgs e)
-    {
-        LocalNet.Server.BroadcastMessage(SendBox.Text);
-    }
-
-    private void Host_OnParallelRemainChange(int args)
-    {
-        BeginInvoke(() =>
-        {
-            ParallelCount.Text = args.ToString();
-            Update();
-        });
-    }
-
-    private void UpdateMessage(string message)
-    {
-        BeginInvoke(new Action(() =>
-        {
-            MessageBox.Text += $"{message}\n";
-            Update();
-        }));
     }
 
     protected override void Redraw()

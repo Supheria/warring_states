@@ -21,15 +21,12 @@ public partial class GamePlayer : Pannel
 
     InfoBar InfoBar { get; } = new();
 
-    public int ToolBarHeight { get; set; } = 30;
+    public static int ToolBarHeight { get; set; } = 30;
 
-    public int InfoBarHeight { get; set; } = 100;
-
-    //GridDrawer Grid { get; } = new();
+    public static int InfoBarHeight { get; set; } = 100;
 
     public GamePlayer()
     {
-        KeyDown += KeyPressed;
         Controls.AddRange([
             Settings,
             ToolBar,
@@ -46,8 +43,9 @@ public partial class GamePlayer : Pannel
         Atlas.Relocate(map, new(1000));
     }
 
-    public void EnableListener()
+    public override void EnableListener()
     {
+        base.EnableListener();
         Settings.EnableListener();
         ToolBar.EnableListener();
         GamePlane.EnableListener();
@@ -55,8 +53,9 @@ public partial class GamePlayer : Pannel
         InfoBar.EnableListener();
     }
 
-    public void DisableListener()
+    public override void DisableListener()
     {
+        base.DisableListener();
         Settings.DisableListener();
         ToolBar.DisableListener();
         GamePlane.DisableListener();
@@ -64,13 +63,9 @@ public partial class GamePlayer : Pannel
         InfoBar.DisableListener();
     }
 
-    private void KeyPressed(object? sender, KeyEventArgs e)
-    {
-
-    }
-
     protected override void SetSize()
     {
+        base.SetSize();
         //
         ToolBar.Bounds = new(
             ClientLeft,
@@ -94,7 +89,7 @@ public partial class GamePlayer : Pannel
             );
         //
         Overview.Bounds = new(
-            ClientLeft, 
+            ClientLeft,
             ToolBar.Bottom,
             ClientWidth,
             ClientHeight - ToolBar.Height);

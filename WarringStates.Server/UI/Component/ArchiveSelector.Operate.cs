@@ -8,8 +8,9 @@ namespace WarringStates.Server.UI.Component;
 
 partial class ArchiveSelector
 {
-    private void AddOperations()
+    protected override void AddOperation()
     {
+        base.AddOperation();
         BuildButton.Click += BuildButton_Click;
         SwitchButton.Click += SwitchButton_Click;
         DeleteButton.Click += DeleteButton_Click;

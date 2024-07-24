@@ -7,45 +7,27 @@ namespace WarringStates.Client.UI.Component;
 
 public class ToolBar : Displayer
 {
-    bool DoSetting { get; set; } = false;
-
-    Rectangle Range { get; set; } = new();
-
     Date CurrentDate { get; set; } = new();
 
     SolidBrush DateBrush { get; } = new(Color.White);
 
-    public ToolBar()
+    public override void EnableListener()
     {
-        //Height = 30;
-    }
-
-    public void EnableListener()
-    {
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        base.EnableListener();
         LocalEvents.TryAddListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
     }
 
-    public void DisableListener()
+    public override void DisableListener()
     {
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
+        base.DisableListener();
         LocalEvents.TryRemoveListener<SpanFlowTickOnArgs>(LocalEvents.Flow.SpanFlowTickOn, SetDate);
-    }
-
-    private void SetBounds(Rectangle rect)
-    {
-        Range = rect;
-        Width = rect.Width;
-        //Relocate();
-        Redraw();
-        rect = new Rectangle(rect.Left, rect.Top + Height, rect.Width, rect.Height - Height);
-        //LocalEvents.TryBroadcast(LocalEvents.UserInterface.ToolBarOnSetBounds, rect);
     }
 
     private void SetDate(SpanFlowTickOnArgs args)
     {
         CurrentDate = args.CurrentDate;
         Redraw();
+        Invalidate();
     }
 
     public override void Redraw()
