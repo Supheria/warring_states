@@ -13,7 +13,7 @@ public class Player(string name, string password) : IRosterItem<string>
 
     public string Signature => Id;
 
-    public Player() : this("", "")
+    public Player() : this("admin", "password")
     {
 
     }

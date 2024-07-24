@@ -1,6 +1,7 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
+using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
@@ -8,7 +9,7 @@ using WarringStates.Client.UI.Component;
 
 namespace WarringStates.Client.UI;
 
-public partial class GamePlayer : Control
+public partial class GamePlayer : Pannel
 {
     Settings Settings { get; } = new();
 
@@ -20,7 +21,11 @@ public partial class GamePlayer : Control
 
     InfoBar InfoBar { get; } = new();
 
-    GridDrawer Grid { get; } = new();
+    public int ToolBarHeight { get; set; } = 30;
+
+    public int InfoBarHeight { get; set; } = 100;
+
+    //GridDrawer Grid { get; } = new();
 
     public GamePlayer()
     {
@@ -61,50 +66,37 @@ public partial class GamePlayer : Control
 
     private void KeyPressed(object? sender, KeyEventArgs e)
     {
-        Controls.Clear();
-        Controls.AddRange([
-            Settings,
-            ToolBar,
-            Overview,
-            GamePlane,
-            InfoBar,
-        ]);
-        //Redraw();
+
     }
 
-    protected override void OnResize(EventArgs e)
+    protected override void SetSize()
     {
-        base.OnResize(e);
-        BeginInvoke(SetSize);
-    }
-
-    private void SetSize()
-    {
-        if (Math.Min(ClientSize.Width, ClientSize.Height) is 0)
-            return;
         //
         ToolBar.Bounds = new(
-            Left,
-            Top,
-            Width,
-            ToolBar.Height
+            ClientLeft,
+            ClientTop,
+            ClientWidth,
+            ToolBarHeight
             );
         //
         GamePlane.Bounds = new(
-            Left,
+            ClientLeft,
             ToolBar.Bottom,
-            Width,
+            ClientWidth,
             Height - ToolBar.Height - InfoBar.Height
             );
         //
         InfoBar.Bounds = new(
-            Left,
-            Height - InfoBar.Height,
-            Width,
-            InfoBar.Height
+            ClientLeft,
+            ClientHeight - InfoBar.Height,
+            ClientWidth,
+            InfoBarHeight
             );
         //
-        var bounds = new Rectangle(Left, ToolBar.Bottom, Width, Height);
-        Overview.SetBounds(bounds);
+        Overview.Bounds = new(
+            ClientLeft, 
+            ToolBar.Bottom,
+            ClientWidth,
+            ClientHeight - ToolBar.Height);
     }
 }

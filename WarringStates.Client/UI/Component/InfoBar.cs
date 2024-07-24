@@ -11,7 +11,7 @@ public class InfoBar : Displayer
 
     public InfoBar()
     {
-        Height = 100;
+        //Height = 100;
     }
 
     public void EnableListener()
@@ -26,10 +26,11 @@ public class InfoBar : Displayer
 
     public override void Redraw()
     {
-        base.Redraw(); using var g = Graphics.FromImage(Image);
+        base.Redraw(); 
+        using var g = Graphics.FromImage(Image);
         g.Clear(Color.Gray);
         var info = $"\n水源{SingleLand.Types.Stream.GetLandTypeCount()}\n平原{SingleLand.Types.Plain.GetLandTypeCount()}\n树林{SingleLand.Types.Wood.GetLandTypeCount()}\n山地{SingleLand.Types.Hill.GetLandTypeCount()}";
-        g.DrawString(info, ContentFontData, InfoBrush, new Rectangle(new(0, 0), Size));
+        g.DrawString(info, ContentFontData, InfoBrush, ClientRect);
     }
 
     //private void SetBounds(Rectangle rect)

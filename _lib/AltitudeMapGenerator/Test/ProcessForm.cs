@@ -28,7 +28,7 @@ public partial class ProcessForm : ResizeableForm
 
     public void Progress()
     {
-        InvokeAsync(() =>
+        Invoke(() =>
         {
             Label.Text = Math.Round(++Now / Total * 100, 2).ToString();
             Update();

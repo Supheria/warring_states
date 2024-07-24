@@ -10,7 +10,7 @@ using WarringStates.User;
 
 namespace WarringStates.Net;
 
-public abstract class Service : INetLogger
+public abstract class NetService : INetLogger
 {
     public const int CommandLengthMax = 1024 * 1024 * 2;
 
@@ -34,8 +34,6 @@ public abstract class Service : INetLogger
 
     public Player Player { get; protected set; } = new();
 
-    protected abstract string RepoPath { get; set; }
-
     protected AutoDisposeItemCollection<AutoDisposeFileStream> AutoFiles { get; } = [];
 
     protected abstract DaemonThread DaemonThread { get; init; }
@@ -46,7 +44,7 @@ public abstract class Service : INetLogger
 
     protected static SsSignTable SignTable { get; } = new();
 
-    public Service(Protocol protocol)
+    public NetService(Protocol protocol)
     {
         Protocol = protocol;
         Protocol.OnLog += this.HandleLog;
@@ -178,23 +176,6 @@ public abstract class Service : INetLogger
             return;
         var errorMessage = receiver.GetArgs<string>(ServiceKey.ErrorMessage);
         throw new NetException(callbackCode, errorMessage);
-    }
-
-    public string GetFileRepoPath(string dirName, string fileName)
-    {
-        var dir = Path.Combine(RepoPath, dirName);
-        if (!Directory.Exists(dir))
-        {
-            try
-            {
-                Directory.CreateDirectory(dir);
-            }
-            catch (Exception ex)
-            {
-                this.HandleException(ex);
-            }
-        }
-        return Path.Combine(dir, fileName);
     }
 
     protected void HandleLogined()

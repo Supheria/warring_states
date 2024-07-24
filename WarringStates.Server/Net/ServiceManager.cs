@@ -16,6 +16,10 @@ internal class ServiceManager : INetLogger
 {
     public event NetEventHandler<int>? OnConnectionCountChange;
 
+    public event NetEventHandler? OnStart;
+
+    public event NetEventHandler? OnClose;
+
     public NetEventHandler<string>? OnLog { get; set; }
 
     Socket? Socket { get; set; } = null;
@@ -55,6 +59,7 @@ internal class ServiceManager : INetLogger
             IsStart = true;
             EnableListener();
             this.HandleLog("start");
+            OnStart?.Invoke();
         }
         catch (Exception ex)
         {
@@ -74,6 +79,7 @@ internal class ServiceManager : INetLogger
             IsStart = false;
             DisableListener();
             this.HandleLog("close");
+            OnClose?.Invoke();
         }
         catch (Exception ex)
         {

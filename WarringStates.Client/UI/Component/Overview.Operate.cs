@@ -32,19 +32,17 @@ partial class Overview
         {
             var dX = (args.X - FocusRect.Left - FocusRect.Width * 0.5) * FocusScaleRatio.Width;
             var dY = (args.Y - FocusRect.Top - FocusRect.Height * 0.5) * FocusScaleRatio.Height;
-            var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(-dX.ToRoundInt(), -dY.ToRoundInt()));
-            LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
+            GridDrawer.OffsetOrigin(new(-dX.ToRoundInt(), -dY.ToRoundInt()));
         }
         else if (args.Button is MouseButtons.Right)
         {
             //if (GridUpdatedArgs is null)
             //    return;
             FullScreen = !FullScreen;
-            var size = FullScreen ? Atlas.Size.ScaleSizeWithinRatio(Range.Size) : new((Range.Width * 0.25).ToRoundInt(), (Range.Height * 0.25).ToRoundInt());
             //Size = Atlas.Size.ScaleSizeWithinRatio(size);
             //Relocate(GridUpdatedArgs);
             //Location = FullScreen ? new(Range.Left + (Range.Width - Width) / 2, Range.Top + (Range.Height - Height) / 2) : new(Range.Right - Width, Range.Top);
-            SetBounds(Range);
+            Bounds = Range;
         }
     }
 
@@ -70,15 +68,16 @@ partial class Overview
         {
             var dX = (args.X - DragStartPoint.X) * FocusScaleRatio.Width;
             var dY = (args.Y - DragStartPoint.Y) * FocusScaleRatio.Height;
-            if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
+            //if (Math.Abs(dX) > DragMoveSensibility || Math.Abs(dY) > DragMoveSensibility)
             {
                 //dX = dX / LatticeGrid.CellEdgeLength == 0 ? 0 : dX < 0 ? -1 : 1;
                 //dX *= LatticeGrid.CellEdgeLength;
                 //dY = dY / LatticeGrid.CellEdgeLength == 0 ? 0 : dY < 0 ? -1 : 1;
                 //dY *= LatticeGrid.CellEdgeLength;
+                GridDrawer.OffsetOrigin(new(-dX.ToRoundInt(), -dY.ToRoundInt()));
                 DragStartPoint = args.Location;
-                var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(-dX.ToRoundInt(), -dY.ToRoundInt()));
-                LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
+                //var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(-dX.ToRoundInt(), -dY.ToRoundInt()));
+                //LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
             }
             //var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(-dX.ToRoundInt(), -dY.ToRoundInt()));
             //LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);

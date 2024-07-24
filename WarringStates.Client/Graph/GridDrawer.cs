@@ -41,14 +41,12 @@ public partial class GridDrawer
 
     public static Size CellCenterSizeAddOnePadding { get; private set; } = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
 
-    Rectangle DrawRect { get; set; }
-
-    public Coordinate Origin { get; private set; } = new();
+    public static Coordinate Origin { get; private set; } = new();
 
     private void EnableListner()
     {
-        LocalEvents.TryAddListener<GridOriginOperateArgs>(LocalEvents.Graph.OperateGridOrigin, OperateOrigin);
-        LocalEvents.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
+        //LocalEvents.TryAddListener<GridOriginOperateArgs>(LocalEvents.Graph.OperateGridOrigin, OperateOrigin);
+        //LocalEvents.TryAddListener<GridToRelocateArgs>(LocalEvents.Graph.GridToRelocate, Relocate);
         LocalEvents.TryAddListener<PointOnGridCellArgs>(LocalEvents.Graph.PointOnGridCell, ConvertToCell);
     }
 

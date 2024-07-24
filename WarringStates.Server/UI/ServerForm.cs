@@ -11,16 +11,9 @@ internal class ServerForm : ResizeableForm
 {
     public override string InitializeName => nameof(ServerForm);
 
-    ServiceManager Server { get; set; } = new();
-
     NumericUpDown Port { get; } = new()
     {
-        Value = 60,
-    };
-
-    Button SwitchButton { get; } = new()
-    {
-        Text = "Start"
+        Value = LocalNet.Port,
     };
 
     Label ParallelCount { get; } = new()
@@ -52,17 +45,18 @@ internal class ServerForm : ResizeableForm
         Text = "Server";
         Controls.AddRange([
             Port,
-            SwitchButton,
             ParallelCount,
             MessageBox,
             SendBox,
             SendButton,
             ArchiveSelector
             ]);
-        SwitchButton.Click += SwitchButton_Click;
         SendButton.Click += SendButton_Click;
-        Server.OnLog += UpdateMessage;
-        Server.OnConnectionCountChange += Host_OnParallelRemainChange;
+        Port.ValueChanged += (_, _) => LocalNet.Port = (int)Port.Value;
+        LocalNet.Server.OnLog += UpdateMessage;
+        LocalNet.Server.OnConnectionCountChange += Host_OnParallelRemainChange;
+        LocalNet.Server.OnStart += () => Port.Enabled = false;
+        LocalNet.Server.OnClose += () => Port.Enabled = true;
         //Host.Start((int)Port.Value);
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveToLoad, LoadArchive);
         ArchiveSelector.EnableListener();
@@ -82,7 +76,7 @@ internal class ServerForm : ResizeableForm
 
     private void SendButton_Click(object? sender, EventArgs e)
     {
-        Server.BroadcastMessage(SendBox.Text);
+        LocalNet.Server.BroadcastMessage(SendBox.Text);
     }
 
     private void Host_OnParallelRemainChange(int args)
@@ -103,30 +97,10 @@ internal class ServerForm : ResizeableForm
         }));
     }
 
-    private void SwitchButton_Click(object? sender, EventArgs e)
-    {
-        if (Server.IsStart)
-        {
-            Server.Close();
-            if (!Server.IsStart)
-                SwitchButton.Text = "Start";
-            else
-                System.Windows.Forms.MessageBox.Show($"close server failed");
-        }
-        else
-        {
-            Server.Start((int)Port.Value);
-            if (Server.IsStart)
-                SwitchButton.Text = "Close";
-            else
-                System.Windows.Forms.MessageBox.Show($"start server failed");
-        }
-    }
-
     protected override void Redraw()
     {
         base.Redraw(); 
-        var width = (ClientWidth - Padding * 5) / 3;
+        var width = (ClientWidth - Padding * 5) / 2;
         var top = ClientTop + Padding;
         var height = Port.Height;
         //
@@ -136,23 +110,15 @@ internal class ServerForm : ResizeableForm
             width,
             height
             );
-        //
-        SwitchButton.Bounds = new(
+        ParallelCount.Bounds = new(
             Port.Right + Padding,
             top,
             width,
             height
             );
         //
-        ParallelCount.Bounds = new(
-            SwitchButton.Right + Padding,
-            top,
-            width,
-            height
-            );
-        //
         width = (ClientWidth - Padding * 3) / 5;
-        top = SwitchButton.Bottom + Padding;
+        top = Port.Bottom + Padding;
         height = ClientHeight - Port.Height - SendButton.Height - Padding * 4;
         //
         ArchiveSelector.Bounds = new(

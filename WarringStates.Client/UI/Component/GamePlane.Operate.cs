@@ -69,19 +69,17 @@ partial class GamePlane
             dY = dY / DragMoveSensibility == 0 ? 0 : dY < 0 ? -1 : 1;
             dY *= DragMoveSensibility;
             DragStartPoint = args.Location;
-            var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(dX, dY));
-            LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
+            GridDrawer.OffsetOrigin(new(dX, dY));
         }
     }
 
     private void OnMouseWheel(object? sender, MouseEventArgs args)
     {
-        var diffInWidth = args.Location.X - Width / 2;
-        var diffInHeight = args.Location.Y - Height / 2;
-        var dX = diffInWidth / GridDrawer.CellEdgeLength * Width / 200;
-        var dY = diffInHeight / GridDrawer.CellEdgeLength * Height / 200;
-        GridDrawer.CellEdgeLength += args.Delta / 100 * Math.Max(Width, Height) / 200;
-        var sendArgs = new GridOriginOperateArgs(GridOriginOperateArgs.OperateTypes.Offset, new(dX, dY));
-        LocalEvents.TryBroadcast(LocalEvents.Graph.OperateGridOrigin, sendArgs);
+        var diffInWidth = args.Location.X - ClientWidth / 2;
+        var diffInHeight = args.Location.Y - ClientHeight / 2;
+        var dX = diffInWidth / GridDrawer.CellEdgeLength * ClientWidth / 200;
+        var dY = diffInHeight / GridDrawer.CellEdgeLength * ClientHeight / 200;
+        GridDrawer.CellEdgeLength += args.Delta / 100 * Math.Max(ClientWidth, ClientHeight) / 200;
+        GridDrawer.OffsetOrigin(new(dX, dY));
     }
 }

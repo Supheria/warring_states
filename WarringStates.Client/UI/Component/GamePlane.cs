@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
+using WarringStates.Client.Graph;
 
 namespace WarringStates.Client.UI.Component;
 
@@ -14,31 +15,26 @@ public partial class GamePlane : Displayer
 
     public void EnableListener()
     {
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginSet, GridRedraw);
+        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginSet, GridRedrawAsync);
     }
 
     public void DisableListener()
     {
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.InfoBarOnSetBounds, SetBounds);
-        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginSet, GridRedraw);
+        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginSet, GridRedrawAsync);
     }
-
-    private void GridRedraw()
-    {
-        Redraw();
-        Invalidate();
-    }
-    //private void SetBounds(Rectangle rect)
-    //{
-    //    Bounds = rect;
-    //    //base.Relocate();
-    //    Relocate();
-    //}
 
     public override void Redraw()
     {
         base.Redraw();
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridToRelocate, new GridToRelocateArgs(Image, BackColor));
+        GridRedrawAsync();
+    }
+
+    private async void GridRedrawAsync()
+    {
+        var source = await GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor);
+        if (source is null)
+            return;
+        Image?.Dispose();
+        Image = source;
     }
 }

@@ -17,7 +17,7 @@ public class ToolBar : Displayer
 
     public ToolBar()
     {
-        Height = 30;
+        //Height = 30;
     }
 
     public void EnableListener()
@@ -51,8 +51,8 @@ public class ToolBar : Displayer
     public override void Redraw()
     {
         base.Redraw();
-        var dateWidth = (Width * 0.2).ToRoundInt();
-        var dateRect = new Rectangle(Right - dateWidth, Top, dateWidth, Height);
+        var dateWidth = (ClientWidth * 0.2).ToRoundInt();
+        var dateRect = new Rectangle(ClientLeft + ClientWidth - dateWidth, ClientTop, dateWidth, ClientHeight);
         using var g = Graphics.FromImage(Image);
         g.FillRectangle(new SolidBrush(Color.LightSlateGray), dateRect);
         var format = new StringFormat()

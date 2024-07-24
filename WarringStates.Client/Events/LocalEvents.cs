@@ -143,11 +143,8 @@ public class LocalEvents
 
     public enum UserInterface
     {
-        Login,
         ArchiveListRefreshed,
-        Logout,
-        RequestFetchThumbnail,
-        ResponseFetchThumbnail,
+        ThumbnailFetched,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

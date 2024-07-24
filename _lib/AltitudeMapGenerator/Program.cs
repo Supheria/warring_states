@@ -18,7 +18,7 @@ public class Program
         //var data = new AtlasData("testMap", new(500, 500), new(4, 4), new(5, 6), RiverLayout.Type.Horizontal, 120000, 0.66f, new RandomPointsGenerationGaussian());
 
         //var data = new AltitudeMapData(new(200, 300), new(2, 3), new(6, 3), RiverLayout.Types.BackwardSlash, 1, 30000, 0.5f);
-        var atl = new AltitudeMap(data);
+        var atl = new AltitudeMap(data, null);
         var signTable = new SsSignTable();
         SerializeTool.SerializeFile(atl, new(), "test.ss", false, signTable);
         var stopwatch = new Stopwatch();

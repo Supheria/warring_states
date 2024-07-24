@@ -67,13 +67,13 @@ internal class LocalArchives
         }
     }
 
-    public static bool CreateArchive(AltitudeMapData mapData, string worldName)
+    public static bool CreateArchive(AltitudeMapData mapData, string worldName, IProgressor progressor)
     {
         try
         {
             var info = new ArchiveInfo(worldName, mapData.Size);
             Directory.CreateDirectory(GetArchiveRootPath(info));
-            var archive = CreateArchive(info, mapData);
+            var archive = CreateArchive(info, mapData, progressor);
             SaveArchive(info, archive);
             var fields = TableTool.GetFieldsValue(info);
             using var query = new SQLiteQuery(RegisterPath);
@@ -265,10 +265,10 @@ internal class LocalArchives
         SerializeTool.SerializeFile(archive.CurrentSpan, new(nameof(Archive.CurrentSpan)), GetCurrentSpanPath(info), true, SignTable);
     }
 
-    public static Archive CreateArchive(ArchiveInfo info, AltitudeMapData mapData)
+    public static Archive CreateArchive(ArchiveInfo info, AltitudeMapData mapData, IProgressor progressor)
     {
         Directory.CreateDirectory(Path.Combine(RootPath, info.Id));
-        var altitudeMap = new AltitudeMap(mapData);
+        var altitudeMap = new AltitudeMap(mapData, progressor);
         var landMap = new LandMap();
         var randomTable = new RandomTable(1000);
         landMap.Relocate(altitudeMap, randomTable);

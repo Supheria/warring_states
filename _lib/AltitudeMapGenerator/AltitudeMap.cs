@@ -33,7 +33,7 @@ public class AltitudeMap
 
     }
 
-    public AltitudeMap(AltitudeMapData data)
+    public AltitudeMap(AltitudeMapData data, IProgressor? progressor)
     {
         VoronoiPlane plane;
         List<Coordinate> sites;
@@ -47,8 +47,8 @@ public class AltitudeMap
         } while (river.Successful is false);
         RiverPoints = river.River.ToList();
 
-        DlaMap.TestForm.Reset(data.PixelNumber);
-        DlaMap.TestForm.Show();
+        progressor?.Reset(data.PixelNumber);
+        DlaMap.Progressor = progressor;
 
         var altitudes = new List<double>();
         Parallel.ForEach(plane.Generate(sites), (cell) =>

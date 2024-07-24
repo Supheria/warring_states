@@ -6,9 +6,18 @@ namespace WarringStates.Client.UI.Component;
 
 public class Settings : Displayer
 {
-    public bool DoSetting { get; set; } = false;
+    public bool DoSetting
+    {
+        get => Visible;
+        set => Visible = value;
+    }
 
     Rectangle Range { get; set; } = new();
+
+    public Settings()
+    {
+        DoSetting = false;
+    }
 
     public void EnableListener()
     {

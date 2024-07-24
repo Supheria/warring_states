@@ -10,9 +10,9 @@ using WarringStates.Net.Utilities;
 
 namespace WarringStates.Server.Net;
 
-internal partial class ServerService : Service, IRosterItem<string>
+internal partial class ServerService : NetService, IRosterItem<string>
 {
-    protected override string RepoPath { get; set; } = @"repo\server";
+    protected string RepoPath { get; set; } = @"repo\server";
 
     public string TimeStamp { get; } = DateTime.Now.ToString(DateTimeFormat.Data);
 
@@ -78,6 +78,23 @@ internal partial class ServerService : Service, IRosterItem<string>
         if (span.TotalMilliseconds < ConstTabel.SocketTimeoutMilliseconds)
             return;
         Dispose();
+    }
+
+    public string GetFileRepoPath(string dirName, string fileName)
+    {
+        var dir = Path.Combine(RepoPath, dirName);
+        if (!Directory.Exists(dir))
+        {
+            try
+            {
+                Directory.CreateDirectory(dir);
+            }
+            catch (Exception ex)
+            {
+                this.HandleException(ex);
+            }
+        }
+        return Path.Combine(dir, fileName);
     }
 
     //private void DoDir(CommandParser commandParser)

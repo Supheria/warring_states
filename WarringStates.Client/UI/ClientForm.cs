@@ -10,26 +10,24 @@ namespace WarringStates.Client.UI;
 
 public partial class ClientForm : ResizeableForm
 {
-    ClientService Client { get; } = new();
-
-    TextBox HostAddress { get; } = new()
+    TextBox Address { get; } = new()
     {
-        Text = "127.0.0.1"
+        Text = LocalNet.ServerAddress
     };
 
-    NumericUpDown HostPort { get; } = new()
+    NumericUpDown Port { get; } = new()
     {
-        Value = 60,
+        Value = LocalNet.ServerPort
     };
 
     TextBox PlayerName { get; } = new()
     {
-        Text = "admin"
+        Text = LocalNet.PlayerName
     };
 
     TextBox Password { get; } = new()
     {
-        Text = "password"
+        Text = LocalNet.PlayerPassword
     };
 
     RichTextBox MessageBox { get; } = new();
@@ -86,10 +84,11 @@ public partial class ClientForm : ResizeableForm
     {
         InitializeName = initializeName;
         Text = "Client";
-        OperatePannel = GamePlayControl;
+        //OperatePannel = GamePlayControl;
+        OperatePannel = ArchiveSelector;
         Controls.AddRange([
-            HostAddress,
-            HostPort,
+            Address,
+            Port,
             PlayerName,
             Password,
             MessageBox,
@@ -107,25 +106,100 @@ public partial class ClientForm : ResizeableForm
         SendButton.Click += SendButton_Click;
         FilePathButton.Click += FilePathButton_Click;
         UploadButton.Click += UploadButton_Click;
-        DownloadButton.Click += (_, _) => Client.DownLoadFileAsync(DirName.Text, Path.GetFileName(FilePath.Text));
-        Client.OnLog += UpdateMessage;
-        Client.OnLogined += Client_OnConnected;
-        Client.OnClosed += Client_OnDisconnected;
-        Client.OnProcessing += UpdateFormText;
-        Client.OnUpdatePlayerList += Client_OnUpdateUserList;
-        //ArchiveSelector.EnableListener();
-        GamePlayControl.EnableListener();
-        EnableListener();
+        DownloadButton.Click += (_, _) => LocalNet.Service.DownLoadFileAsync(DirName.Text, Path.GetFileName(FilePath.Text));
+        Address.TextChanged += Address_TextChanged;
+        Port.ValueChanged += Port_ValueChanged;
+        PlayerName.TextChanged += PlayerName_TextChanged;
+        Password.TextChanged += Password_TextChanged;
+        LocalNet.Service.OnLog += UpdateMessage;
+        LocalNet.Service.OnLogined += Service_OnLogined; ;
+        LocalNet.Service.OnClosed += Service_OnClosed; ;
+        LocalNet.Service.OnProcessing += UpdateFormText;
+        LocalNet.Service.OnUpdatePlayerList += Client_OnUpdateUserList;
+        ArchiveSelector.EnableListener();
+        //GamePlayControl.EnableListener();
+    }
+
+    private void Service_OnLogined()
+    {
+        BeginInvoke(() =>
+        {
+            Address.Enabled = false;
+            Port.Enabled = false;
+            PlayerName.Enabled = false;
+            Password.Enabled = false;
+            Update();
+        });
+        StartGame();
+    }
+
+    private void Service_OnClosed()
+    {
+        BeginInvoke(() =>
+        {
+            Address.Enabled = true;
+            Port.Enabled = true;
+            PlayerName.Enabled = true;
+            Password.Enabled = true;
+            Update();
+        });
+        EndGame();
+    }
+
+    private void StartGame()
+    {
+        BeginInvoke(() =>
+        {
+            Controls.Remove(OperatePannel);
+            GamePlayControl.EnableListener();
+            ArchiveSelector.DisableListener();
+            OperatePannel = GamePlayControl;
+            Controls.Add(OperatePannel);
+            Redraw();
+        });
+    }
+
+    private void EndGame()
+    {
+        BeginInvoke(() =>
+        {
+            Controls.Remove(OperatePannel);
+            ArchiveSelector.EnableListener();
+            GamePlayControl.DisableListener();
+            OperatePannel = ArchiveSelector;
+            Controls.Add(OperatePannel);
+            Redraw();
+        });
+    }
+
+    private void Password_TextChanged(object? sender, EventArgs e)
+    {
+        LocalNet.PlayerPassword = Password.Text;
+    }
+
+    private void PlayerName_TextChanged(object? sender, EventArgs e)
+    {
+        LocalNet.PlayerName = PlayerName.Text;
+    }
+
+    private void Port_ValueChanged(object? sender, EventArgs e)
+    {
+        LocalNet.ServerPort = (int)Port.Value;
+    }
+
+    private void Address_TextChanged(object? sender, EventArgs e)
+    {
+        LocalNet.ServerAddress = Address.Text;
     }
 
     private void UploadButton_Click(object? sender, EventArgs e)
     {
-        var fileName = Path.GetFileName(FilePath.Text);
-        var filePath = Client.GetFileRepoPath(DirName.Text, fileName);
-        // HACK: for test
-        if (!File.Exists(filePath))
-            File.Copy(FilePath.Text, filePath);
-        Client.UploadFileAsync(DirName.Text, fileName);
+        //var fileName = Path.GetFileName(FilePath.Text);
+        //var filePath = Client.GetFileRepoPath(DirName.Text, fileName);
+        //// HACK: for test
+        //if (!File.Exists(filePath))
+        //    File.Copy(FilePath.Text, filePath);
+        LocalNet.Service.UploadFileAsync(DirName.Text, FilePath.Text);
     }
 
     private void SendButton_Click(object? sender, EventArgs e)
@@ -138,7 +212,7 @@ public partial class ClientForm : ResizeableForm
             return;
         }
         foreach (var item in UserList.SelectedItems)
-            Client.SendMessage(SendBox.Text, (string)item);
+            LocalNet.Service.SendMessage(SendBox.Text, (string)item);
     }
 
     private void Client_OnUpdateUserList(string[] playersName)
@@ -155,38 +229,7 @@ public partial class ClientForm : ResizeableForm
         });
     }
 
-    private void Client_OnDisconnected()
-    {
-        BeginInvoke(() =>
-        {
-            HostAddress.Enabled = true;
-            HostPort.Enabled = true;
-            PlayerName.Enabled = true;
-            Password.Enabled = true;
-            Update();
-        });
-        //GamePlay.FinishGame();
-    }
 
-    private void Client_OnConnected()
-    {
-        BeginInvoke(() =>
-        {
-            HostAddress.Enabled = false;
-            HostPort.Enabled = false;
-            PlayerName.Enabled = false;
-            Password.Enabled = false;
-            Update();
-        });
-        // TODO: for test
-        //ArchiveManager.LoadArchive(0, out var archive);
-        //Atlas.Relocate(archive);
-        //SourceLand.TryBuild(new(22, 22), Atlas.LandMap, SourceLand.Types.TerraceLand, out var s1);
-        //archive.SourceLands.Add(s1);
-        //Atlas.Relocate(archive);
-
-        //GamePlay.StartGame();
-    }
 
     private class ClientData : FormData
     {
@@ -207,8 +250,8 @@ public partial class ClientForm : ResizeableForm
     {
         if (data is not ClientData clientData)
             return;
-        HostAddress.Text = clientData.HostAddress;
-        HostPort.Value = clientData.HostPort;
+        Address.Text = clientData.HostAddress;
+        Port.Value = clientData.HostPort;
         PlayerName.Text = clientData.UserName;
         Password.Text = clientData.Password;
         DirName.Text = clientData.DirName;
@@ -219,8 +262,8 @@ public partial class ClientForm : ResizeableForm
     {
         return new ClientData()
         {
-            HostAddress = HostAddress.Text,
-            HostPort = (int)HostPort.Value,
+            HostAddress = Address.Text,
+            HostPort = (int)Port.Value,
             UserName = PlayerName.Text,
             Password = Password.Text,
             DirName = DirName.Text,
@@ -231,7 +274,7 @@ public partial class ClientForm : ResizeableForm
     protected override void OnClosed(EventArgs e)
     {
         base.OnClosed(e);
-        Client.Dispose();
+        LocalNet.Service.Dispose();
     }
 
     private void FilePathButton_Click(object? sender, EventArgs e)
@@ -266,15 +309,15 @@ public partial class ClientForm : ResizeableForm
         var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
         //
-        HostAddress.Left = ClientLeft + Padding;
-        HostAddress.Top = top;
-        HostAddress.Width = width;
+        Address.Left = ClientLeft + Padding;
+        Address.Top = top;
+        Address.Width = width;
         //
-        HostPort.Left = HostAddress.Right + Padding;
-        HostPort.Top = top;
-        HostPort.Width = width;
+        Port.Left = Address.Right + Padding;
+        Port.Top = top;
+        Port.Width = width;
         //
-        PlayerName.Left = HostPort.Right + Padding;
+        PlayerName.Left = Port.Right + Padding;
         PlayerName.Top = top;
         PlayerName.Width = width;
         //
@@ -284,12 +327,14 @@ public partial class ClientForm : ResizeableForm
         //
         width = (ClientWidth - Padding * 5) / 5;
         top = Password.Bottom + Padding;
-        var height = ClientHeight - HostAddress.Height - SendBox.Height - FilePath.Height - Padding * 6;
+        var height = ClientHeight - Address.Height - SendBox.Height - FilePath.Height - Padding * 6;
         //
-        OperatePannel.Left = ClientLeft + Padding;
-        OperatePannel.Top = top;
-        OperatePannel.Width = width * 5;
-        OperatePannel.Height = height;
+        OperatePannel.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width * 4,
+            height
+            );
         //
         MessageBox.Left = OperatePannel.Right + Padding;
         //MessageBox.Left = ClientLeft + Padding;

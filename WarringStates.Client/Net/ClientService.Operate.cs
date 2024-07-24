@@ -106,7 +106,7 @@ partial class ClientService
                 CurrentSpan = receiver.GetArgs<int>(ServiceKey.Span),
                 PlayerCount = receiver.GetArgs<int>(ServiceKey.Count),
             };
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ResponseFetchThumbnail, info);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ThumbnailFetched, info);
         }
     }
 }

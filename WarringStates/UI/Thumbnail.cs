@@ -28,9 +28,9 @@ public class Thumbnail : Displayer
             var random = new Random();
             var pImage = new PointBitmap((Bitmap)Image);
             pImage.LockBits();
-            for (var i = 0; i < Width; i++)
+            for (var i = 0; i < ClientWidth; i++)
             {
-                for (var j = 0; j < Height; j++)
+                for (var j = 0; j < ClientHeight; j++)
                 {
                     Color color;
                     if (random.Next() < random.Next())
@@ -48,9 +48,9 @@ public class Thumbnail : Displayer
             var rect = new Rectangle();
             try
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(ThumbnailSource.Size, Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(ThumbnailSource.Size, ClientSize);
                 var thumbnail = BitmapTool.CopyToNewSize(ThumbnailSource, size, InterpolationMode.Low);
-                rect = new((Width - thumbnail.Width) / 2, 0, thumbnail.Width, thumbnail.Height);
+                rect = new((ClientWidth - thumbnail.Width) / 2, 0, thumbnail.Width, thumbnail.Height);
                 BitmapTool.DrawTemplateOnto(thumbnail, (Bitmap)Image, rect, true);
                 rect = new(0, thumbnail.Height, Width, Height - thumbnail.Height);
                 thumbnail.Dispose();

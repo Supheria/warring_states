@@ -32,6 +32,28 @@ public partial class Overview : Displayer
 
     Coordinate GridOrigin { get; set; } = new();
 
+    public new Rectangle Bounds
+    {
+        get => base.Bounds;
+        set
+        {
+            Range = value;
+            if (FullScreen)
+            {
+                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
+                base.Bounds = new(location, size);
+            }
+            else
+            {
+                var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
+                size = Atlas.Size.ScaleSizeWithinRatio(size);
+                var location = new Point(Range.Right - size.Width, Range.Top);
+                base.Bounds = new(location, size);
+            }
+        }
+    }
+
     public Overview()
     {
         AddOperations();
@@ -39,48 +61,30 @@ public partial class Overview : Displayer
 
     public void EnableListener()
     {
-        //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
         LocalEvents.TryAddListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
     }
 
     public void DisableListener()
     {
-        //LocalEvents.TryRemoveListener<Rectangle>(LocalEvents.UserInterface.ToolBarOnSetBounds, SetBounds);
         LocalEvents.TryRemoveListener<GridRelocatedArgs>(LocalEvents.Graph.GridRedraw, Relocate);
-    }
-
-    public void SetBounds(Rectangle bounds)
-    {
-        Range = bounds;
-        if (FullScreen)
-        {
-            var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
-            var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
-            Bounds = new(location, size);
-        }
-        else
-        {
-            var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
-            size = Atlas.Size.ScaleSizeWithinRatio(size);
-            var location = new Point(Range.Right - size.Width, Range.Top);
-            Bounds = new(location, size);
-        }
-        Redraw();
-        Invalidate();
     }
 
     private void Relocate(GridRelocatedArgs args)
     {
         if (Width is 0 || Height is 0)
             return;
-        GridDrawRect = args.DrawRect;
-        GridOrigin = args.Origin;
-        Redraw();
-        Invalidate();
+        BeginInvoke(() =>
+        {
+            GridDrawRect = args.DrawRect;
+            GridOrigin = args.Origin;
+            Redraw();
+            Invalidate();
+        });
     }
 
     public override void Redraw()
     {
+        base.Redraw();
         RelocateOverview();
         RelocateFocus();
     }
@@ -94,10 +98,10 @@ public partial class Overview : Displayer
         }
         OverviewCache?.Dispose();
         Image?.Dispose();
-        var widthUnit = (Width / (double)Atlas.Width).ToRoundInt();
+        var widthUnit = (ClientWidth / (double)Atlas.Width).ToRoundInt();
         if (widthUnit is 0)
             widthUnit = 1;
-        var heightUnit = (Height / (double)Atlas.Height).ToRoundInt();
+        var heightUnit = (ClientHeight / (double)Atlas.Height).ToRoundInt();
         if (heightUnit is 0)
             heightUnit = 1;
         OverviewCache = new(Atlas.Width * widthUnit, Atlas.Height * heightUnit);
@@ -112,7 +116,7 @@ public partial class Overview : Displayer
             }
         }
         pOverview.UnlockBits();
-        var temp = OverviewCache.CopyToNewSize(Size, InterpolationMode.Low);
+        var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
         OverviewCache.Dispose();
         OverviewCache = temp;
         Image = OverviewCache.Clone() as Bitmap;
@@ -137,14 +141,14 @@ public partial class Overview : Displayer
         var height = GridDrawRect.Height / edgeLength;
         var x = Atlas.Width - GridOrigin.X / edgeLength;
         var y = Atlas.Height - GridOrigin.Y / edgeLength;
-        var widthRatio = Atlas.Width / (double)Width;
-        var heightRatio = Atlas.Height / (double)Height;
+        var widthRatio = Atlas.Width / (double)ClientWidth;
+        var heightRatio = Atlas.Height / (double)ClientHeight;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
-        FocusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
+        FocusRect = new((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);
         FocusRects.Clear();
-        FocusRects.AddRange(FocusRect.CutRectLoopRectsInRange(new(new(0, 0), Size)));
-        using var pen = new Pen(FocusColor, Math.Min(Width, Height) * 0.01f);
+        FocusRects.AddRange(FocusRect.CutRectLoopRectsInRange(ClientRect));
+        using var pen = new Pen(FocusColor, Math.Min(ClientWidth, ClientHeight) * 0.01f);
         LastFocusOnRects.Clear();
         foreach (var rect in FocusRects)
         {
@@ -152,7 +156,7 @@ public partial class Overview : Displayer
             foreach (var edge in EdgeTool.GetRectEdges(rect))
             {
                 var lineRect = EdgeTool.GetCrossLineRect(edge, pen.Width);
-                if (GeometryTool.CutRectInRange(lineRect, new(new(0, 0), Size), out var r))
+                if (GeometryTool.CutRectInRange(lineRect, ClientRect, out var r))
                     LastFocusOnRects.Add(r.Value);
             }
         }

@@ -14,10 +14,7 @@ internal class DlaMap(VoronoiCell cell)
 
     internal double AltitudeMax { get; private set; } = 0;
 
-    //#if DEBUG
-    internal static ProcessForm TestForm { get; } = new();
-
-    static int Now { get; set; } = 0;
+    public static IProgressor? Progressor { get; set; }
     //#endif
     /// <summary>
     /// 
@@ -29,22 +26,23 @@ internal class DlaMap(VoronoiCell cell)
     {
         PixelMap.Clear();
         AltitudeMax = 0;
-        var root = new Coordinate((int)Cell.Site.X, (int)Cell.Site.Y);
+        var root = new Coordinate(Cell.Site.X, Cell.Site.Y);
         PixelMap[root] = new(root.X, root.Y);
         bool innerFilter(int x, int y) => Cell.ContainPoint(x, y);
-        for (int i = 0; PixelMap.Count < (int)(pixelCount * density); i++)
+        var count = (int)(pixelCount * density);
+        for (int i = 0; PixelMap.Count < count; i++)
         {
             var pixel = AddWalker(innerFilter);
             PixelMap[pixel] = pixel;
-            TestForm.Progress();
         }
+        Progressor?.Progress(count);
         bool outerFilter(int x, int y) => Bounds.Contains(x, y);
         for (int i = 0; PixelMap.Count < pixelCount; i++)
         {
             var pixel = AddWalker(outerFilter);
             PixelMap[pixel] = pixel;
-            TestForm.Progress();
         }
+        Progressor?.Progress(pixelCount - count);
         ComputeHeight();
         return PixelMap.Values.ToList();
     }

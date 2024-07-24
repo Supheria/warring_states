@@ -11,10 +11,8 @@ using WarringStates.User;
 
 namespace WarringStates.Client.Net;
 
-public partial class ClientService : Service
+public partial class ClientService : NetService
 {
-    protected override string RepoPath { get; set; } = @"repo\client";
-
     AutoResetEvent LoginDone { get; } = new(false);
 
     protected override DaemonThread DaemonThread { get; init; }

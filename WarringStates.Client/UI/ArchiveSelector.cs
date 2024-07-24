@@ -8,7 +8,7 @@ using WarringStates.UI;
 
 namespace WarringStates.Client.UI;
 
-public partial class ArchiveSelector : Control
+public partial class ArchiveSelector : Pannel
 {
     public static new Size Padding { get; } = new(30, 30);
 
@@ -74,7 +74,7 @@ public partial class ArchiveSelector : Control
     {
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
         //LocalEvents.TryAddListener<Rectangle>(LocalEvents.UserInterface.GamePlayControlOnDraw, SetBounds);
-        LocalEvents.TryAddListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ResponseFetchThumbnail, SetThumbnail);
+        LocalEvents.TryAddListener<ThumbnailRedrawArgs>(LocalEvents.UserInterface.ThumbnailFetched, SetThumbnail);
         //LocalEvents.TryAddListener<Keys>(LocalEvents.UserInterface.KeyPressed, KeyPress);
     }
 
@@ -124,33 +124,47 @@ public partial class ArchiveSelector : Control
         Bounds = rect;
     }
 
-    protected override void OnResize(EventArgs e)
+    protected override void SetSize()
     {
-        base.OnResize(e);
-        BeginInvoke(SetSize);
-    }
-
-    private void SetSize()
-    {
-        var colWidth = (Width - Padding.Width * 3) / 3;
-        var height = Height - Padding.Height * 2;
+        var colWidth = (ClientWidth - Padding.Width * 3) / 3;
+        var height = ClientHeight - Padding.Height * 2;
         //
-        Selector.Bounds = new(Padding.Width, Padding.Height, colWidth * 2, height);
+        Selector.Bounds = new(
+            ClientLeft + Padding.Width,
+            ClientTop + Padding.Height,
+            colWidth * 2,
+            height);
         //
         var padding = Padding + Padding / 4;
         var left = Selector.Right + padding.Width;
         colWidth -= Padding.Width / 2;
         height /= 2;
         //
-        Thumbnail.Bounds = new(left, padding.Height, colWidth, height - Padding.Height / 2); 
+        Thumbnail.Bounds = new(
+            left,
+            padding.Height,
+            colWidth,
+            height - Padding.Height / 2);
         //
         var buttonPadding = (height - ButtonHeight * 3) / 4;
         //
-        LoginButton.Bounds = new(left, Thumbnail.Bottom + buttonPadding, colWidth, ButtonHeight);
+        LoginButton.Bounds = new(
+            left,
+            Thumbnail.Bottom + buttonPadding,
+            colWidth,
+            ButtonHeight);
         //
-        JoinButton.Bounds = new(left, LoginButton.Bottom + buttonPadding, colWidth, ButtonHeight);
+        JoinButton.Bounds = new(
+            left,
+            LoginButton.Bottom + buttonPadding,
+            colWidth,
+            ButtonHeight);
         //
         var buttonWidth = colWidth - Padding.Width * 2;
-        LogoutButton.Bounds = new(left + Padding.Width, JoinButton.Bottom + buttonPadding, buttonWidth, ButtonHeight);
+        LogoutButton.Bounds = new(
+            left + Padding.Width,
+            JoinButton.Bottom + buttonPadding,
+            buttonWidth,
+            ButtonHeight);
     }
 }
