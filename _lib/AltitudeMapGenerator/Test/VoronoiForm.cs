@@ -1,7 +1,6 @@
 ﻿using AltitudeMapGenerator.Layout;
 using AltitudeMapGenerator.VoronoiDiagram;
 using AltitudeMapGenerator.VoronoiDiagram.Data;
-using LocalUtilities.TypeGeneral;
 using System.Drawing.Drawing2D;
 
 namespace AltitudeMapGenerator.Test;

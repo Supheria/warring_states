@@ -1,14 +1,6 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript.Common;
-using LocalUtilities.SimpleScript;
-using LocalUtilities.SQLiteHelper;
-using LocalUtilities.SQLiteHelper.Data;
-using LocalUtilities.TypeToolKit;
-using LocalUtilities.TypeToolKit.Text;
-using WarringStates.Map.Terrain;
-using WarringStates.Map;
-using WarringStates.User;
+﻿using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
 

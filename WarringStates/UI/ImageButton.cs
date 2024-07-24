@@ -1,19 +1,12 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static System.ComponentModel.Design.ObjectSelectorEditor;
 
 namespace WarringStates.UI;
 
 public class ImageButton : Displayer
 {
     public new string Text { get; set; } = "Null";
-    
+
     new bool Focused { get; set; } = false;
 
     public new bool CanSelect { get; set; } = false;

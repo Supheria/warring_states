@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;

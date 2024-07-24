@@ -1,8 +1,5 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Client.Events;
+﻿using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Graph;
-using WarringStates.Client.Map;
 
 namespace WarringStates.Client.UI.Component;
 

@@ -5,10 +5,8 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using WarringStates.Net;
 using WarringStates.Net.Common;
 using WarringStates.Server.Events;
-using WarringStates.Server.User;
 
 namespace WarringStates.Server.Net;
 
@@ -139,7 +137,7 @@ internal class ServiceManager : INetLogger
     private void AddService(ServerService service)
     {
         if (string.IsNullOrEmpty(service.Signature) ||
-            !PlayerMap.TryAdd(service)) 
+            !PlayerMap.TryAdd(service))
         {
             service.Dispose();
             return;
@@ -150,7 +148,7 @@ internal class ServiceManager : INetLogger
     private void RemoveService(ServerService service)
     {
         if (string.IsNullOrEmpty(service.Signature) ||
-            !(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp)) 
+            !(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
         PlayerMap.TryRemove(service);
         HandleUpdateConnection();
@@ -178,7 +176,7 @@ internal class ServiceManager : INetLogger
 
     public void BroadcastMessage(string message)
     {
-        Parallel.ForEach(PlayerMap, service => 
+        Parallel.ForEach(PlayerMap, service =>
         {
             service.SendMessage(message);
         });

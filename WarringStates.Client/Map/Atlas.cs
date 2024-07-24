@@ -27,7 +27,7 @@ public static class Atlas
 
     public static void Relocate(AltitudeMap altitudeMap, RandomTable randomTable)
     {
-        LandMap.Relocate(altitudeMap,randomTable);
+        LandMap.Relocate(altitudeMap, randomTable);
     }
 
     public static Coordinate SetPointWithinTerrainMap(this Coordinate Point)

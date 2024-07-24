@@ -1,7 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
-using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.Flow.Model;
 using WarringStates.Server.Events;
 using WarringStates.Server.User;
 using WarringStates.UI;
@@ -68,7 +65,7 @@ public partial class ArchiveSelector : Pannel
             Selector,
             Thumbnail,
             BuildButton,
-            SwitchButton, 
+            SwitchButton,
             DeleteButton,
             Progressor,
             ]);

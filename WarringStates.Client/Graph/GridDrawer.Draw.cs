@@ -1,9 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Diagnostics;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.Client.UI;
 using WarringStates.Map.Terrain;
 
 namespace WarringStates.Client.Graph;

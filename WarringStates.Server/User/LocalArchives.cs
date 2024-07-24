@@ -4,14 +4,11 @@ using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.SQLiteHelper.Data;
 using LocalUtilities.TypeGeneral;
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using WarringStates.Map.Terrain;
 using WarringStates.Map;
 using WarringStates.Server.Events;
-using WarringStates.User;
 using WarringStates.Server.Map;
+using WarringStates.User;
 
 namespace WarringStates.Server.User;
 
@@ -35,7 +32,7 @@ internal class LocalArchives
         {
             ArchiveInfoList.Clear();
             using var query = new SQLiteQuery(RegisterPath);
-            foreach (var fields in query.SelectFieldsValue(TableName, TableTool.GetFieldsName<ArchiveInfo>(), null)) 
+            foreach (var fields in query.SelectFieldsValue(TableName, TableTool.GetFieldsName<ArchiveInfo>(), null))
             {
                 var info = new ArchiveInfo();
                 TableTool.SetFieldsValue(info, fields);
@@ -43,7 +40,7 @@ internal class LocalArchives
             }
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             MessageBox.Show(ex.Message);
         }
@@ -102,7 +99,7 @@ internal class LocalArchives
                 return;
             var condition = new Condition(field.Name, info.Id, Condition.Operates.Equal);
             query.UpdateFieldsValues(TableName, TableTool.GetFieldsValue(info), condition);
-            ReLocate() ;
+            ReLocate();
         }
         catch (Exception ex)
         {

@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Map.Terrain;
 
@@ -11,7 +10,7 @@ public class InfoBar : Displayer
 
     public override void Redraw()
     {
-        base.Redraw(); 
+        base.Redraw();
         using var g = Graphics.FromImage(Image);
         g.Clear(Color.Gray);
         var info = $"\n水源{SingleLand.Types.Stream.GetLandTypeCount()}\n平原{SingleLand.Types.Plain.GetLandTypeCount()}\n树林{SingleLand.Types.Wood.GetLandTypeCount()}\n山地{SingleLand.Types.Hill.GetLandTypeCount()}";

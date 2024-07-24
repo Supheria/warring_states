@@ -1,4 +1,3 @@
-using AltitudeMapGenerator.Test;
 using AltitudeMapGenerator.VoronoiDiagram.Data;
 using LocalUtilities.TypeGeneral;
 

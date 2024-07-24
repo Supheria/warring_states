@@ -1,7 +1,5 @@
-﻿using WarringStates.Client.Events;
-using WarringStates.Client.Net;
+﻿using WarringStates.Client.Net;
 using WarringStates.Client.User;
-using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 

@@ -1,10 +1,6 @@
 using AltitudeMapGenerator.DLA;
 using AltitudeMapGenerator.VoronoiDiagram;
-using AltitudeMapGenerator.VoronoiDiagram.Data;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
-using System.ComponentModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AltitudeMapGenerator;
 

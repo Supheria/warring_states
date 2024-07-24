@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.User;
 
 namespace WarringStates.User;
 

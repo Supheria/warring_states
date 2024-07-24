@@ -2,8 +2,6 @@
 using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Events;
-using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
 using WarringStates.Client.UI.Component;
 

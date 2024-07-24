@@ -1,5 +1,4 @@
 using AltitudeMapGenerator.Layout;
-using AltitudeMapGenerator.Test;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;

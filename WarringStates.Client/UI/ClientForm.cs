@@ -1,10 +1,5 @@
-﻿using LocalUtilities.FileHelper;
-using LocalUtilities.SimpleScript;
-using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Events;
+﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Net;
-using WarringStates.Client.User;
-using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 
@@ -102,7 +97,7 @@ public partial class ClientForm : ResizeableForm
 
     protected override void Redraw()
     {
-        base.Redraw(); 
+        base.Redraw();
         var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
         //

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using WarringStates.Client.Events;
+﻿using WarringStates.Client.Events;
 using WarringStates.User;
 
 namespace WarringStates.Client.User;

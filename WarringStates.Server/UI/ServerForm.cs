@@ -1,9 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Flow;
-using WarringStates.Server.Events;
-using WarringStates.Server.UI.Component;
-using WarringStates.Server.User;
 using WarringStates.Server.Net;
+using WarringStates.Server.UI.Component;
 
 namespace WarringStates.Server.UI;
 
@@ -56,7 +54,7 @@ internal partial class ServerForm : ResizeableForm
 
     protected override void Redraw()
     {
-        base.Redraw(); 
+        base.Redraw();
         var width = (ClientWidth - Padding * 5) / 2;
         var top = ClientTop + Padding;
         var height = Port.Height;

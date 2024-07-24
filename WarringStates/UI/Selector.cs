@@ -1,10 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WarringStates.User;
 
 namespace WarringStates.UI;
@@ -22,13 +17,13 @@ public partial class Selector : Displayer
     int OffsetMax { get; set; } = 0;
 
     int LasOffsetMax { get; set; } = 0;
-    
+
     Rectangle ItemColumnRect { get; set; } = new();
 
     List<Rectangle> ItemRects { get; } = [];
 
     Rectangle BarColumnRect { get; set; } = new();
-    
+
     Rectangle BarRect { get; set; } = new();
 
     int BarHeight { get; set; } = 0;
@@ -36,7 +31,7 @@ public partial class Selector : Displayer
     int BarHeightMin { get; set; } = 20;
 
     double BarRatio { get; set; } = 0;
-    
+
     int ItemHeight { get; set; } = 125;
 
     int ItemShowCount { get; set; } = 0;

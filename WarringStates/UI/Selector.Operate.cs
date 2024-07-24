@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WarringStates.UI;
+﻿namespace WarringStates.UI;
 
 partial class Selector
 {
@@ -16,7 +10,7 @@ partial class Selector
         Item,
         Bar
     }
-    
+
     DragPart Dragger { get; set; } = DragPart.None;
 
     Point DragStartPoint { get; set; } = new();
@@ -26,7 +20,7 @@ partial class Selector
         base.OnMouseDoubleClick(e);
         using var g = Graphics.FromImage(Image);
         var isContain = false;
-        foreach(var rect in ItemRects)
+        foreach (var rect in ItemRects)
         {
             if (rect.Contains(e.Location))
             {
