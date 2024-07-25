@@ -15,30 +15,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UI\ClientForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="UI\Component\GamePlane.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\ClientForm.cs" />
+    <Compile Update="UI\Component\GamePlane.cs" />
     <Compile Update="UI\Component\GamePlane.Operate.cs" />
     <Compile Update="UI\GamePlayer.cs" />
-    <Compile Update="UI\Component\InfoBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="UI\Component\Overview.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\Component\InfoBar.cs" />
+    <Compile Update="UI\Component\Overview.cs" />
     <Compile Update="UI\Component\Overview.Operate.cs" />
-    <Compile Update="UI\Component\Settings.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="UI\Component\ToolBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="UI\TestForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Update="UI\Component\Settings.cs" />
+    <Compile Update="UI\Component\ToolBar.cs" />
+    <Compile Update="UI\TestForm.cs" />
   </ItemGroup>
 
 </Project>

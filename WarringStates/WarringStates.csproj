@@ -19,16 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="UI\ImageButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Update="UI\Selector.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\ImageButton.cs" />
+    <Compile Update="UI\Selector.cs" />
     <Compile Update="UI\Selector.Operate.cs" />
-    <Compile Update="UI\Thumbnail.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\Thumbnail.cs" />
   </ItemGroup>
 
 </Project>

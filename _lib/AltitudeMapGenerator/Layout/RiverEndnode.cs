@@ -4,11 +4,11 @@ using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.Layout;
 
-public class RiverEndnode(Directions direction, OperatorTypes operatorType, Size size)
+public class RiverEndnode(Directions direction, Operators operatorType, Size size)
 {
     internal Directions Direction { get; } = direction;
 
-    internal OperatorTypes OperatorType { get; } = operatorType;
+    internal Operators OperatorType { get; } = operatorType;
 
     internal double CompareValue { get; } = direction switch
     {

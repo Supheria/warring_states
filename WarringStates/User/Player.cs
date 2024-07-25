@@ -7,18 +7,24 @@ namespace WarringStates.User;
 
 public class Player(string name, string password) : IRosterItem<string>
 {
-    [TableField(IsPrimaryKey = true)]
-    public string Id { get; private set; } = (name + DateTime.Now.ToBinary()).ToMd5HashString();
+    [TableField(IsPrimaryKey = true, Name = "shit fuck it")]
+    public string Id { get; private set; } = HashTool.ToMd5HashString(name + DateTime.Now.ToBinary());
 
-    public string Name { get; private set; } = name;
+    [TableField(Name = "shit the shit wha tfuch @@\' \" # sjf= -dsmsdf oiwee9\" ")]
+    public string Name { get; set; } = name;
 
-    public string Password { get; private set; } = password.ToMd5HashString();
+    public string Password { get; private set; } = HashTool.ToMd5HashString(password);
 
     public string Signature => Id;
 
     public Player() : this("admin", "password")
     {
 
+    }
+
+    public void SetPasspord(string passpord)
+    {
+        Password = HashTool.ToMd5HashString(password);
     }
 
     public static bool operator ==(Player? userInfo, object? obj)
@@ -32,7 +38,7 @@ public class Player(string name, string password) : IRosterItem<string>
         }
         if (obj is not Player other)
             return false;
-        return userInfo.Name == other.Name && userInfo.Password == other.Password;
+        return userInfo.Id == other.Id && userInfo.Password == other.Password;
     }
 
     public static bool operator !=(Player? userInfo, object? obj)

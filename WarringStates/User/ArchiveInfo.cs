@@ -24,7 +24,7 @@ public class ArchiveInfo : IRosterItem<string>
         WorldName = worldName;
         WorldSize = worldSize;
         LastSaveTime = CreateTime = DateTime.Now;
-        Id = (WorldName + CreateTime.ToBinary()).ToMd5HashString();
+        Id = HashTool.ToMd5HashString(WorldName + CreateTime.ToBinary());
     }
 
     public ArchiveInfo()

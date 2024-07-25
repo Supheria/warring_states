@@ -47,7 +47,7 @@ partial class ServerService
                 var task = Task.Run(() =>
                 {
                     using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    return fileStream.ToMd5HashString();
+                    return HashTool.ToMd5HashString(fileStream);
                 });
                 if (await task == fileArgs.Md5Value)
                     throw new NetException(ServiceCode.SameVersionAlreadyExist);
@@ -118,7 +118,7 @@ partial class ServerService
             var task = Task.Run(() =>
             {
                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                return fileStream.ToMd5HashString();
+                return HashTool.ToMd5HashString(fileStream);
             });
             if (await task == fileArgs.Md5Value)
                 throw new NetException(ServiceCode.SameVersionAlreadyExist);

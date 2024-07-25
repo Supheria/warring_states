@@ -27,43 +27,12 @@ internal class LocalArchives
 
     static SsSignTable SignTable { get; } = new();
 
-    public static void ReLocate()
+    public static void Relocate()
     {
         try
         {
-            var players = new Players();
-            for (var i = 0; i < 10000; i++)
-            {
-                var player = new Player("test" + i, "13324");
-                players.TryAdd(player);
-            }
-            SerializeTool.SerializeFile(players, new("Players"), SignTable, true, "players");
-            var a = SerializeTool.DeserializeFile<Players>(new("Players"), SignTable, "players").Count;
-            var stop = new Stopwatch();
-            stop.Start();
-            using var query = new SQLiteQuery("test.db");
-            var field = TableTool.GetFieldsName<Player>();
-            var x = query.Sum("test", null, null);
-            stop.Stop();
-            query.CreateTable("test", field);
-            foreach(var p in players)
-            {
-                field = TableTool.GetFieldsValue(p);
-                query.InsertFieldsValue("test", field);
-            }
-            query.Dispose();
-            stop.Stop();
-            //using var query = new SQLiteQuery(RegisterPath);
-            ArchiveInfoList.Clear();
-            TableTool.GetFieldName<ArchiveInfo>(nameof(ArchiveInfo.WorldName), out var f);
-            var count = query.Sum(TableName, f, null);
-            foreach (var fields in query.SelectFieldsValue(TableName, TableTool.GetFieldsName<ArchiveInfo>(), null))
-            {
-                var info = new ArchiveInfo();
-                TableTool.SetFieldsValue(info, fields);
-                ArchiveInfoList.TryAdd(info);
-            }
-            BroadCastUpdate();
+            using var query = new SQLiteQuery(RegisterPath);
+            Relocate(query);
         }
         catch (Exception ex)
         {
@@ -71,8 +40,11 @@ internal class LocalArchives
         }
     }
 
-    private  static void BroadCastUpdate()
+    private static void Relocate(SQLiteQuery query)
     {
+        ArchiveInfoList.Clear();
+        foreach (var info in query.SelectItems<ArchiveInfo>(TableName, null, null))
+            ArchiveInfoList.TryAdd(info);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
 
@@ -83,7 +55,6 @@ internal class LocalArchives
             if (!ArchiveInfoList.TryGetValue(intdex, out var info))
                 return false;
             CurrentArchive = LoadArchive(info);
-            //UserException.ThrowIfNotUseable(info);
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveToLoad);
             return true;
         }
@@ -102,12 +73,10 @@ internal class LocalArchives
             Directory.CreateDirectory(GetArchiveRootPath(info));
             var archive = CreateArchive(info, mapData, progressor);
             SaveArchive(info, archive);
-            var fields = TableTool.GetFieldsValue(info);
             using var query = new SQLiteQuery(RegisterPath);
-            query.CreateTable(TableName, fields);
-            query.InsertFieldsValue(TableName, fields);
-            ArchiveInfoList.TryAdd(info);
-            BroadCastUpdate();
+            query.CreateTable<ArchiveInfo>(TableName);
+            query.InsertItem(TableName, info);
+            Relocate(query);
             return true;
         }
         catch (Exception ex)
@@ -126,10 +95,10 @@ internal class LocalArchives
             SaveArchive(info, CurrentArchive);
             info.UpdateLastSaveTime();
             using var query = new SQLiteQuery(RegisterPath);
-            if (!TableTool.GetFieldName<ArchiveInfo>(nameof(ArchiveInfo.Id), out var field))
-                return;
-            var condition = new Condition(field.Name, info.Id, Condition.Operates.Equal);
-            query.UpdateFieldsValues(TableName, TableTool.GetFieldsValue(info), condition);
+            query.UpdateItems(
+                TableName, 
+                SQLiteQuery.GetFieldValues(info), 
+                SQLiteQuery.GetCondition(info, nameof(ArchiveInfo.Id), Operators.Equal));
         }
         catch (Exception ex)
         {
@@ -148,12 +117,8 @@ internal class LocalArchives
                 return false;
             Directory.Delete(GetArchiveRootPath(info), true);
             using var query = new SQLiteQuery(RegisterPath);
-            if (!TableTool.GetFieldName<ArchiveInfo>(nameof(ArchiveInfo.Id), out var field))
-                return false;
-            var condition = new Condition(field.Name, info.Id, Condition.Operates.Equal);
-            query.DeleteFields(TableName, condition);
-            ArchiveInfoList.TryRemove(info);
-            BroadCastUpdate();
+            query.DeleteItems(TableName, SQLiteQuery.GetCondition(info, nameof(ArchiveInfo.Id), Operators.Equal));
+            Relocate(query);
             return true;
         }
         catch (Exception ex)

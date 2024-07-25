@@ -17,23 +17,23 @@ public static class RiverLayoutType
         return type switch
         {
             RiverLayout.Types.Horizontal => (size) => new(
-                (new(Directions.Left, OperatorTypes.LessThan, size), new(Directions.Right, OperatorTypes.LessThan, size)),
-                (new(Directions.Left, OperatorTypes.GreaterThan, size), new(Directions.Right, OperatorTypes.GreaterThan, size))
+                (new(Directions.Left, Operators.LessThan, size), new(Directions.Right, Operators.LessThan, size)),
+                (new(Directions.Left, Operators.GreaterThan, size), new(Directions.Right, Operators.GreaterThan, size))
                 ),
             RiverLayout.Types.Vertical => (size) => new(
-                (new(Directions.Top, OperatorTypes.LessThan, size), new(Directions.Bottom, OperatorTypes.LessThan, size)),
-                (new(Directions.Top, OperatorTypes.GreaterThan, size), new(Directions.Bottom, OperatorTypes.GreaterThan, size))
+                (new(Directions.Top, Operators.LessThan, size), new(Directions.Bottom, Operators.LessThan, size)),
+                (new(Directions.Top, Operators.GreaterThan, size), new(Directions.Bottom, Operators.GreaterThan, size))
                 ),
             RiverLayout.Types.ForwardSlash => (size) => new(
-                (new(Directions.Top, OperatorTypes.GreaterThanOrEqualTo, size), new(Directions.Left, OperatorTypes.GreaterThanOrEqualTo, size)),
-                (new(Directions.Right, OperatorTypes.LessThanOrEqualTo, size), new(Directions.Bottom, OperatorTypes.LessThanOrEqualTo, size))
+                (new(Directions.Top, Operators.GreaterThanOrEqualTo, size), new(Directions.Left, Operators.GreaterThanOrEqualTo, size)),
+                (new(Directions.Right, Operators.LessThanOrEqualTo, size), new(Directions.Bottom, Operators.LessThanOrEqualTo, size))
                 ),
             RiverLayout.Types.BackwardSlash => (size) => new(
-                (new(Directions.Left, OperatorTypes.LessThanOrEqualTo, size), new(Directions.Bottom, OperatorTypes.GreaterThanOrEqualTo, size)),
-                (new(Directions.Top, OperatorTypes.LessThanOrEqualTo, size), new(Directions.Right, OperatorTypes.GreaterThanOrEqualTo, size))
+                (new(Directions.Left, Operators.LessThanOrEqualTo, size), new(Directions.Bottom, Operators.GreaterThanOrEqualTo, size)),
+                (new(Directions.Top, Operators.LessThanOrEqualTo, size), new(Directions.Right, Operators.GreaterThanOrEqualTo, size))
                 ),
             RiverLayout.Types.OneForTest => (size) => new(
-                (new(Directions.Top, OperatorTypes.GreaterThanOrEqualTo, size), new(Directions.Left, OperatorTypes.GreaterThanOrEqualTo, size))
+                (new(Directions.Top, Operators.GreaterThanOrEqualTo, size), new(Directions.Left, Operators.GreaterThanOrEqualTo, size))
                 ),
             _ => throw new InvalidOperationException()
         };
