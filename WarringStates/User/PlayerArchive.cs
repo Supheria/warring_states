@@ -1,4 +1,4 @@
-﻿using WarringStates.Map.Terrain;
+﻿using WarringStates.Map;
 
 namespace WarringStates.User;
 
@@ -12,7 +12,5 @@ public class PlayerArchive()
 
     public long CurrentSpan { get; set; } = 0;
 
-    public int PlayerCount { get; set; } = 0;
-
-    public List<SourceLand> OwnerShip { get; set; } = [];
+    public SingleLand[] VisibleLands { get; set; } = [];
 }

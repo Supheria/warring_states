@@ -52,25 +52,25 @@ public class Program
         var mountainRatio = 0.2505f; // 3/12
         // waterRatio                // 8/12
         double mountain = 0, water = 0, forest = 0;
-        foreach (var point in atlas.AltitudePoints)
-        {
-            float heightRatio = (float)point.Altitude / (float)atlas.AltitudeMax;
-            if (heightRatio <= forestRatio)
-            {
-                pImage.SetPixel(point.X, point.Y, Color.ForestGreen);
-                forest++;
-            }
-            else if (heightRatio > forestRatio && heightRatio <= forestRatio + mountainRatio)
-            {
-                pImage.SetPixel(point.X, point.Y, Color.Black);
-                mountain++;
-            }
-            else
-            {
-                pImage.SetPixel(point.X, point.Y, Color.SkyBlue);
-                water++;
-            }
-        }
+        //foreach (var point in atlas.AltitudePoints)
+        //{
+        //    float heightRatio = (float)point.Altitude / (float)atlas.AltitudeMax;
+        //    if (heightRatio <= forestRatio)
+        //    {
+        //        pImage.SetPixel(point.X, point.Y, Color.ForestGreen);
+        //        forest++;
+        //    }
+        //    else if (heightRatio > forestRatio && heightRatio <= forestRatio + mountainRatio)
+        //    {
+        //        pImage.SetPixel(point.X, point.Y, Color.Black);
+        //        mountain++;
+        //    }
+        //    else
+        //    {
+        //        pImage.SetPixel(point.X, point.Y, Color.SkyBlue);
+        //        water++;
+        //    }
+        //}
         pImage.UnlockBits();
         var total = atlas.Width * atlas.Height;
         mountain = Math.Round(mountain / total * 100, 2);

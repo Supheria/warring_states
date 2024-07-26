@@ -44,14 +44,11 @@ partial class ArchiveSelector
         Progressor.Progressing = true;
         SetSize();
         Invalidate(true);
-        var task = Task.Run(() => LocalArchives.CreateArchive(data, "new world", Progressor));
-        if (await task)
-        {
-            Selector.Redraw();
-            Progressor.Progressing = false;
-            SetSize();
-            Invalidate(true);
-        }
+        await Task.Run(() => LocalArchive.CreateArchive(data, "new world", Progressor));
+        Selector.Redraw();
+        Progressor.Progressing = false;
+        SetSize();
+        Invalidate(true);
     }
 
     private void SwitchButton_Click(object? sender, EventArgs e)
@@ -64,7 +61,7 @@ partial class ArchiveSelector
 
     private void DeleteButton_Click(object? sender, EventArgs e)
     {
-        LocalArchives.Delete(Selector.SelectedIndex);
+        LocalArchive.Delete(Selector.SelectedIndex);
         Selector.SelectedIndex = -1;
     }
 
@@ -74,9 +71,8 @@ partial class ArchiveSelector
             DeleteButton.CanSelect = false;
         else
             DeleteButton.CanSelect = true;
-        if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info) &&
-            LocalArchives.LoadThumbnail(info, out var thumbnail))
-            Thumbnail.SetThumbnail(thumbnail, LocalArchives.LoadCurrentSpan(info));
+        if (LocalArchive.Archives.TryGetValue(Selector.SelectedIndex, out var info))
+            Thumbnail.SetThumbnail(LocalArchive.LoadThumbnail(info), LocalArchive.LoadCurrentSpan(info));
         else
             Thumbnail.SetThumbnailVoid();
         Thumbnail.Redraw();

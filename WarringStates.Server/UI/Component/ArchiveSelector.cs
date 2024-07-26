@@ -85,7 +85,7 @@ public partial class ArchiveSelector : Pannel
 
     private void RefreshSelector()
     {
-        Selector.ArchiveInfoList = LocalArchives.ArchiveInfoList;
+        Selector.ArchiveInfoList = LocalArchive.Archives;
         Selector.Redraw();
         Selector.Invalidate();
     }

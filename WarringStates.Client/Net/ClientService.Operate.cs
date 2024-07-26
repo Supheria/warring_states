@@ -4,7 +4,6 @@ using LocalUtilities.SimpleScript;
 using System.Net;
 using WarringStates.Client.Events;
 using WarringStates.Client.User;
-using WarringStates.Map.Terrain;
 using WarringStates.Net.Common;
 using WarringStates.User;
 
@@ -12,7 +11,7 @@ namespace WarringStates.Client.Net;
 
 partial class ClientService
 {
-    public event NetEventHandler<string[]>? OnUpdatePlayerList;
+    public event NetEventHandler<PlayerIdNamePair[]>? OnUpdatePlayerList;
 
     private void HeartBeats()
     {
@@ -110,14 +109,14 @@ partial class ClientService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.List)
         {
-            var nameList = SerializeTool.Deserialize<string[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? [];
-            OnUpdatePlayerList?.Invoke(nameList);
+            var playerList = SerializeTool.Deserialize<PlayerIdNamePair[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? [];
+            OnUpdatePlayerList?.Invoke(playerList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
         }
     }
 
-    public void FetchThumbnail(string archiveId)
+    public void FetchArchive(string archiveId)
     {
         var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Request)
             .AppendArgs(ServiceKey.Id, archiveId);
@@ -144,9 +143,14 @@ partial class ClientService
         else if (operateCode is OperateCode.Request)
         {
             ReceiveCallback(receiver);
+            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) /*?? new()*/;
+            LocalArchives.SetCurrentArchive(playerArchive);
+        }
+        else if (operateCode is OperateCode.Join)
+        {
+            ReceiveCallback(receiver);
             var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? new();
-            var args = new FetchPlayerArchiveArgs(playerArchive);
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.PlayerAchiveFetched, args);
+            LocalArchives.StartPlayArchive(playerArchive);
         }
     }
 }

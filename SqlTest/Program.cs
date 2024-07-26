@@ -45,6 +45,10 @@ q.UpdateItems(
     "test",
     SQLiteQuery.GetFieldValues(playerWorld),
     SQLiteQuery.GetCondition(playerHello, Operators.Equal, nameof(Player.Name)));
+var player = new Player("tte", "35");
+q.InsertItem("test", player);
+player = new Player("tte", "35");
+Console.WriteLine("exist: " + q.Exist("test", player).ToString());
 //q.UpdateItems(
 //    "test",
 //    SQLiteQuery.GetFieldValues(playerWorld),

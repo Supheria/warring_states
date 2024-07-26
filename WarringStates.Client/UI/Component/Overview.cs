@@ -39,14 +39,14 @@ public partial class Overview : Displayer
             Range = value;
             if (FullScreen)
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.WorldSize, Range.Size);
                 var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
                 base.Bounds = new(location, size);
             }
             else
             {
                 var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
-                size = Atlas.Size.ScaleSizeWithinRatio(size);
+                size = Atlas.WorldSize.ScaleSizeWithinRatio(size);
                 var location = new Point(Range.Right - size.Width, Range.Top);
                 base.Bounds = new(location, size);
             }
@@ -92,18 +92,18 @@ public partial class Overview : Displayer
         }
         OverviewCache?.Dispose();
         Image?.Dispose();
-        var widthUnit = (ClientWidth / (double)Atlas.Width).ToRoundInt();
+        var widthUnit = (ClientWidth / (double)Atlas.WorldWidth).ToRoundInt();
         if (widthUnit is 0)
             widthUnit = 1;
-        var heightUnit = (ClientHeight / (double)Atlas.Height).ToRoundInt();
+        var heightUnit = (ClientHeight / (double)Atlas.WorldHeight).ToRoundInt();
         if (heightUnit is 0)
             heightUnit = 1;
-        OverviewCache = new(Atlas.Width * widthUnit, Atlas.Height * heightUnit);
+        OverviewCache = new(Atlas.WorldWidth * widthUnit, Atlas.WorldHeight * heightUnit);
         var pOverview = new PointBitmap(OverviewCache);
         pOverview.LockBits();
-        for (int i = 0; i < Atlas.Width; i++)
+        for (int i = 0; i < Atlas.WorldWidth; i++)
         {
-            for (int j = 0; j < Atlas.Height; j++)
+            for (int j = 0; j < Atlas.WorldHeight; j++)
             {
                 var color = Atlas.GetLand(new(i, j)).Color;
                 drawUnit(i, j, color);
@@ -133,10 +133,10 @@ public partial class Overview : Displayer
         var edgeLength = (double)GridDrawer.CellEdgeLength;
         var width = GridDrawRect.Width / edgeLength;
         var height = GridDrawRect.Height / edgeLength;
-        var x = Atlas.Width - GridOrigin.X / edgeLength;
-        var y = Atlas.Height - GridOrigin.Y / edgeLength;
-        var widthRatio = Atlas.Width / (double)ClientWidth;
-        var heightRatio = Atlas.Height / (double)ClientHeight;
+        var x = Atlas.WorldWidth - GridOrigin.X / edgeLength;
+        var y = Atlas.WorldHeight - GridOrigin.Y / edgeLength;
+        var widthRatio = Atlas.WorldWidth / (double)ClientWidth;
+        var heightRatio = Atlas.WorldHeight / (double)ClientHeight;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
         FocusRect = new((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);

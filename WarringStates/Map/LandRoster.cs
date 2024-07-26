@@ -1,0 +1,12 @@
+﻿using LocalUtilities.TypeGeneral;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace WarringStates.Map;
+
+public class LandRoster<T> : Roster<Coordinate, T> where T : Land
+{
+}

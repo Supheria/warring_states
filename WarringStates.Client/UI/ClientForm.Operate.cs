@@ -1,9 +1,17 @@
-﻿using WarringStates.Client.Net;
+﻿using System.Collections.Concurrent;
+using WarringStates.Client.Events;
+using WarringStates.Client.Net;
+using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 
 partial class ClientForm
 {
+    /// <summary>
+    /// key is <see cref="Player.Name"/>
+    /// </summary>
+    ConcurrentDictionary<string, string> PlayerNameMap { get; } = [];
+
     protected override void AddOperation()
     {
         base.AddOperation();
@@ -20,6 +28,7 @@ partial class ClientForm
         LocalNet.Service.OnClosed += Service_OnClosed; ;
         LocalNet.Service.OnProcessing += UpdateFormText;
         LocalNet.Service.OnUpdatePlayerList += Client_OnUpdateUserList;
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
     }
 
     protected override void OnClosed(EventArgs e)
@@ -38,7 +47,7 @@ partial class ClientForm
             Password.Enabled = false;
             Update();
         });
-        StartGame();
+        //StartGame();
     }
 
     private void Service_OnClosed()
@@ -114,18 +123,24 @@ partial class ClientForm
             return;
         }
         foreach (var item in UserList.SelectedItems)
-            LocalNet.Service.SendMessage(SendBox.Text, (string)item);
+        {
+            var name = (string)item;
+            LocalNet.Service.SendMessage(SendBox.Text, PlayerNameMap[name]);
+        }
     }
 
-    private void Client_OnUpdateUserList(string[] playersName)
+    private void Client_OnUpdateUserList(PlayerIdNamePair[] playerList)
     {
         BeginInvoke(() =>
         {
             UserList.Items.Clear();
-            foreach (var player in playersName)
+            PlayerNameMap.Clear();
+            foreach (var player in playerList)
             {
-                if (player != PlayerName.Text)
-                    UserList.Items.Add(player);
+                if (player.Name == PlayerName.Text)
+                    continue;
+                UserList.Items.Add(player);
+                PlayerNameMap.TryAdd(player.Name, player.Id);
             }
             Update();
         });

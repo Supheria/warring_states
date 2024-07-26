@@ -80,14 +80,14 @@ internal partial class ServerForm : ResizeableForm
         ArchiveSelector.Bounds = new(
             ClientLeft + Padding,
             top,
-            width * 4,
+            width * 3,
             height
             );
         //
         MessageBox.Bounds = new(
             ArchiveSelector.Right + Padding,
             top,
-            width,
+            width * 2,
             height
             );
         //

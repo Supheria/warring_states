@@ -71,44 +71,44 @@ internal class AltiteudeForm : ResizeableForm
 
     private void MakeMap()
     {
-        if (Atlas is null)
-            return;
-        var altitudeCount = new Dictionary<double, int>();
-        foreach (var points in Atlas.AltitudePoints)
-        {
-            var alt = points.Altitude;
-            if (altitudeCount.ContainsKey(alt))
-                altitudeCount[alt]++;
-            else
-                altitudeCount[alt] = 1;
-        }
-        altitudeCount = altitudeCount.OrderBy(x => x.Key).ToDictionary();
-        var mapHeight = AltitudeMap.Height - 100;
-        var heightRatio = mapHeight / (double)altitudeCount.Values.Max();
+        //if (Atlas is null)
+        //    return;
+        //var altitudeCount = new Dictionary<double, int>();
+        //foreach (var points in Atlas.AltitudePoints)
+        //{
+        //    var alt = points.Altitude;
+        //    if (altitudeCount.ContainsKey(alt))
+        //        altitudeCount[alt]++;
+        //    else
+        //        altitudeCount[alt] = 1;
+        //}
+        //altitudeCount = altitudeCount.OrderBy(x => x.Key).ToDictionary();
+        //var mapHeight = AltitudeMap.Height - 100;
+        //var heightRatio = mapHeight / (double)altitudeCount.Values.Max();
 
-        AltitudeMap.Image = new Bitmap(AltitudeMap.Width, AltitudeMap.Height);
-        var colWidth = AltitudeMap.Width / altitudeCount.Keys.Count;
-        var g = Graphics.FromImage(AltitudeMap.Image);
-        g.Clear(Color.White);
-        var i = 0;
-        double lastAltiudeHeight = 0;
-        foreach (var pair in altitudeCount)
-        {
-            var left = colWidth * i;
-            var height = (pair.Value * heightRatio).ToRoundInt();
-            var top = mapHeight - height + 50;
-            g.FillRectangle(new SolidBrush(Color.Green), new(left, top, colWidth, height));
-            g.DrawString($"{pair.Value}\n{Math.Round(pair.Value / (double)Atlas.AltitudePoints.Count * 100, 2)}%", LabelFontData, new SolidBrush(Color.Red), new RectangleF(left, top - 50, colWidth, 50));
-            var altitudeRatio = pair.Key / (double)Atlas.AltitudeMax;
+        //AltitudeMap.Image = new Bitmap(AltitudeMap.Width, AltitudeMap.Height);
+        //var colWidth = AltitudeMap.Width / altitudeCount.Keys.Count;
+        //var g = Graphics.FromImage(AltitudeMap.Image);
+        //g.Clear(Color.White);
+        //var i = 0;
+        //double lastAltiudeHeight = 0;
+        //foreach (var pair in altitudeCount)
+        //{
+        //    var left = colWidth * i;
+        //    var height = (pair.Value * heightRatio).ToRoundInt();
+        //    var top = mapHeight - height + 50;
+        //    g.FillRectangle(new SolidBrush(Color.Green), new(left, top, colWidth, height));
+        //    g.DrawString($"{pair.Value}\n{Math.Round(pair.Value / (double)Atlas.AltitudePoints.Count * 100, 2)}%", LabelFontData, new SolidBrush(Color.Red), new RectangleF(left, top - 50, colWidth, 50));
+        //    var altitudeRatio = pair.Key / (double)Atlas.AltitudeMax;
 
-            var altitudeHeight = mapHeight - altitudeRatio * mapHeight + 50;
-            if (i is not 0)
-                g.DrawLine(Pens.Red, new PointF(colWidth * (i - 1), (float)lastAltiudeHeight), new(left, (float)altitudeHeight));
-            lastAltiudeHeight = altitudeHeight;
-            g.DrawString(pair.Key.ToString(), LabelFontData, new SolidBrush(Color.Black), new RectangleF(left, mapHeight + 50, colWidth, 50));
-            i++;
-        }
-        g.Flush();
-        g.Dispose();
+        //    var altitudeHeight = mapHeight - altitudeRatio * mapHeight + 50;
+        //    if (i is not 0)
+        //        g.DrawLine(Pens.Red, new PointF(colWidth * (i - 1), (float)lastAltiudeHeight), new(left, (float)altitudeHeight));
+        //    lastAltiudeHeight = altitudeHeight;
+        //    g.DrawString(pair.Key.ToString(), LabelFontData, new SolidBrush(Color.Black), new RectangleF(left, mapHeight + 50, colWidth, 50));
+        //    i++;
+        //}
+        //g.Flush();
+        //g.Dispose();
     }
 }

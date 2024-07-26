@@ -19,7 +19,7 @@ partial class ServerForm
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
-        LocalArchives.Relocate();
+        LocalArchive.Relocate();
     }
 
     private void SendButton_Click(object? sender, EventArgs e)

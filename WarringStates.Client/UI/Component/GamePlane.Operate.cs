@@ -3,7 +3,7 @@
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
-using WarringStates.Map.Terrain;
+using WarringStates.Map;
 
 namespace WarringStates.Client.UI.Component;
 
@@ -21,10 +21,10 @@ partial class GamePlane
     {
         var land = args.TerrainPoint.GetLand();
         LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.Type.ToString()));
+        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.LandType.ToString()));
         LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
-        if (land is SourceLand sourceLand)
-            LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
+        //if (land is SourceLand sourceLand)
+        //    LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
     }
 
     protected override void OnMouseDown(MouseEventArgs e)

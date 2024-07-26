@@ -2,6 +2,6 @@
 
 namespace WarringStates.Server.Net;
 
-internal class ServiceGroup : Roster<string, ServerService>
+internal class ServiceRoster : Roster<string, ServerService>
 {
 }

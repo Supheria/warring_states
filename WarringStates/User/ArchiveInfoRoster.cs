@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.User;
 
-public class ArchiveInfoList : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
+public class ArchiveInfoRoster : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
 {
     List<ArchiveInfo> InfoList { get; } = [];
 

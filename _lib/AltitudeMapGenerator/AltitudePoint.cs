@@ -3,15 +3,13 @@ using LocalUtilities.TypeToolKit.Convert;
 
 namespace AltitudeMapGenerator;
 
-public class AltitudePoint(int x, int y, double altitude) : IArrayStringConvertable
+public class AltitudePoint(Coordinate coordinate, double altitude) : IArrayStringConvertable
 {
-    public int X { get; private set; } = x;
+    public Coordinate Coordinate { get; private set; } = coordinate;
 
-    public int Y { get; private set; } = y;
+    public double Altitude { get; set; } = altitude;
 
-    public double Altitude { get; private set; } = altitude;
-
-    public AltitudePoint() : this(0, 0, 0)
+    public AltitudePoint() : this(new(), 0)
     {
 
     }
@@ -23,7 +21,7 @@ public class AltitudePoint(int x, int y, double altitude) : IArrayStringConverta
 
     public string ToArrayString()
     {
-        return ArrayString.ToArrayString(X, Y, Altitude);
+        return ArrayString.ToArrayString(Coordinate.ToArrayString(), Altitude);
     }
 
     public void ParseArrayString(string str)
@@ -34,13 +32,7 @@ public class AltitudePoint(int x, int y, double altitude) : IArrayStringConverta
             !int.TryParse(array[1], out var y) ||
             !int.TryParse(array[2], out var altitude))
             return;
-        X = x;
-        Y = y;
+        Coordinate = new(x, y);
         Altitude = altitude;
-    }
-
-    public static implicit operator Coordinate(AltitudePoint point)
-    {
-        return new(point.X, point.Y);
     }
 }

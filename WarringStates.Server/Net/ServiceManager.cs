@@ -6,7 +6,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using WarringStates.Net.Common;
+using WarringStates.Net.Utilities;
 using WarringStates.Server.Events;
+using WarringStates.Server.User;
+using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
@@ -24,9 +27,11 @@ internal class ServiceManager : INetLogger
 
     public bool IsStart { get; private set; } = false;
 
-    ServiceGroup PlayerMap { get; } = [];
+    ServiceRoster PlayerMap { get; } = [];
 
-    ConcurrentDictionary<long, ServiceGroup> PlayerGroup { get; } = [];
+    ConcurrentDictionary<string, CacheArchive> CacheArchives { get; } = [];
+
+    PlayerGroupRoster PlayerGroups { get; } = [];
 
     public string GetLog(string message)
     {
@@ -88,13 +93,13 @@ internal class ServiceManager : INetLogger
     private void EnableListener()
     {
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
-        LocalEvents.TryAddListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
+        //LocalEvents.TryAddListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
     }
 
     private void DisableListener()
     {
         LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
-        LocalEvents.TryRemoveListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
+        //LocalEvents.TryRemoveListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
     }
 
     private void BroadcastArchiveList()
@@ -128,10 +133,41 @@ internal class ServiceManager : INetLogger
         service.OnLog += this.HandleLog;
         service.OnLogined += () => AddService(service);
         service.OnClosed += () => RemoveService(service);
+        service.OnRequestArchive += (receiver) => RequestArchive(receiver, service);
+        service.OnJoinArchive += (receiver) => JoinArchive(receiver, service);
         service.Accept(acceptArgs.AcceptSocket);
     ACCEPT:
         if (acceptArgs.SocketError is SocketError.Success)
             AcceptAsync(acceptArgs);
+    }
+
+    private void RequestArchive(CommandReceiver receiver, ServerService service)
+    {
+        try
+        {
+            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ??
+                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.Id);
+            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info)) 
+                throw new NetException(ServiceCode.NoMatchArchiveId);
+            if (CacheArchives.TryGetValue(archiveId, out var cache))
+            {
+                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, cache.LandMap, service.Player.Id));
+                return;
+            }
+            if (PlayerGroups.TryGetValue(archiveId, out var group))
+            {
+                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
+                return;
+            }
+            cache = new(info);
+            cache.OnDisposed += () => CacheArchives.TryRemove(archiveId, out _);
+            CacheArchives.TryAdd(archiveId, cache);
+            service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, cache.LandMap, service.Player.Id));
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
     }
 
     private void AddService(ServerService service)
@@ -152,25 +188,63 @@ internal class ServiceManager : INetLogger
         HandleUpdateConnection();
     }
 
-    private void RelayCommand(CommandRelayArgs args)
+    private void JoinArchive(CommandReceiver receiver, ServerService service)
     {
         try
         {
-            var userId = (OperateCode)args.Receiver.OperateCode switch
+            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ??
+                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.Id);
+            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info))
+                return;
+            if (PlayerGroups.TryGetValue(archiveId, out var group))
             {
-                OperateCode.Request => args.Receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
-                OperateCode.Callback => args.Receiver.GetArgs<string>(ServiceKey.SendPlayer),
-                _ => null,
-            } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
-            if (!PlayerMap.TryGetValue(userId, out var user))
-                throw new NetException(ServiceCode.PlayerNotExist);
-            user.HandleCommand(args.Receiver);
+                group.AddPlayer(service);
+                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
+                return;
+            }
+            if (CacheArchives.TryGetValue(archiveId, out var cache))
+                cache.Dispose();
+            group = new(info);
+            group.AddPlayer(service);
+            if (!PlayerGroups.TryAdd(group))
+                group.RemovePlayer(service);
+            else
+                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
         }
         catch (Exception ex)
         {
             this.HandleException(ex);
         }
     }
+
+    private void LeaveArchive(string archiveId, ServerService service)
+    {
+        if (!PlayerGroups.TryGetValue(archiveId, out var group))
+            return;
+        group.RemovePlayer(service);
+        if (group.PlayerCount < 1)
+            PlayerGroups.TryRemove(group);
+    }
+
+    //private void RelayCommand(CommandRelayArgs args)
+    //{
+    //    try
+    //    {
+    //        var userId = (OperateCode)args.Receiver.OperateCode switch
+    //        {
+    //            OperateCode.Request => args.Receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
+    //            OperateCode.Callback => args.Receiver.GetArgs<string>(ServiceKey.SendPlayer),
+    //            _ => null,
+    //        } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
+    //        if (!PlayerMap.TryGetValue(userId, out var user))
+    //            throw new NetException(ServiceCode.PlayerNotExist);
+    //        user.HandleCommand(args.Receiver);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        this.HandleException(ex);
+    //    }
+    //}
 
     public void BroadcastMessage(string message)
     {

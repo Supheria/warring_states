@@ -101,26 +101,39 @@ public partial class ClientForm : ResizeableForm
         base.Redraw();
         var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
+        var height = Address.Height;
         //
-        Address.Left = ClientLeft + Padding;
-        Address.Top = top;
-        Address.Width = width;
+        Address.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width,
+            height
+            );
         //
-        Port.Left = Address.Right + Padding;
-        Port.Top = top;
-        Port.Width = width;
+        Port.Bounds = new(
+            Address.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        PlayerName.Left = Port.Right + Padding;
-        PlayerName.Top = top;
-        PlayerName.Width = width;
+        PlayerName.Bounds = new(
+            Port.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        Password.Left = PlayerName.Right + Padding;
-        Password.Top = top;
-        Password.Width = width;
+        Password.Bounds = new(
+            PlayerName.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        width = (ClientWidth - Padding * 5) / 5;
+        width = (ClientWidth - Padding * 5) / 6;
         top = Password.Bottom + Padding;
-        var height = ClientHeight - Address.Height - SendBox.Height - FilePath.Height - Padding * 6;
+        height = ClientHeight - Address.Height - SendBox.Height - FilePath.Height - Padding * 6;
         //
         OperatePannel.Bounds = new(
             ClientLeft + Padding,
@@ -129,50 +142,75 @@ public partial class ClientForm : ResizeableForm
             height
             );
         //
-        MessageBox.Left = OperatePannel.Right + Padding;
-        //MessageBox.Left = ClientLeft + Padding;
-        MessageBox.Top = top;
-        MessageBox.Width = width;
-        //MessageBox.Width = width * 4;
-        MessageBox.Height = height;
+        MessageBox.Bounds = new(
+            OperatePannel.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        UserList.Left = MessageBox.Right + Padding;
-        UserList.Top = top;
-        UserList.Width = width;
-        UserList.Height = height;
+        UserList.Bounds = new(
+             MessageBox.Right + Padding,
+             top,
+             width,
+             height
+            );
         //
         width = (ClientWidth - Padding * 3) / 4;
+        height = SendBox.Height;
+        top = MessageBox.Bottom + Padding;
         //
-        SendBox.Left = ClientLeft + Padding;
-        SendBox.Top = MessageBox.Bottom + Padding;
-        SendBox.Width = width * 3;
+        SendBox.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width * 3,
+            height
+            );
         //
-        SendButton.Left = SendBox.Right + Padding;
-        SendButton.Top = MessageBox.Bottom + Padding;
-        SendButton.Width = width;
+        SendButton.Bounds = new(
+            SendBox.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
         width = (ClientWidth - Padding * 10) / 12;
         var width2x = width * 3;
         top = SendButton.Bottom + Padding;
         //
-        DirName.Left = ClientLeft + Padding;
-        DirName.Top = top;
-        DirName.Width = width2x;
+        DirName.Bounds = new(
+            ClientLeft + Padding,
+            top,
+            width2x,
+            height
+            );
         //
-        FilePath.Left = DirName.Right + Padding;
-        FilePath.Top = top;
-        FilePath.Width = width2x + Padding;
+        FilePath.Bounds = new(
+            DirName.Right + Padding,
+            top,
+            width2x + Padding,
+            height
+            );
         //
-        FilePathButton.Left = FilePath.Right + Padding;
-        FilePathButton.Top = top;
-        FilePathButton.Width = width;
+        FilePathButton.Bounds = new(
+            FilePath.Right + Padding,
+            top,
+            width,
+            height
+            );
         //
-        UploadButton.Left = FilePathButton.Right + Padding;
-        UploadButton.Top = top;
-        UploadButton.Width = width2x;
+        UploadButton.Bounds = new(
+            FilePathButton.Right + Padding,
+            top,
+            width2x,
+            height
+            );
         //
-        DownloadButton.Left = UploadButton.Right + Padding;
-        DownloadButton.Top = top;
-        DownloadButton.Width = width2x;
+        DownloadButton.Bounds = new(
+            UploadButton.Right + Padding,
+            top,
+            width2x,
+            height
+            );
     }
 }

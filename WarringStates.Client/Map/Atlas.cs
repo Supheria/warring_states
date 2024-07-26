@@ -1,45 +1,49 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Map;
-using WarringStates.Map.Terrain;
+using WarringStates.User;
 
 namespace WarringStates.Client.Map;
 
 public static class Atlas
 {
-    public static LandMap LandMap { get; } = new();
+    static LandRoster<SingleLand> LandMap { get; set; } = [];
 
-    public static int Width => LandMap.Width;
+    public static Size WorldSize { get; private set; } = new();
 
-    public static int Height => LandMap.Height;
+    public static int WorldWidth => WorldSize.Width;
 
-    public static Size Size => LandMap.Size;
+    public static int WorldHeight => WorldSize.Height;
 
-    public static ILand GetLand(this Coordinate coordinate)
+    public static Land GetLand(this Coordinate coordinate)
     {
-        return LandMap[coordinate];
+        if (LandMap.TryGetValue(coordinate, out var land))
+            return land;
+        return new SingleLand(coordinate, LandTypes.Plain);
     }
 
-    public static string GetLandTypeCount(this Enum type)
+    //public static string GetLandTypeCount(this Enum type)
+    //{
+    //    return LandMap.GetLandTypeCount(type);
+    //}
+
+    public static void Relocate(PlayerArchive playerArchive)
     {
-        return LandMap.GetLandTypeCount(type);
+        LandMap.RosterList = playerArchive.VisibleLands;
+        WorldSize = playerArchive.WorldSize;
+        // TODO: broadcast event
     }
 
-    public static void Relocate(AltitudeMap altitudeMap, RandomTable randomTable)
+    public static Coordinate SetPointWithin(this Coordinate Point)
     {
-        LandMap.Relocate(altitudeMap, randomTable);
-    }
-
-    public static Coordinate SetPointWithinTerrainMap(this Coordinate Point)
-    {
-        if (Width is 0 || Height is 0)
+        if (WorldWidth is 0 || WorldHeight is 0)
             return new();
-        var x = Point.X % Width;
+        var x = Point.X % WorldWidth;
         if (x < 0)
-            x += Width;
-        var y = Point.Y % Height;
+            x += WorldWidth;
+        var y = Point.Y % WorldHeight;
         if (y < 0)
-            y += Height;
+            y += WorldHeight;
         return new(x, y);
     }
 

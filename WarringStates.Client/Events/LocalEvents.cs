@@ -84,17 +84,10 @@ public class LocalEvents
 
     public static bool TryBroadcast(Enum eventType)
     {
-        try
-        {
-            if (!EventMap.TryGetValue(eventType, out var callback))
-                return false;
-            callback.DynamicInvoke();
-            return true;
-        }
-        catch
-        {
+        if (!EventMap.TryGetValue(eventType, out var callback))
             return false;
-        }
+        callback.DynamicInvoke();
+        return true;
     }
 
     public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : ICallbackArgs
@@ -144,7 +137,7 @@ public class LocalEvents
     public enum UserInterface
     {
         ArchiveListRefreshed,
-        PlayerAchiveFetched,
+        CurrentArchiveChange,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

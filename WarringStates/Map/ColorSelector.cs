@@ -1,4 +1,4 @@
-﻿namespace WarringStates.Map.Terrain;
+﻿namespace WarringStates.Map;
 
 public abstract class ColorSelector
 {

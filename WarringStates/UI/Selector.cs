@@ -6,7 +6,7 @@ namespace WarringStates.UI;
 
 public partial class Selector : Displayer
 {
-    public ArchiveInfoList ArchiveInfoList { get; set; } = [];
+    public ArchiveInfoRoster ArchiveInfoList { get; set; } = [];
 
     public override Size Padding { get; set; } = new(3, 3);
 

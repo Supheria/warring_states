@@ -22,7 +22,7 @@ partial class GridDrawer
             LatticePoint = latticePoint;
             RealRect = GetRealRect(LatticePoint);
             CenterRealRect = GetCenterRealRect(RealRect);
-            TerrainPoint = latticePoint.SetPointWithinTerrainMap();
+            TerrainPoint = latticePoint.SetPointWithin();
         }
 
         private static Rectangle GetRealRect(Coordinate latticePoint)

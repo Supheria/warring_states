@@ -18,7 +18,9 @@ partial class ArchiveSelector
 
     private void JoinButton_Click(object? sender, EventArgs e)
     {
-        throw new NotImplementedException();
+        if (LocalArchives.CurrentArchive is null)
+            return;
+        LocalNet.Service.JoinArchive(LocalArchives.CurrentArchive.ArchiveId);
     }
 
     private void Service_OnLogined()
@@ -45,7 +47,7 @@ partial class ArchiveSelector
         else
             JoinButton.CanSelect = true;
         if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info))
-            LocalNet.Service.FetchThumbnail(info.Id);
+            LocalNet.Service.FetchArchive(info.Id);
         else
         {
             Thumbnail.SetThumbnailVoid();

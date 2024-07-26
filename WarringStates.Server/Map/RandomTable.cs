@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.SimpleScript;
 
-namespace WarringStates.Map;
+namespace WarringStates.Server.Map;
 
 public class RandomTable
 {
@@ -15,6 +15,11 @@ public class RandomTable
         var random = new Random();
         for (int i = 0; i < number; i++)
             Table[i] = random.NextDouble();
+    }
+
+    public RandomTable(double[] table)
+    {
+        Table = table;
     }
 
     public RandomTable()

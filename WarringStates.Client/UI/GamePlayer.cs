@@ -32,14 +32,14 @@ public partial class GamePlayer : Pannel
             GamePlane,
             InfoBar,
         ]);
-        Fortest();
+        //Fortest();
     }
 
-    private void Fortest()
-    {
-        var map = SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(AltitudeMap)), new SsSignTable(), "altitude map");
-        Atlas.Relocate(map, new(1000));
-    }
+    //private void Fortest()
+    //{
+    //    var map = SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(AltitudeMap)), new SsSignTable(), "altitude map");
+    //    Atlas.Relocate(map, new(1000));
+    //}
 
     public override void EnableListener()
     {

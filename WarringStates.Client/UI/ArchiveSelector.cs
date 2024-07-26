@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
+using System.Drawing;
 using WarringStates.Client.Events;
 using WarringStates.Client.User;
 using WarringStates.UI;
@@ -70,34 +71,36 @@ public partial class ArchiveSelector : Pannel
     {
         base.EnableListener();
         LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryAddListener<FetchPlayerArchiveArgs>(LocalEvents.UserInterface.PlayerAchiveFetched, SetPlayerArchive);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.CurrentArchiveChange, SetPlayerArchive);
     }
 
     public override void DisableListener()
     {
         base.DisableListener();
         LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-        LocalEvents.TryRemoveListener<FetchPlayerArchiveArgs>(LocalEvents.UserInterface.PlayerAchiveFetched, SetPlayerArchive);
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.CurrentArchiveChange, SetPlayerArchive);
     }
 
-    private void SetPlayerArchive(FetchPlayerArchiveArgs args)
+    private void SetPlayerArchive()
     {
-        var archive = args.Archive;
-        LocalArchives.CurrentArchive = archive;
-        var thumbnail = new Bitmap(archive.WorldSize.Width, archive.WorldSize.Height);
-        var g = Graphics.FromImage(thumbnail);
-        g.Clear(Color.White);
-        var pThumbnail = new PointBitmap(thumbnail);
-        pThumbnail.LockBits();
-        foreach (var land in archive.OwnerShip)
+        if (LocalArchives.CurrentArchive is null)
+            Thumbnail.SetThumbnailVoid();
+        else
         {
-            foreach (var point in land.GetPoints())
+            // TODO: use method in LandMap
+            var archive = LocalArchives.CurrentArchive;
+            var thumbnail = new Bitmap(archive.WorldSize.Width, archive.WorldSize.Height);
+            using var g = Graphics.FromImage(thumbnail);
+            g.Clear(Color.White);
+            var pThumbnail = new PointBitmap(thumbnail);
+            pThumbnail.LockBits();
+            foreach (var land in archive.VisibleLands)
             {
-                pThumbnail.SetPixel(point.X, point.Y, land.Color);
+                pThumbnail.SetPixel(land.Site.X, land.Site.Y, land.Color);
             }
+            pThumbnail.UnlockBits();
+            Thumbnail.SetThumbnail(thumbnail, archive.CurrentSpan);
         }
-        pThumbnail.UnlockBits();
-        Thumbnail.SetThumbnail(thumbnail, archive.CurrentSpan);
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
     }

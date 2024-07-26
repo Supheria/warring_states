@@ -11,7 +11,11 @@ namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    //public NetEventHandler<CommandReceiver>? OnRelayCommand;
+    public event NetEventHandler<CommandReceiver>? OnRelayCommand;
+
+    public event NetEventHandler<CommandReceiver>? OnRequestArchive;
+
+    public event NetEventHandler<CommandReceiver>? OnJoinArchive;
 
     private void HandleHeartBeats(CommandReceiver receiver)
     {
@@ -31,6 +35,7 @@ partial class ServerService
                 throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.UserName, ServiceKey.Password);
             if (!LocalNet.CheckLogin(name, password, out var player, out var code))
                 throw new NetException(code);
+            Player = player;
             IsLogined = true;
             HandleLogined();
             var data = SerializeTool.Serialize(Player, new(), SignTable, null);
@@ -76,10 +81,7 @@ partial class ServerService
                 SendCommand(sender);
             }
             else
-            {
-                var args = new CommandRelayArgs(receiver);
-                LocalEvents.TryBroadcast(LocalEvents.NetService.RelayCommand, args);
-            }
+                OnRelayCommand?.Invoke(receiver);
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -93,8 +95,7 @@ partial class ServerService
             else
             {
                 ReceiveCallback(receiver);
-                var args = new CommandRelayArgs(receiver);
-                LocalEvents.TryBroadcast(LocalEvents.NetService.RelayCommand, args);
+                OnRelayCommand?.Invoke(receiver);
             }
         }
         else if (operateCode is OperateCode.Broadcast)
@@ -105,11 +106,11 @@ partial class ServerService
         }
     }
 
-    public void UpdatePlayerList(string[] nameList)
+    public void UpdatePlayerList(PlayerIdNamePair[] playerList)
     {
         try
         {
-            var data = SerializeTool.Serialize(nameList, new(), SignTable, null);
+            var data = SerializeTool.Serialize(playerList, new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Player, (byte)OperateCode.List, data, 0, data.Length);
             SendCommand(sender);
         }
@@ -138,7 +139,7 @@ partial class ServerService
             //var data = SerializeTool.Serialize(playerArchiveInfoList, new(ServiceKey.ArchiveList), SignTable, null);
             //var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
             //SendCommand(sender);
-            var data = SerializeTool.Serialize(LocalArchives.ArchiveInfoList.ToArray(), new(), SignTable, null);
+            var data = SerializeTool.Serialize(LocalArchive.Archives.ToArray(), new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
             SendCommand(sender);
         }
@@ -157,29 +158,25 @@ partial class ServerService
         }
         else if (operateCode is OperateCode.Request)
         {
-            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ?? "";
-            if (!LocalArchives.ArchiveInfoList.TryGetValue(archiveId, out var info))
-                throw new NetException(ServiceCode.NoMatchArchiveId);
-            var playerArchive = new PlayerArchive()
-            {
-                ArchiveId = archiveId,
-                WorldName = info.WorldName,
-                WorldSize = info.WorldSize,
-                CurrentSpan = LocalArchives.LoadCurrentSpan(info),
-                PlayerCount = LocalArchives.LoadPlayers(info).Count,
-                OwnerShip = LocalArchives.LoadSourceLands(info).GetOwnership(Player.Id)
-            };
+            OnRequestArchive?.Invoke(receiver);
+        }
+        else if (operateCode is OperateCode.Join)
+        {
+            OnJoinArchive?.Invoke(receiver);
+        }
+    }
+
+    public void ResbonseArchiveRequestOrJoin(CommandReceiver receiver, PlayerArchive playerArchive)
+    {
+        try
+        {
             var data = SerializeTool.Serialize(playerArchive, new(), SignTable, null);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
             CallbackSuccess(sender);
         }
-        else if (operateCode is OperateCode.Join)
+        catch (Exception ex)
         {
-            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ?? "";
-            if (!LocalArchives.ArchiveInfoList.TryGetValue(archiveId, out var info))
-                throw new NetException(ServiceCode.NoMatchArchiveId);
-            var args = new PlayerJoinArgs();
-            LocalEvents.TryBroadcast(LocalEvents.NetService.JoinArchive, args);
+            this.HandleException(ex);
         }
     }
 }

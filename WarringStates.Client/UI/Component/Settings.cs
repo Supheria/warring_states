@@ -24,14 +24,14 @@ public class Settings : Displayer
             Range = value;
             if (DoSetting)
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.WorldSize, Range.Size);
                 var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
                 base.Bounds = new(location, size);
             }
             else
             {
                 var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
-                size = Atlas.Size.ScaleSizeWithinRatio(size);
+                size = Atlas.WorldSize.ScaleSizeWithinRatio(size);
                 var location = new Point(Range.Right - size.Width, Range.Top);
                 base.Bounds = new(location, size);
             }

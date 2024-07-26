@@ -11,18 +11,15 @@ public class ArchiveInfo : IRosterItem<string>
 
     public string WorldName { get; private set; } = "";
 
-    public Size WorldSize { get; private set; } = new();
-
     public DateTime CreateTime { get; private set; }
 
     public DateTime LastSaveTime { get; private set; }
 
     public string Signature => Id;
 
-    public ArchiveInfo(string worldName, Size worldSize)
+    public ArchiveInfo(string worldName)
     {
         WorldName = worldName;
-        WorldSize = worldSize;
         LastSaveTime = CreateTime = DateTime.Now;
         Id = HashTool.ToMd5HashString(WorldName + CreateTime.ToBinary());
     }

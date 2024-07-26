@@ -2,7 +2,7 @@
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.Map.Terrain;
+using WarringStates.Map;
 
 namespace WarringStates.Client.Graph;
 
@@ -24,11 +24,11 @@ partial class GridDrawer
 
     public static void OffsetOrigin(Coordinate offset)
     {
-        var width = Atlas.Width * CellEdgeLength;
+        var width = Atlas.WorldWidth * CellEdgeLength;
         var x = (Origin.X + offset.X) % width;
         if (x < 0)
             x += width;
-        var height = Atlas.Height * CellEdgeLength;
+        var height = Atlas.WorldHeight * CellEdgeLength;
         var y = (Origin.Y + offset.Y) % height;
         if (y < 0)
             y += height;
@@ -85,7 +85,7 @@ partial class GridDrawer
         DrawGuideLine(g);
     }
 
-    private static void DrawLand(Graphics g, ILand land, Cell cell)
+    private static void DrawLand(Graphics g, Land land, Cell cell)
     {
         if (land is SingleLand)
         {
@@ -94,8 +94,7 @@ partial class GridDrawer
         }
         else if (land is SourceLand sourceLand)
         {
-            var direction = sourceLand[cell.TerrainPoint];
-            if (GetSourceLandCellRect(direction, cell).CutRectInRange(DrawRect, out var rect))
+            if (GetSourceLandCellRect(sourceLand.Direction, cell).CutRectInRange(DrawRect, out var rect))
                 g.FillRectangle(new SolidBrush(land.Color), rect.Value);
         }
     }
