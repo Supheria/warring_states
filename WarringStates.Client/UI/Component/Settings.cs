@@ -1,5 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
+using WarringStates.Client.Map;
 using WarringStates.UI;
 
 namespace WarringStates.Client.UI.Component;
@@ -13,6 +15,28 @@ public class Settings : Displayer
     }
 
     Rectangle Range { get; set; } = new();
+
+    public new Rectangle Bounds
+    {
+        get => base.Bounds;
+        set
+        {
+            Range = value;
+            if (DoSetting)
+            {
+                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
+                base.Bounds = new(location, size);
+            }
+            else
+            {
+                var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
+                size = Atlas.Size.ScaleSizeWithinRatio(size);
+                var location = new Point(Range.Right - size.Width, Range.Top);
+                base.Bounds = new(location, size);
+            }
+        }
+    }
 
     public Settings()
     {
@@ -44,5 +68,11 @@ public class Settings : Displayer
             Bounds = Range;
         }
         DoSetting = !DoSetting;
+    }
+
+    public override void Redraw()
+    {
+        base.Redraw();
+
     }
 }

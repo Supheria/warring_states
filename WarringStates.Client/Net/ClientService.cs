@@ -60,49 +60,4 @@ public partial class ClientService : NetService
             .Append(DateTime.Now.ToString(DateTimeFormat.Outlook))
             .ToString();
     }
-
-    private void HeartBeats()
-    {
-        try
-        {
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.HeartBeats, (byte)OperateCode.None);
-            SendCommand(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
-    public void Login(string address, int port, string name, string password)
-    {
-        try
-        {
-            if (IsLogined)
-                return;
-            var host = new IPEndPoint(IPAddress.Parse(address), port);
-            Player = new(name, password);
-            if (!((ClientProtocol)Protocol).Connect(host))
-                throw new NetException(ServiceCode.NoConnection);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
-                .AppendArgs(ServiceKey.UserName, Player.Name)
-                .AppendArgs(ServiceKey.Password, Player.Password);
-            SendCommand(sender);
-            LoginDone?.WaitOne(ConstTabel.BlockkMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            Dispose();
-            this.HandleException(ex);
-        }
-    }
-
-    private void HandleLogin(CommandReceiver receiver)
-    {
-        ReceiveCallback(receiver);
-        IsLogined = true;
-        LoginDone.Set();
-        HandleLogined();
-        DaemonThread.Start();
-    }
 }

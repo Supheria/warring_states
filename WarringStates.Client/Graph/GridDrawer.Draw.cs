@@ -38,6 +38,8 @@ partial class GridDrawer
 
     public static async void RedrawAsync(int width, int height, Color backColor)
     {
+        if (width <= 0 || height <= 0) 
+            return;
         if (IsDrawing)
         {
             IsWaiting = true;

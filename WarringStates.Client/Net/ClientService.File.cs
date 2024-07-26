@@ -16,7 +16,7 @@ partial class ClientService
             var task = Task.Run(() =>
             {
                 using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                return fileStream.ToMd5HashString();
+                return HashTool.ToMd5HashString(fileStream);
             });
             var fileArgs = new FileTransferArgs(dirName, filePath)
             {
@@ -40,7 +40,7 @@ partial class ClientService
             var task = Task.Run(() =>
             {
                 using var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                return fileStream.ToMd5HashString();
+                return HashTool.ToMd5HashString(fileStream);
             });
             var fileArgs = new FileTransferArgs(dirName, filePath)
             {

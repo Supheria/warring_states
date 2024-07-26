@@ -41,6 +41,7 @@ internal partial class ServerForm : ResizeableForm
     public ServerForm()
     {
         Text = "Server";
+        MinimumSize = new(800, 550);
         Controls.AddRange([
             Port,
             ParallelCount,

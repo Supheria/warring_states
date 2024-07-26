@@ -91,5 +91,7 @@ public partial class GamePlayer : Pannel
             ToolBar.Bottom,
             ClientWidth,
             ClientHeight - ToolBar.Height);
+        //
+        Settings.Bounds = ClientRect;
     }
 }

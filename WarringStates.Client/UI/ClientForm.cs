@@ -75,6 +75,7 @@ public partial class ClientForm : ResizeableForm
     {
         InitializeName = initializeName;
         Text = "Client";
+        MinimumSize = new(800, 550);
         OperatePannel = ArchiveSelector;
         Controls.AddRange([
             Address,

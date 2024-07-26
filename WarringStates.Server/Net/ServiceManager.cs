@@ -163,7 +163,7 @@ internal class ServiceManager : INetLogger
                 _ => null,
             } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
             if (!PlayerMap.TryGetValue(userId, out var user))
-                throw new NetException(ServiceCode.UserNotExist);
+                throw new NetException(ServiceCode.PlayerNotExist);
             user.HandleCommand(args.Receiver);
         }
         catch (Exception ex)

@@ -15,37 +15,36 @@ for (var i = 0; i < 50000; i++)
 {
     players.Add(new Player("fuck", "54321"));
 }
-var q = new SQLiteQuery("test.db");
+using var q = new SQLiteQuery("test.db");
 q.CreateTable<Player>("test");
 stop.Start();
 q.InsertItems("test", players.ToArray());
-q.Dispose();
+q.Commit();
 stop.Stop();
 Console.WriteLine("insert: " + stop.ElapsedMilliseconds);
 stop.Restart();
-q = new SQLiteQuery("test.db");
-var x = q.SelectItems<Player>("test", null, null);
+q.Begin();
+var x = q.SelectItems<Player>("test", null);
 stop.Stop();
 Console.WriteLine($"select({x.Length}): " + stop.ElapsedMilliseconds);
 //var a = q.SelectItems<Player>("test", null, null);
 var playerShit = new Player("\"1  \\\"\\\" 345435b #/ 23456\"", "123456");
 var playerFuck = new Player("fuck", "54321");
 var playerHello = new Player("hello", "78910");
-var condition1 = SQLiteQuery.GetCondition(playerShit, nameof(Player.Name), Operators.Equal);
-var condition2 = SQLiteQuery.GetCondition(playerFuck, nameof(Player.Name), Operators.Equal);
+var condition1 = SQLiteQuery.GetCondition(playerShit, Operators.Equal, nameof(Player.Name));
+var condition2 = SQLiteQuery.GetCondition(playerFuck, Operators.Equal, nameof(Player.Name));
 stop.Restart();
 q.UpdateItems("test", SQLiteQuery.GetFieldValues(playerHello), [condition1, condition2], ConditionCombo.Or);
 Console.WriteLine(q.Sum("test", null, null));
-q.Dispose();
+q.Commit();
 stop.Stop();
 Console.WriteLine("update: " + stop.ElapsedMilliseconds);
 var playerWorld = new Player("World", "joskoadfmof");
-q = new SQLiteQuery("test.db");
+q.Begin();
 q.UpdateItems(
     "test",
     SQLiteQuery.GetFieldValues(playerWorld),
-    SQLiteQuery.GetCondition(playerHello, nameof(Player.Name), Operators.Equal));
-q.Dispose();
+    SQLiteQuery.GetCondition(playerHello, Operators.Equal, nameof(Player.Name)));
 //q.UpdateItems(
 //    "test",
 //    SQLiteQuery.GetFieldValues(playerWorld),

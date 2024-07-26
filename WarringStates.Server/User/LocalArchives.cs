@@ -17,11 +17,11 @@ internal class LocalArchives
 {
     public static string RootPath { get; } = Directory.CreateDirectory(nameof(Archive)).FullName;
 
-    static string RegisterPath { get; } = Path.Combine(RootPath, nameof(ArchiveInfoList) + ".db");
+    //static string RegisterPath { get; } = Path.Combine(RootPath, nameof(ArchiveInfoList) + ".db");
 
     public static ArchiveInfoList ArchiveInfoList { get; } = [];
 
-    static string TableName { get; } = nameof(ArchiveInfoList);
+    static string TableName { get; } = nameof(Archive);
 
     public static Archive? CurrentArchive { get; private set; } = null;
 
@@ -31,7 +31,7 @@ internal class LocalArchives
     {
         try
         {
-            using var query = new SQLiteQuery(RegisterPath);
+            using var query = LocalDataBase.NewQuery();
             Relocate(query);
         }
         catch (Exception ex)
@@ -43,7 +43,7 @@ internal class LocalArchives
     private static void Relocate(SQLiteQuery query)
     {
         ArchiveInfoList.Clear();
-        foreach (var info in query.SelectItems<ArchiveInfo>(TableName, null, null))
+        foreach (var info in query.SelectItems<ArchiveInfo>(TableName, null))
             ArchiveInfoList.TryAdd(info);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
@@ -73,7 +73,7 @@ internal class LocalArchives
             Directory.CreateDirectory(GetArchiveRootPath(info));
             var archive = CreateArchive(info, mapData, progressor);
             SaveArchive(info, archive);
-            using var query = new SQLiteQuery(RegisterPath);
+            using var query = LocalDataBase.NewQuery();
             query.CreateTable<ArchiveInfo>(TableName);
             query.InsertItem(TableName, info);
             Relocate(query);
@@ -94,11 +94,11 @@ internal class LocalArchives
                 return;
             SaveArchive(info, CurrentArchive);
             info.UpdateLastSaveTime();
-            using var query = new SQLiteQuery(RegisterPath);
+            using var query = LocalDataBase.NewQuery();
             query.UpdateItems(
                 TableName, 
                 SQLiteQuery.GetFieldValues(info), 
-                SQLiteQuery.GetCondition(info, nameof(ArchiveInfo.Id), Operators.Equal));
+                SQLiteQuery.GetCondition(info, Operators.Equal));
         }
         catch (Exception ex)
         {
@@ -116,8 +116,8 @@ internal class LocalArchives
             if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                 return false;
             Directory.Delete(GetArchiveRootPath(info), true);
-            using var query = new SQLiteQuery(RegisterPath);
-            query.DeleteItems(TableName, SQLiteQuery.GetCondition(info, nameof(ArchiveInfo.Id), Operators.Equal));
+            using var query = LocalDataBase.NewQuery();
+            query.DeleteItems(TableName, SQLiteQuery.GetCondition(info, Operators.Equal));
             Relocate(query);
             return true;
         }

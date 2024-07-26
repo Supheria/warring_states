@@ -5,26 +5,37 @@ using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;
 
-public class Player(string name, string password) : IRosterItem<string>
+public class Player : IRosterItem<string>
 {
-    [TableField(IsPrimaryKey = true, Name = "shit fuck it")]
-    public string Id { get; private set; } = HashTool.ToMd5HashString(name + DateTime.Now.ToBinary());
+    [TableField(IsPrimaryKey = true, Name = "PID")]
+    public string Id { get; private set; }
 
-    [TableField(Name = "shit the shit wha tfuch @@\' \" # sjf= -dsmsdf oiwee9\" ")]
-    public string Name { get; set; } = name;
+    public string Name { get; private set; }
 
-    public string Password { get; private set; } = HashTool.ToMd5HashString(password);
+    public string Password { get; private set; }
 
     public string Signature => Id;
 
-    public Player() : this("admin", "password")
+    public Player(string id, string name, string password)
+    {
+        Id = id;
+        Name = name;
+        Password = password;
+    }
+
+    public Player() : this("", "", "")
     {
 
     }
 
-    public void SetPasspord(string passpord)
+    public static string CreateId(string name)
     {
-        Password = HashTool.ToMd5HashString(password);
+        return HashTool.ToMd5HashString(name + DateTime.Now.ToBinary());
+    }
+
+    public static string ConvertPasswortText(string passwordText)
+    {
+        return HashTool.ToMd5HashString(passwordText);
     }
 
     public static bool operator ==(Player? userInfo, object? obj)

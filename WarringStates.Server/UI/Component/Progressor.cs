@@ -50,6 +50,8 @@ internal class Progressor : Displayer, IProgressor
 
     private void DrawProgress(float percent)
     {
+        if (!Visible)
+            return;
         var rect = new RectangleF(0, 0, Width * percent, Height);
         using var g = Graphics.FromImage(Image);
         g.Clear(BackColor);

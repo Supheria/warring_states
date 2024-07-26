@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeToolKit.Convert;
+using System.Xml.Linq;
 using WarringStates.Net.Common;
 using WarringStates.Server.Events;
 using WarringStates.Server.User;
@@ -20,17 +21,28 @@ partial class ServerService
 
     private void HandleLogin(CommandReceiver receiver)
     {
-        if (IsLogined)
-            throw new NetException(ServiceCode.UserAlreadyLogined);
-        var name = receiver.GetArgs<string>(ServiceKey.UserName) ?? "";
-        var password = receiver.GetArgs<string>(ServiceKey.Password) ?? "";
-        // TODO: validate userinfo
-        Player = new(name, password);
-        IsLogined = true;
-        HandleLogined();
-        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-        CallbackSuccess(sender);
-        UpdateArchiveList();
+        try
+        {
+            if (IsLogined)
+                throw new NetException(ServiceCode.UserAlreadyLogined);
+            var name = receiver.GetArgs<string>(ServiceKey.UserName);
+            var password = receiver.GetArgs<string>(ServiceKey.Password);
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(password))
+                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.UserName, ServiceKey.Password);
+            if (!LocalNet.CheckLogin(name, password, out var player, out var code))
+                throw new NetException(code);
+            IsLogined = true;
+            HandleLogined();
+            var data = SerializeTool.Serialize(Player, new(), SignTable, null);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
+            CallbackSuccess(sender);
+            UpdateArchiveList();
+        }
+        catch (Exception ex)
+        {
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            CallbackFailure(sender, ex);
+        }
     }
 
     public void SendMessage(string message)

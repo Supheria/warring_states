@@ -1,5 +1,7 @@
-﻿using LocalUtilities.IocpNet.Common;
+﻿using LocalUtilities.IocpNet;
+using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
+using System.Net;
 using WarringStates.Client.Events;
 using WarringStates.Client.User;
 using WarringStates.Map.Terrain;
@@ -11,6 +13,52 @@ namespace WarringStates.Client.Net;
 partial class ClientService
 {
     public event NetEventHandler<string[]>? OnUpdatePlayerList;
+
+    private void HeartBeats()
+    {
+        try
+        {
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.HeartBeats, (byte)OperateCode.None);
+            SendCommand(sender);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
+    }
+
+    public void Login(string address, int port, string name, string password)
+    {
+        try
+        {
+            if (IsLogined)
+                return;
+            var host = new IPEndPoint(IPAddress.Parse(address), port);
+            if (!((ClientProtocol)Protocol).Connect(host))
+                throw new NetException(ServiceCode.NoConnection);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
+               .AppendArgs(ServiceKey.UserName, name)
+               .AppendArgs(ServiceKey.Password, password);
+            SendCommand(sender);
+            LoginDone?.WaitOne(ConstTabel.BlockkMilliseconds);
+        }
+        catch (Exception ex)
+        {
+            Dispose();
+            this.HandleException(ex);
+        }
+    }
+
+    private void HandleLogin(CommandReceiver receiver)
+    {
+        ReceiveCallback(receiver);
+        Player = SerializeTool.Deserialize<Player>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ??
+            throw new NetException(ServiceCode.MissingCommandArgs, nameof(Player));
+        IsLogined = true;
+        LoginDone.Set();
+        HandleLogined();
+        DaemonThread.Start();
+    }
 
     public void SendMessage(string message, string receivePlayerId)
     {
