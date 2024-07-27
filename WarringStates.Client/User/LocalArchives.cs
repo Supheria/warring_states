@@ -1,7 +1,5 @@
-﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Events;
+﻿using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.UI;
 using WarringStates.User;
 
 namespace WarringStates.Client.User;

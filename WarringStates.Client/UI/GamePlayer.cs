@@ -1,8 +1,4 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript;
-using LocalUtilities.SimpleScript.Common;
-using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Map;
+﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Client.UI.Component;
 
 namespace WarringStates.Client.UI;

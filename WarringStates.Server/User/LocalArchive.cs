@@ -1,17 +1,11 @@
 ﻿using AltitudeMapGenerator;
-using LocalUtilities.IocpNet.Common;
-using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
-using LocalUtilities.SQLiteHelper.Data;
 using LocalUtilities.TypeGeneral;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
-using WarringStates.Net.Common;
+using WarringStates.Server.Data;
 using WarringStates.Server.Events;
 using WarringStates.Server.Map;
-using WarringStates.Server.Net;
 using WarringStates.User;
 
 namespace WarringStates.Server.User;
@@ -132,7 +126,7 @@ internal partial class LocalArchive
         var ownerSites = GetOwnerSites(info);
         foreach (var ownerSite in ownerSites)
         {
-            if(!landMap.AddSouceLand(ownerSite.Site, ownerSite.Type))
+            if (!landMap.AddSouceLand(ownerSite.Site, ownerSite.Type))
                 RemoveOwnerSite(info, ownerSite.Site);
         }
         return landMap;

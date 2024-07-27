@@ -2,7 +2,6 @@
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
-using System.Net;
 using System.Text;
 using WarringStates.Net;
 using WarringStates.Net.Common;

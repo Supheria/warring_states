@@ -1,6 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Map;
-using WarringStates.Map;
 
 namespace WarringStates.Client.UI.Component;
 

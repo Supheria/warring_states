@@ -2,7 +2,6 @@
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
 using System.Net;
-using WarringStates.Client.Events;
 using WarringStates.Client.User;
 using WarringStates.Net.Common;
 using WarringStates.User;

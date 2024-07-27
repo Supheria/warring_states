@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace WarringStates.Map;
 

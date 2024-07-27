@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Net.Utilities;
+﻿using WarringStates.Net.Utilities;
 using WarringStates.Server.Map;
 using WarringStates.Server.User;
 using WarringStates.User;

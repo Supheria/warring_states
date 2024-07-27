@@ -1,10 +1,8 @@
 ﻿using LocalUtilities.TypeGeneral;
-using System.Drawing;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Client.User;
 using WarringStates.UI;
-using WarringStates.User;
 
 namespace WarringStates.Client.UI;
 

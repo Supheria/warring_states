@@ -1,7 +1,6 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Diagnostics;
 using System.Text;
 using WarringStates.Map;
 
@@ -206,7 +205,7 @@ internal class LandMapEx : LandMap
     public VisibleLands GetAllSingleLands()
     {
         var lands = new VisibleLands();
-        SingleLands.ToList().ForEach(x=>lands.AddLand(x));
+        SingleLands.ToList().ForEach(x => lands.AddLand(x));
         return lands;
     }
 }

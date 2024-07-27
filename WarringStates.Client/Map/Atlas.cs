@@ -1,5 +1,4 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Map;
 using WarringStates.User;

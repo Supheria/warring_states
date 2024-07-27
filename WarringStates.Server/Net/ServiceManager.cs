@@ -6,10 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using WarringStates.Net.Common;
-using WarringStates.Net.Utilities;
 using WarringStates.Server.Events;
 using WarringStates.Server.User;
-using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
@@ -147,7 +145,7 @@ internal class ServiceManager : INetLogger
         {
             var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ??
                 throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.Id);
-            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info)) 
+            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info))
                 throw new NetException(ServiceCode.NoMatchArchiveId);
             if (CacheArchives.TryGetValue(archiveId, out var cache))
             {

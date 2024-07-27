@@ -3,7 +3,6 @@
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
-using WarringStates.Map;
 
 namespace WarringStates.Client.UI.Component;
 

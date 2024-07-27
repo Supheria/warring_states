@@ -1,14 +1,8 @@
-﻿using LocalUtilities.FileHelper;
-using LocalUtilities.SQLiteHelper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LocalUtilities.SQLiteHelper;
 using WarringStates.Server.User;
 using WarringStates.User;
 
-namespace WarringStates.Server;
+namespace WarringStates.Server.Data;
 
 internal class LocalDataBase
 {
