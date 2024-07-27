@@ -14,5 +14,5 @@ internal class CacheArchive(ArchiveInfo archiveInfo) : AutoDisposeItem(ConstTabl
 {
     public ArchiveInfo ArchiveInfo { get; } = archiveInfo;
 
-    public LandMap LandMap { get; } = LocalArchive.InitializeLandMap(archiveInfo);
+    public LandMapEx LandMap { get; } = LocalArchive.InitializeLandMap(archiveInfo);
 }

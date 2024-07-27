@@ -20,8 +20,6 @@ public partial class Overview : Displayer
 
     Rectangle FocusRect { get; set; }
 
-    List<Rectangle> LastFocusOnRects { get; } = [];
-
     List<Rectangle> FocusRects { get; } = [];
 
     Color FocusColor { get; set; } = Color.Red;
@@ -39,14 +37,14 @@ public partial class Overview : Displayer
             Range = value;
             if (FullScreen)
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.WorldSize, Range.Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
                 var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
                 base.Bounds = new(location, size);
             }
             else
             {
                 var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
-                size = Atlas.WorldSize.ScaleSizeWithinRatio(size);
+                size = Atlas.Size.ScaleSizeWithinRatio(size);
                 var location = new Point(Range.Right - size.Width, Range.Top);
                 base.Bounds = new(location, size);
             }
@@ -72,87 +70,41 @@ public partial class Overview : Displayer
             return;
         GridDrawRect = args.DrawRect;
         GridOrigin = args.Origin;
-        Redraw();
-        Invalidate();
+        BeginInvoke(() =>
+        {
+            Redraw();
+            Invalidate();
+        });
     }
 
     public override void Redraw()
     {
-        base.Redraw();
-        RelocateOverview();
-        RelocateFocus();
-    }
-
-    private void RelocateOverview()
-    {
-        if (OverviewCache is not null && Size == OverviewCache.Size)
-        {
-            BitmapTool.DrawTemplateSamePartsOnto(OverviewCache, (Bitmap)Image, LastFocusOnRects, true);
-            return;
-        }
-        OverviewCache?.Dispose();
         Image?.Dispose();
-        var widthUnit = (ClientWidth / (double)Atlas.WorldWidth).ToRoundInt();
-        if (widthUnit is 0)
-            widthUnit = 1;
-        var heightUnit = (ClientHeight / (double)Atlas.WorldHeight).ToRoundInt();
-        if (heightUnit is 0)
-            heightUnit = 1;
-        OverviewCache = new(Atlas.WorldWidth * widthUnit, Atlas.WorldHeight * heightUnit);
-        var pOverview = new PointBitmap(OverviewCache);
-        pOverview.LockBits();
-        for (int i = 0; i < Atlas.WorldWidth; i++)
+        if (OverviewCache is not null && Size == OverviewCache.Size)
+            Image = (Bitmap)OverviewCache.Clone();
+        else
         {
-            for (int j = 0; j < Atlas.WorldHeight; j++)
-            {
-                var color = Atlas.GetLand(new(i, j)).Color;
-                drawUnit(i, j, color);
-            }
+            OverviewCache?.Dispose();
+            OverviewCache = Atlas.GetOverview(ClientSize);
+            var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
+            OverviewCache.Dispose();
+            OverviewCache = temp;
+            Image = (Bitmap)OverviewCache.Clone();
         }
-        pOverview.UnlockBits();
-        var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
-        OverviewCache.Dispose();
-        OverviewCache = temp;
-        Image = OverviewCache.Clone() as Bitmap;
-        void drawUnit(int col, int row, Color color)
-        {
-            var dx = widthUnit * col;
-            var dy = heightUnit * row;
-            for (var x = 0; x < widthUnit; x++)
-            {
-                for (var y = 0; y < heightUnit; y++)
-                {
-                    pOverview.SetPixel(x + dx, y + dy, color);
-                }
-            }
-        }
-    }
-
-    private void RelocateFocus()
-    {
         var edgeLength = (double)GridDrawer.CellEdgeLength;
         var width = GridDrawRect.Width / edgeLength;
         var height = GridDrawRect.Height / edgeLength;
-        var x = Atlas.WorldWidth - GridOrigin.X / edgeLength;
-        var y = Atlas.WorldHeight - GridOrigin.Y / edgeLength;
-        var widthRatio = Atlas.WorldWidth / (double)ClientWidth;
-        var heightRatio = Atlas.WorldHeight / (double)ClientHeight;
+        var x = Atlas.Width - GridOrigin.X / edgeLength;
+        var y = Atlas.Height - GridOrigin.Y / edgeLength;
+        var widthRatio = Atlas.Width / (double)ClientWidth;
+        var heightRatio = Atlas.Height / (double)ClientHeight;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
-        FocusRect = new((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
+        var focusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);
-        FocusRects.Clear();
-        FocusRects.AddRange(FocusRect.CutRectLoopRectsInRange(ClientRect));
         using var pen = new Pen(FocusColor, Math.Min(ClientWidth, ClientHeight) * 0.01f);
-        LastFocusOnRects.Clear();
-        foreach (var rect in FocusRects)
+        foreach (var rect in GeometryTool.CutRectLoopRectsInRange(focusRect, ClientRect))
         {
             g.DrawRectangle(pen, rect);
-            foreach (var edge in EdgeTool.GetRectEdges(rect))
-            {
-                var lineRect = EdgeTool.GetCrossLineRect(edge, pen.Width);
-                if (GeometryTool.CutRectInRange(lineRect, ClientRect, out var r))
-                    LastFocusOnRects.Add(r.Value);
-            }
         }
     }
 }

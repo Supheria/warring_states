@@ -14,8 +14,8 @@ public class ServiceKey
     public const string CallbackCode = nameof(CallbackCode);
     public const string ErrorMessage = nameof(ErrorMessage);
     public const string TimeStamp = nameof(TimeStamp);
-    public const string ReceivePlayer = nameof(ReceivePlayer);
-    public const string SendPlayer = nameof(SendPlayer);
+    public const string ReceiveName = nameof(ReceiveName);
+    public const string SendName = nameof(SendName);
     public const string StartTime = nameof(StartTime);
     public const string List = nameof(List);
     public const string Size = nameof(Size);

@@ -14,8 +14,6 @@ internal class LocalNet
 
     public static int Port { get; set; } = 60;
 
-    public static string PlayerTableName { get; } = nameof(Player);
-
     public static void Start()
     {
         Server.Start(Port);
@@ -30,9 +28,9 @@ internal class LocalNet
     {
         player = null;
         using var query = LocalDataBase.NewQuery();
-        query.CreateTable<Player>(PlayerTableName);
+        query.CreateTable<Player>(LocalDataBase.NameofPlayer);
         var condition = new Condition(SQLiteQuery.GetFieldName<Player>(nameof(Player.Name)), name, Operators.Equal);
-        var selects = query.SelectItems<Player>(PlayerTableName, condition);
+        var selects = query.SelectItems<Player>(LocalDataBase.NameofPlayer, condition);
         if (selects.Length > 1)
         {
             code = ServiceCode.MultiPlayerName;
@@ -60,9 +58,9 @@ internal class LocalNet
     {
         player = null;
         using var query = LocalDataBase.NewQuery();
-        query.CreateTable<Player>(PlayerTableName);
+        query.CreateTable<Player>(LocalDataBase.NameofPlayer);
         var condition = new Condition(SQLiteQuery.GetFieldName<Player>(nameof(Player.Name)), name, Operators.Equal);
-        var selects = query.SelectItems<Player>(PlayerTableName, condition);
+        var selects = query.SelectItems<Player>(LocalDataBase.NameofPlayer, condition);
         if (selects.Length > 0)
         {
             player = null;
@@ -80,7 +78,7 @@ internal class LocalNet
             return false;
         }
         player = new Player(Player.CreateId(name), name, Player.ConvertPasswortText(passwordText));
-        query.InsertItem(PlayerTableName, player);
+        query.InsertItem(LocalDataBase.NameofPlayer, player);
         code = ServiceCode.Success;
         return true;
     }

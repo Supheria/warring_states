@@ -24,8 +24,6 @@ internal partial class LocalArchive
 
     public static ArchiveInfoRoster Archives { get; } = [];
 
-    static string TableName { get; } = nameof(Archive);
-
     static SsSignTable SignTable { get; } = new();
 
     public static void Relocate()
@@ -44,7 +42,7 @@ internal partial class LocalArchive
     private static void Relocate(SQLiteQuery query)
     {
         Archives.Clear();
-        foreach (var info in query.SelectItems<ArchiveInfo>(TableName, null))
+        foreach (var info in query.SelectItems<ArchiveInfo>(LocalDataBase.NameofArchive, null))
             Archives.TryAdd(info);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
@@ -57,8 +55,8 @@ internal partial class LocalArchive
             Directory.CreateDirectory(Path.Combine(RootPath, info.Id));
             var altitudeMap = new AltitudeMap(mapData, progressor);
             var randomTable = new RandomTable(1000);
-            var landPoints = LandMap.ConvertLandPoints(altitudeMap);
-            var landMap = new LandMap(altitudeMap.Size, randomTable, landPoints);
+            var landPoints = LandMapEx.ConvertLandPoints(altitudeMap);
+            var landMap = new LandMapEx(altitudeMap.Size, randomTable, landPoints);
             SaveCurrentSpan(info, 0);
             SaveRandomTable(info, randomTable);
             SaveWorldSize(info, landMap.WorldSize);
@@ -66,8 +64,8 @@ internal partial class LocalArchive
             InitOwnerSites(info);
             SaveThumbnail(info, landMap);
             using var query = LocalDataBase.NewQuery();
-            query.CreateTable<ArchiveInfo>(TableName);
-            query.InsertItem(TableName, info);
+            query.CreateTable<ArchiveInfo>(LocalDataBase.NameofArchive);
+            query.InsertItem(LocalDataBase.NameofArchive, info);
             Relocate(query);
         }
         catch (Exception ex)
@@ -90,7 +88,7 @@ internal partial class LocalArchive
             }
             catch { }
             using var query = LocalDataBase.NewQuery();
-            query.DeleteItems(TableName, SQLiteQuery.GetCondition(info, Operators.Equal));
+            query.DeleteItems(LocalDataBase.NameofArchive, SQLiteQuery.GetCondition(info, Operators.Equal));
             Relocate(query);
             return true;
         }
@@ -101,7 +99,7 @@ internal partial class LocalArchive
         }
     }
 
-    public static PlayerArchive GetPlayerArchive(ArchiveInfo info, LandMap landMap, string playerId)
+    public static PlayerArchive GetPlayerArchive(ArchiveInfo info, LandMapEx landMap, string playerId)
     {
         return new()
         {
@@ -109,39 +107,33 @@ internal partial class LocalArchive
             WorldName = info.WorldName,
             WorldSize = landMap.WorldSize,
             CurrentSpan = LoadCurrentSpan(info),
-            //VisibleLands = GetVisibleLands(info, landMap, playerId),
-            VisibleLands = landMap.SingleLands.ToArray(),
+            VisibleLands = GetVisibleLands(info, landMap, playerId),
+            //VisibleLands = landMap.GetAllSingleLands(),
         };
     }
 
-    public static LandRoster<Land> GetVisibleLands(ArchiveInfo info, LandMap landMap, string playerId)
+    public static VisibleLands GetVisibleLands(ArchiveInfo info, LandMapEx landMap, string playerId)
     {
-        var roster = new LandRoster<Land>();
+        var visibleLands = new VisibleLands();
         var ownerSites = GetOwnerSites(info, playerId);
         foreach (var ownerSite in ownerSites)
         {
-            var lands = landMap.GetRoundLands(ownerSite.Site);
-            lands.ForEach(l => roster.TryAdd(l));
+            landMap.GetRoundLands(ownerSite.Site, visibleLands);
         }
-        return roster;
+        return visibleLands;
     }
 
-    public static LandMap InitializeLandMap(ArchiveInfo info)
+    public static LandMapEx InitializeLandMap(ArchiveInfo info)
     {
         var worldSize = LoadWorldSize(info);
         var randomTable = LoadRandomTable(info);
         var landPoints = LoadLandPoints(info);
-        var landMap = new LandMap(worldSize, randomTable, landPoints);
+        var landMap = new LandMapEx(worldSize, randomTable, landPoints);
         var ownerSites = GetOwnerSites(info);
         foreach (var ownerSite in ownerSites)
         {
-            var sourceLands = landMap.BuildSourceLands(ownerSite.Site, ownerSite.Type);
-            if (sourceLands.Count is 0)
-            {
+            if(!landMap.AddSouceLand(ownerSite.Site, ownerSite.Type))
                 RemoveOwnerSite(info, ownerSite.Site);
-                continue;
-            }
-            sourceLands.ForEach(s => landMap.SourceLands.TryAdd(s));
         }
         return landMap;
     }

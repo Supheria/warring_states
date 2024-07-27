@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using System.Drawing;
 using WarringStates.Client.Events;
+using WarringStates.Client.Map;
 using WarringStates.Client.User;
 using WarringStates.UI;
 using WarringStates.User;
@@ -87,19 +88,8 @@ public partial class ArchiveSelector : Pannel
             Thumbnail.SetThumbnailVoid();
         else
         {
-            // TODO: use method in LandMap
-            var archive = LocalArchives.CurrentArchive;
-            var thumbnail = new Bitmap(archive.WorldSize.Width, archive.WorldSize.Height);
-            using var g = Graphics.FromImage(thumbnail);
-            g.Clear(Color.White);
-            var pThumbnail = new PointBitmap(thumbnail);
-            pThumbnail.LockBits();
-            foreach (var land in archive.VisibleLands)
-            {
-                pThumbnail.SetPixel(land.Site.X, land.Site.Y, land.Color);
-            }
-            pThumbnail.UnlockBits();
-            Thumbnail.SetThumbnail(thumbnail, archive.CurrentSpan);
+            var thumbnail = Atlas.GetOverview(Thumbnail.ClientSize);
+            Thumbnail.SetThumbnail(thumbnail, LocalArchives.CurrentArchive.CurrentSpan);
         }
         Thumbnail.Redraw();
         Thumbnail.Invalidate();

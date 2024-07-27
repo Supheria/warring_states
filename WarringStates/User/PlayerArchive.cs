@@ -12,5 +12,5 @@ public class PlayerArchive()
 
     public long CurrentSpan { get; set; } = 0;
 
-    public SingleLand[] VisibleLands { get; set; } = [];
+    public VisibleLands VisibleLands { get; set; } = new();
 }

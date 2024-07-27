@@ -24,11 +24,11 @@ partial class GridDrawer
 
     public static void OffsetOrigin(Coordinate offset)
     {
-        var width = Atlas.WorldWidth * CellEdgeLength;
+        var width = Atlas.Width * CellEdgeLength;
         var x = (Origin.X + offset.X) % width;
         if (x < 0)
             x += width;
-        var height = Atlas.WorldHeight * CellEdgeLength;
+        var height = Atlas.Height * CellEdgeLength;
         var y = (Origin.Y + offset.Y) % height;
         if (y < 0)
             y += height;
@@ -78,7 +78,7 @@ partial class GridDrawer
             for (var j = 0; j < LatticeSize.Height; j++)
             {
                 var cell = new Cell(new(i - LatticeOffset.Width, j - LatticeOffset.Height));
-                var land = cell.TerrainPoint.GetLand();
+                var land = Atlas.GetLand(cell.TerrainPoint);
                 DrawLand(g, land, cell);
             }
         }

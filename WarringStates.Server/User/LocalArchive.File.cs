@@ -98,7 +98,7 @@ partial class LocalArchive
         return query.SelectItems<LandPoint>(NameofLandPoints, null).ToList();
     }
 
-    public static void SaveThumbnail(ArchiveInfo info, LandMap landMap)
+    public static void SaveThumbnail(ArchiveInfo info, LandMapEx landMap)
     {
         landMap.GetThumbnail().Save(GetThumbnailPath(info));
     }

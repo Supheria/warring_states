@@ -22,6 +22,7 @@ internal static class LocalArchives
     public static void SetCurrentArchive(PlayerArchive archive)
     {
         CurrentArchive = archive;
+        Atlas.Relocate(archive);
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.CurrentArchiveChange);
     }
 

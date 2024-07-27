@@ -11,7 +11,7 @@ namespace WarringStates.Client.Net;
 
 partial class ClientService
 {
-    public event NetEventHandler<PlayerIdNamePair[]>? OnUpdatePlayerList;
+    public event NetEventHandler<string[]>? OnUpdatePlayerList;
 
     private void HeartBeats()
     {
@@ -65,8 +65,8 @@ partial class ClientService
         {
             var data = SerializeTool.Serialize(message, new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Request, data, 0, data.Length)
-                .AppendArgs(ServiceKey.ReceivePlayer, receivePlayerId)
-                .AppendArgs(ServiceKey.SendPlayer, Player.Id);
+                .AppendArgs(ServiceKey.ReceiveName, receivePlayerId)
+                .AppendArgs(ServiceKey.SendName, Player.Name);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -83,8 +83,8 @@ partial class ClientService
             var message = FormatMessage(receiver);
             this.HandleLog(message);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, receiver.Data, 0, receiver.Data.Length)
-                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
-                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
+                    .AppendArgs(ServiceKey.ReceiveName, receiver.GetArgs<string>(ServiceKey.ReceiveName))
+                    .AppendArgs(ServiceKey.SendName, receiver.GetArgs<string>(ServiceKey.SendName));
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Callback)
@@ -98,8 +98,8 @@ partial class ClientService
             var message = FormatMessage(receiver);
             this.HandleLog(message);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, receiver.Data, 0, receiver.Data.Length)
-                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
-                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
+                    .AppendArgs(ServiceKey.ReceiveName, receiver.GetArgs<string>(ServiceKey.ReceiveName))
+                    .AppendArgs(ServiceKey.SendName, receiver.GetArgs<string>(ServiceKey.SendName));
             CallbackSuccess(sender);
         }
     }
@@ -109,7 +109,7 @@ partial class ClientService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.List)
         {
-            var playerList = SerializeTool.Deserialize<PlayerIdNamePair[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? [];
+            var playerList = SerializeTool.Deserialize<string[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? [];
             OnUpdatePlayerList?.Invoke(playerList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
@@ -143,7 +143,7 @@ partial class ClientService
         else if (operateCode is OperateCode.Request)
         {
             ReceiveCallback(receiver);
-            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) /*?? new()*/;
+            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ?? new();
             LocalArchives.SetCurrentArchive(playerArchive);
         }
         else if (operateCode is OperateCode.Join)

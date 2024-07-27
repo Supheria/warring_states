@@ -56,8 +56,8 @@ partial class ServerService
         {
             var data = SerializeTool.Serialize(message, new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Message, (byte)OperateCode.Broadcast, data, 0, data.Length)
-                .AppendArgs(ServiceKey.ReceivePlayer, Player.Name)
-                .AppendArgs(ServiceKey.SendPlayer, nameof(ServiceManager));
+                .AppendArgs(ServiceKey.ReceiveName, Player.Name)
+                .AppendArgs(ServiceKey.SendName, nameof(ServiceManager));
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -71,13 +71,13 @@ partial class ServerService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.Request)
         {
-            if (Player?.Name == receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
+            if (Player?.Name == receiver.GetArgs<string>(ServiceKey.ReceiveName))
             {
                 var message = FormatMessage(receiver);
                 this.HandleLog(message);
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Request, receiver.Data, 0, receiver.Data.Length)
-                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
-                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
+                    .AppendArgs(ServiceKey.ReceiveName, receiver.GetArgs<string>(ServiceKey.ReceiveName))
+                    .AppendArgs(ServiceKey.SendName, receiver.GetArgs<string>(ServiceKey.SendName));
                 SendCommand(sender);
             }
             else
@@ -85,11 +85,11 @@ partial class ServerService
         }
         else if (operateCode is OperateCode.Callback)
         {
-            if (Player?.Name == receiver.GetArgs<string>(ServiceKey.SendPlayer))
+            if (Player?.Name == receiver.GetArgs<string>(ServiceKey.SendName))
             {
                 var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, (byte)OperateCode.Callback, receiver.Data, 0, receiver.Data.Length)
-                    .AppendArgs(ServiceKey.ReceivePlayer, receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
-                    .AppendArgs(ServiceKey.SendPlayer, receiver.GetArgs<string>(ServiceKey.SendPlayer));
+                    .AppendArgs(ServiceKey.ReceiveName, receiver.GetArgs<string>(ServiceKey.ReceiveName))
+                    .AppendArgs(ServiceKey.SendName, receiver.GetArgs<string>(ServiceKey.SendName));
                 CallbackSuccess(sender);
             }
             else
@@ -106,7 +106,7 @@ partial class ServerService
         }
     }
 
-    public void UpdatePlayerList(PlayerIdNamePair[] playerList)
+    public void UpdatePlayerList(string[] playerList)
     {
         try
         {

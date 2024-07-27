@@ -1,29 +1,15 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Diagnostics;
 using System.Text;
 using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 
-internal class LandMap
+internal class LandMapEx : LandMap
 {
-    public Size WorldSize { get; set; }
-
-    public int WorldWidth => WorldSize.Width;
-
-    public int WorldHeight => WorldSize.Height;
-
-    /// <summary>
-    /// use <see cref="this[Coordinate]"/> to get <see cref="Land"/>, rather than use <see cref="SingleLands"/> directly
-    /// </summary>
-    public LandRoster<SingleLand> SingleLands { get; } = [];
-    
-    public LandRoster<SourceLand> SourceLands { get; } = [];
-
-    Dictionary<LandTypes, int> LandTypesCount { get; } = [];
-
-    public Land this[Coordinate point]
+    public override Land this[Coordinate point]
     {
         get
         {
@@ -33,6 +19,17 @@ internal class LandMap
                 return singleLand;
             return new SingleLand(point, LandTypes.Plain);
         }
+    }
+
+    Dictionary<LandTypes, int> LandTypesCount { get; } = [];
+
+    public bool AddSouceLand(Coordinate site, LandTypes landType)
+    {
+        var sourceLands = BuildSourceLands(site, landType);
+        if (sourceLands.Count is 0)
+            return false;
+        sourceLands.ForEach(s => SourceLands.TryAdd(s));
+        return true;
     }
 
     public string GetLandTypeCount(LandTypes type)
@@ -50,7 +47,7 @@ internal class LandMap
             return "0";
     }
 
-    internal LandMap(Size worldSize, RandomTable randomTable, List<LandPoint> landPoints)
+    internal LandMapEx(Size worldSize, RandomTable randomTable, List<LandPoint> landPoints)
     {
         WorldSize = worldSize;
         foreach (var point in landPoints)
@@ -164,59 +161,18 @@ internal class LandMap
         return true;
     }
 
-    public List<Land> GetRoundLands(Coordinate site)
+    public void GetRoundLands(Coordinate site, VisibleLands visibleLands)
     {
-        var lands = new List<Land>();
         var left = site.X - 2;
         var top = site.Y - 2;
         for (var i = 0; i < 5; i++)
         {
-            for (var j = 0; j < 5; i++)
+            for (var j = 0; j < 5; j++)
             {
                 var point = SetPointWithin(new(left + i, top + j));
-                lands.Add(this[point]);
+                visibleLands.AddLand(this[point]);
             }
         }
-        return lands;
-    }
-
-    public Coordinate SetPointWithin(Coordinate point)
-    {
-        var x = point.X % WorldWidth;
-        if (x < 0)
-            x += WorldWidth;
-        var y = point.Y % WorldHeight;
-        if (y < 0)
-            y += WorldHeight;
-        return new(x, y);
-    }
-
-    public static Coordinate SetPointWithin(Coordinate point, int worldWidth, int worldHeight)
-    {
-        var x = point.X % worldWidth;
-        if (x < 0)
-            x += worldWidth;
-        var y = point.Y % worldHeight;
-        if (y < 0)
-            y += worldHeight;
-        return new(x, y);
-    }
-
-    public Bitmap GetThumbnail()
-    {
-        var thumbnail = new Bitmap(WorldWidth, WorldHeight);
-        var pThumbnail = new PointBitmap(thumbnail);
-        pThumbnail.LockBits();
-        for (int i = 0; i < WorldWidth; i++)
-        {
-            for (int j = 0; j < WorldHeight; j++)
-            {
-                var color = this[new(i, j)].Color;
-                pThumbnail.SetPixel(i, j, color);
-            }
-        }
-        pThumbnail.UnlockBits();
-        return thumbnail;
     }
 
     public static List<LandPoint> ConvertLandPoints(AltitudeMap altitudeMap)
@@ -224,12 +180,12 @@ internal class LandMap
         var landPoints = new Dictionary<Coordinate, LandPoint>();
         foreach (var (coordinate, point) in altitudeMap.AltitudePoints)
         {
-            var site = SetPointWithin(coordinate, altitudeMap.Width, altitudeMap.Height);
+            var site = SetPointWithin(coordinate, altitudeMap.Size);
             landPoints[site] = new(site, point.Altitude / altitudeMap.AltitudeMax, PointTypes.Normal);
         }
         foreach (var coordinate in altitudeMap.RiverPoints)
         {
-            var site = SetPointWithin(coordinate, altitudeMap.Width, altitudeMap.Height);
+            var site = SetPointWithin(coordinate, altitudeMap.Size);
             if (landPoints.TryGetValue(site, out var point))
                 landPoints[site] = new(site, point.AltitudeRatio, PointTypes.River);
             else
@@ -237,12 +193,20 @@ internal class LandMap
         }
         foreach (var coordinate in altitudeMap.OriginPoints)
         {
-            var site = SetPointWithin(coordinate, altitudeMap.Width, altitudeMap.Height);
+            var site = SetPointWithin(coordinate, altitudeMap.Size);
             if (landPoints.TryGetValue(site, out var point))
                 landPoints[site] = new(site, point.AltitudeRatio, PointTypes.Origin);
             else
                 landPoints[site] = new(site, 1d, PointTypes.Origin);
         }
         return landPoints.Values.ToList();
+    }
+
+    [Obsolete("for test")]
+    public VisibleLands GetAllSingleLands()
+    {
+        var lands = new VisibleLands();
+        SingleLands.ToList().ForEach(x=>lands.AddLand(x));
+        return lands;
     }
 }

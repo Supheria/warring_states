@@ -245,10 +245,10 @@ public abstract class NetService : INetLogger
     protected static string FormatMessage(CommandReceiver receiver)
     {
         return new StringBuilder()
-            .Append(receiver.GetArgs<string>(ServiceKey.SendPlayer))
+            .Append(receiver.GetArgs<string>(ServiceKey.SendName))
             .Append(SignCollection.Sub)
             .Append(SignCollection.Greater)
-            .Append(receiver.GetArgs<string>(ServiceKey.ReceivePlayer))
+            .Append(receiver.GetArgs<string>(ServiceKey.ReceiveName))
             .Append(SignCollection.Colon)
             .Append(SignCollection.Space)
             .Append(SerializeTool.Deserialize<string>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null))

@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.IocpNet.Common;
+using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using System;
 using System.Collections.Generic;
@@ -7,17 +8,17 @@ using System.Text;
 using System.Threading.Tasks;
 using WarringStates.Net.Common;
 using WarringStates.Server.Map;
-using WarringStates.Server.Net;
+using WarringStates.Server.User;
 using WarringStates.User;
 
-namespace WarringStates.Server.User;
+namespace WarringStates.Server.Net;
 
 internal class PlayerGroup : IRosterItem<string>
 {
     public ArchiveInfo ArchiveInfo { get; }
 
-    public LandMap LandMap { get; }
-    
+    public LandMapEx LandMap { get; }
+
     ServiceRoster Group { get; } = [];
 
     public string Signature => ArchiveInfo.Id;
@@ -40,13 +41,13 @@ internal class PlayerGroup : IRosterItem<string>
 
     public void RelayCommand(CommandReceiver receiver)
     {
-        var userId = (OperateCode)receiver.OperateCode switch
+        var name = (OperateCode)receiver.OperateCode switch
         {
-            OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
-            OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendPlayer),
+            OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceiveName),
+            OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendName),
             _ => null,
-        } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
-        if (!Group.TryGetValue(userId, out var user))
+        } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceiveName, ServiceKey.SendName);
+        if (!Group.TryGetValue(PlayerTable.CheckoutPlayerId(name), out var user))
             throw new NetException(ServiceCode.PlayerNotExist);
         user.HandleCommand(receiver);
     }
@@ -71,7 +72,7 @@ internal class PlayerGroup : IRosterItem<string>
 
     private void UpdatePlayerList()
     {
-        var playerList = Group.Select(x => new PlayerIdNamePair(x.Player)).ToArray();
+        var playerList = Group.Select(x => x.Player.Name).ToArray();
         Parallel.ForEach(Group, service =>
         {
             service.UpdatePlayerList(playerList);

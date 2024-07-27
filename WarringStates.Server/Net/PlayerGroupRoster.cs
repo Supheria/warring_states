@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WarringStates.Server.User;
+namespace WarringStates.Server.Net;
 
 internal class PlayerGroupRoster : Roster<string, PlayerGroup>
 {

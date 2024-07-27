@@ -7,11 +7,6 @@ namespace WarringStates.Client.UI;
 
 partial class ClientForm
 {
-    /// <summary>
-    /// key is <see cref="Player.Name"/>
-    /// </summary>
-    ConcurrentDictionary<string, string> PlayerNameMap { get; } = [];
-
     protected override void AddOperation()
     {
         base.AddOperation();
@@ -125,22 +120,20 @@ partial class ClientForm
         foreach (var item in UserList.SelectedItems)
         {
             var name = (string)item;
-            LocalNet.Service.SendMessage(SendBox.Text, PlayerNameMap[name]);
+            LocalNet.Service.SendMessage(SendBox.Text, name);
         }
     }
 
-    private void Client_OnUpdateUserList(PlayerIdNamePair[] playerList)
+    private void Client_OnUpdateUserList(string[] playerList)
     {
         BeginInvoke(() =>
         {
             UserList.Items.Clear();
-            PlayerNameMap.Clear();
             foreach (var player in playerList)
             {
-                if (player.Name == PlayerName.Text)
+                if (player == PlayerName.Text)
                     continue;
                 UserList.Items.Add(player);
-                PlayerNameMap.TryAdd(player.Name, player.Id);
             }
             Update();
         });
