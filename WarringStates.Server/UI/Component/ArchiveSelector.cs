@@ -85,7 +85,7 @@ public partial class ArchiveSelector : Pannel
 
     private void RefreshSelector()
     {
-        Selector.ArchiveInfoList = LocalArchive.Archives;
+        Selector.ItemList = LocalArchive.Archives.Select(x => x.WorldName).ToList();
         Selector.Redraw();
         Selector.Invalidate();
     }
@@ -102,7 +102,7 @@ public partial class ArchiveSelector : Pannel
         base.SetSize();
         var colWidth = (ClientWidth - Padding.Width * 3) / 3;
         var height = ClientHeight - Padding.Height * 2;
-        if (Progressor.Progressing)
+        if (Progressor.Visible)
             height -= ProgressorHeight + Padding.Height;
         //
         Selector.Bounds = new(
@@ -144,7 +144,7 @@ public partial class ArchiveSelector : Pannel
             buttonWidth,
             ButtonHeight);
         //
-        if (Progressor.Progressing)
+        if (Progressor.Visible)
             Progressor.Bounds = new(
                 Padding.Width,
                 Selector.Bottom + Padding.Height,

@@ -4,6 +4,7 @@ using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
+using WarringStates.Client.UI;
 
 namespace WarringStates.Client.Graph;
 
@@ -64,26 +65,25 @@ public partial class GridDrawer : IInitializeable
         return data;
     }
 
-    public static void PointOnCell(Point realPoint)
+    public static void PointOnCell(Point realPoint, MouseOperates mouseOperate)
     {
-        var latticeCell = RealPointToLatticePoint(realPoint);
-        var cell = new Cell(latticeCell);
-        var sendArgs = new GridCellPointedOnArgs(cell.TerrainPoint, cell.GetRealPointOnPart(realPoint));
+        var cell = new Cell(realPoint);
+        var sendArgs = new GridCellPointedOnArgs(mouseOperate, cell.Site, cell.Part);
         LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnCell, sendArgs);
     }
 
-    private static Coordinate RealPointToLatticePoint(Point realPoint)
-    {
-        var dX = realPoint.X - Origin.X;
-        var x = dX / CellEdgeLength;
-        if (dX < 0)
-            x--;
-        var dY = realPoint.Y - Origin.Y;
-        var y = dY / CellEdgeLength;
-        if (dY < 0)
-            y--;
-        return new(x, y);
-    }
+    //private static Coordinate RealPointToLatticePoint(Point realPoint)
+    //{
+    //    var dX = realPoint.X - Origin.X;
+    //    var x = dX / CellEdgeLength;
+    //    if (dX < 0)
+    //        x--;
+    //    var dY = realPoint.Y - Origin.Y;
+    //    var y = dY / CellEdgeLength;
+    //    if (dY < 0)
+    //        y--;
+    //    return new(x, y);
+    //}
 
     //public void Serialize(SsSerializer serializer)
     //{

@@ -6,7 +6,7 @@ namespace WarringStates.UI;
 
 public partial class Selector : Displayer
 {
-    public ArchiveInfoRoster ArchiveInfoList { get; set; } = [];
+    public IList<string> ItemList { get; set; } = [];
 
     public override Size Padding { get; set; } = new(3, 3);
 
@@ -79,7 +79,7 @@ public partial class Selector : Displayer
             var y = top + i * ItemHeight;
             var rect = new Rectangle(ItemColumnRect.Left, y, ItemColumnRect.Width, ItemHeight - Padding.Height);
             var index = showStartItemIndex + i;
-            if (!ArchiveInfoList.TryGetValue(index, out var info))
+            if (i >= ItemList.Count)
                 continue;
             if (index == SelectedIndex)
                 brush.Color = Color.Gold;
@@ -87,7 +87,7 @@ public partial class Selector : Displayer
                 brush.Color = BackColor;
             g.FillRectangle(brush, rect);
             brush.Color = FrontColor;
-            g.DrawString(info.WorldName, ItemFontData, brush, rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
+            g.DrawString(ItemList[i], ItemFontData, brush, rect, new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center });
             ItemRects.Add(rect);
         }
         brush.Color = FrontColor;
@@ -110,7 +110,7 @@ public partial class Selector : Displayer
     private void SetSize()
     {
         var height = Height - Padding.Height;
-        var itemCount = ArchiveInfoList.Count;
+        var itemCount = ItemList.Count;
         if (itemCount is 0)
             itemCount = 1;
         OffsetMax = Math.Max(0, itemCount * ItemHeight - height);

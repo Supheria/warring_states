@@ -10,6 +10,8 @@ partial class GamePlane
 {
     public delegate void DrawImageHandler();
 
+    public static Color SelectColor { get; } = Color.Red;
+
     bool DoDragGraph { get; set; } = false;
 
     Point DragStartPoint { get; set; } = new();
@@ -18,9 +20,9 @@ partial class GamePlane
 
     private void PointOnCell(GridCellPointedOnArgs args)
     {
-        var land = args.TerrainPoint.GetLand();
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.TerrainPoint.ToString()));
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.LandType.ToString()));
+        var land = args.Site.GetLand();
+        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.Site.ToString()));
+        //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.LandType.ToString()));
         LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
         //if (land is SourceLand sourceLand)
         //    LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
@@ -33,7 +35,7 @@ partial class GamePlane
         {
             DoDragGraph = true;
             DragStartPoint = e.Location;
-            GridDrawer.PointOnCell(e.Location);
+            GridDrawer.PointOnCell(e.Location, MouseOperates.LeftClick);
         }
     }
 
@@ -46,16 +48,27 @@ partial class GamePlane
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
+        MouseLocation = e.Location;
         if (DoDragGraph)
         {
             var dX = e.X - DragStartPoint.X;
             var dY = e.Y - DragStartPoint.Y;
             GridDrawer.OffsetOrigin(new(dX, dY));
             DragStartPoint = e.Location;
+            return;
         }
-        else
             // HACK: for test
-            GridDrawer.PointOnCell(e.Location);
+            GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
+        GridDrawer.RedrawSelectAsync(Image, BackColor, e.Location);
+        Invalidate();
+    }
+
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        MouseLocation = null;
+        Redraw();
+        Invalidate();
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -67,5 +80,16 @@ partial class GamePlane
         var dY = diffInHeight / GridDrawer.CellEdgeLength * ClientHeight / 200;
         GridDrawer.CellEdgeLength += e.Delta / 100 * Math.Max(ClientWidth, ClientHeight) / 200;
         GridDrawer.OffsetOrigin(new(dX, dY));
+    }
+
+    protected override void OnMouseDoubleClick(MouseEventArgs e)
+    {
+        base.OnMouseDoubleClick(e);
+        if (e.Button == MouseButtons.Left)
+        {
+            GridDrawer.PointOnCell(e.Location, MouseOperates.LeftDoubleClick);
+            GridDrawer.RedrawSelectAsync(Image, BackColor, e.Location);
+            Invalidate();
+        }
     }
 }

@@ -4,8 +4,6 @@ namespace WarringStates.Map;
 
 public abstract class Land : IRosterItem<Coordinate>
 {
-    public abstract LandTypes LandType { get; set; }
-
     public abstract Coordinate Site { get; set; }
 
     public abstract Color Color { get; }

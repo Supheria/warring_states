@@ -20,8 +20,6 @@ public partial class Overview : Displayer
 
     Rectangle FocusRect { get; set; }
 
-    List<Rectangle> FocusRects { get; } = [];
-
     Color FocusColor { get; set; } = Color.Red;
 
     Rectangle GridDrawRect { get; set; } = new();
@@ -52,31 +50,6 @@ public partial class Overview : Displayer
         }
     }
 
-    public override void EnableListener()
-    {
-        base.EnableListener();
-        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
-    }
-
-    public override void DisableListener()
-    {
-        base.DisableListener();
-        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
-    }
-
-    private void Relocate(GridRedrawArgs args)
-    {
-        if (Width is 0 || Height is 0)
-            return;
-        GridDrawRect = args.DrawRect;
-        GridOrigin = args.Origin;
-        BeginInvoke(() =>
-        {
-            Redraw();
-            Invalidate();
-        });
-    }
-
     public override void Redraw()
     {
         Image?.Dispose();
@@ -99,10 +72,10 @@ public partial class Overview : Displayer
         var widthRatio = Atlas.Width / (double)ClientWidth;
         var heightRatio = Atlas.Height / (double)ClientHeight;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
-        var focusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
+        FocusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);
         using var pen = new Pen(FocusColor, Math.Min(ClientWidth, ClientHeight) * 0.01f);
-        foreach (var rect in GeometryTool.CutRectLoopRectsInRange(focusRect, ClientRect))
+        foreach (var rect in GeometryTool.CutRectLoopRectsInRange(FocusRect, ClientRect))
         {
             g.DrawRectangle(pen, rect);
         }

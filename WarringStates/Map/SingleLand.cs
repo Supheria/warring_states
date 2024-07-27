@@ -2,9 +2,9 @@
 
 namespace WarringStates.Map;
 
-public class SingleLand(Coordinate point, LandTypes type) : Land
+public class SingleLand(Coordinate point, SingleLandTypes type) : Land
 {
-    public override LandTypes LandType { get; set; } = type;
+    public SingleLandTypes LandType { get; set; } = type;
 
     public override Coordinate Site { get; set; } = point;
 
@@ -12,7 +12,7 @@ public class SingleLand(Coordinate point, LandTypes type) : Land
 
     public override Color Color => Colors[LandType];
 
-    public SingleLand() : this(new(), LandTypes.Plain)
+    public SingleLand() : this(new(), SingleLandTypes.None)
     {
 
     }

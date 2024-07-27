@@ -4,10 +4,10 @@ public class SingleLandColors : ColorSelector
 {
     protected override Dictionary<Enum, Color> Colors { get; set; } = new()
     {
-        [LandTypes.None] = Color.White,
-        [LandTypes.Plain] = Color.LightYellow,
-        [LandTypes.Wood] = Color.LimeGreen,
-        [LandTypes.Stream] = Color.SkyBlue,
-        [LandTypes.Hill] = Color.DarkSlateGray,
+        [SingleLandTypes.None] = Color.Black,
+        [SingleLandTypes.Plain] = Color.LightYellow,
+        [SingleLandTypes.Wood] = Color.LimeGreen,
+        [SingleLandTypes.Stream] = Color.SkyBlue,
+        [SingleLandTypes.Hill] = Color.DarkSlateGray,
     };
 }

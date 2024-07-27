@@ -11,19 +11,13 @@ internal class Progressor : Displayer, IProgressor
 
     public Color BordColor { get; set; } = Color.Black;
 
-    public bool Progressing
-    {
-        get => Visible;
-        set => Visible = value;
-    }
-
     float Totol { get; set; } = 0f;
 
     int Now { get; set; } = 0;
 
     public Progressor()
     {
-        Progressing = false;
+        Visible = false;
     }
 
     public void Reset(int total)

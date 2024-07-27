@@ -1,10 +1,12 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
+using WarringStates.Flow;
 using WarringStates.Net.Common;
 using WarringStates.Server.Data;
 using WarringStates.Server.Map;
 using WarringStates.Server.User;
 using WarringStates.User;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WarringStates.Server.Net;
 
@@ -20,10 +22,15 @@ internal class PlayerGroup : IRosterItem<string>
 
     public int PlayerCount => Group.Count;
 
+    SpanFlow SpanFlow { get; } = new();
+
     internal PlayerGroup(ArchiveInfo archiveInfo)
     {
         ArchiveInfo = archiveInfo;
         LandMap = LocalArchive.InitializeLandMap(archiveInfo);
+        SpanFlow.Relocate(LocalArchive.LoadCurrentSpan(archiveInfo));
+        SpanFlow.Tick += UpdateCurrentDate;
+        SpanFlow.Start();
     }
 
     public void BroadcastMessage(string message)
@@ -55,12 +62,23 @@ internal class PlayerGroup : IRosterItem<string>
         {
             RemovePlayer(service);
         };
-        service.OnRelayCommand += RelayCommand;
+        service.PlayerGroup = this;
+        CheckNewPlayer(service);
         UpdatePlayerList();
+    }
+
+    private void CheckNewPlayer(ServerService service)
+    {
+        var owners = LocalArchive.GetOwnerSites(ArchiveInfo, service.Player.Id);
+        if (owners.Count is not 0)
+            return;
+        var owner = LandMap.SetRandomSite(service.Player.Id);
+        LocalArchive.SetOwnerSites(ArchiveInfo, owner.Site, owner.LandType, service.Player.Id);
     }
 
     public void RemovePlayer(ServerService service)
     {
+        service.PlayerGroup = null;
         if (Group.TryRemove(service))
             UpdatePlayerList();
     }
@@ -71,6 +89,14 @@ internal class PlayerGroup : IRosterItem<string>
         Parallel.ForEach(Group, service =>
         {
             service.UpdatePlayerList(playerList);
+        });
+    }
+
+    private void UpdateCurrentDate(SpanFlowTickOnArgs args)
+    {
+        Parallel.ForEach(Group, service =>
+        {
+            service.UpdateCurrentDate(args);
         });
     }
 }

@@ -109,11 +109,11 @@ partial class LocalArchive
         query.CreateTable<OwnerSite>(NameofOwnerSites);
     }
 
-    public static void SetOwnerSites(ArchiveInfo info, Coordinate site, LandTypes landType, string playerId)
+    public static void SetOwnerSites(ArchiveInfo info, Coordinate site, SourceLandTypes landType, string playerId)
     {
         using var query = GetArchiveQuery(info);
         query.CreateTable<OwnerSite>(NameofOwnerSites);
-        var ownerSite = new OwnerSite() { Site = site, Type = landType, PlayerId = playerId };
+        var ownerSite = new OwnerSite() { Site = site, LandType = landType, PlayerId = playerId };
         if (query.Exist(NameofOwnerSites, ownerSite))
             query.UpdateItem(NameofOwnerSites, ownerSite);
         else

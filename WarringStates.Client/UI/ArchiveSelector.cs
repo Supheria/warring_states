@@ -2,6 +2,7 @@
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Client.User;
+using WarringStates.Data;
 using WarringStates.UI;
 
 namespace WarringStates.Client.UI;
@@ -34,7 +35,7 @@ public partial class ArchiveSelector : Pannel
 
     ImageButton LoginButton { get; } = new()
     {
-        Text = "登录",
+        Text = Localize.Table.Login,
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
         CanSelect = true,
@@ -42,14 +43,14 @@ public partial class ArchiveSelector : Pannel
 
     ImageButton JoinButton { get; } = new()
     {
-        Text = "加入",
+        Text = Localize.Table.Join,
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
     };
 
     ImageButton LogoutButton { get; } = new()
     {
-        Text = "登出",
+        Text = Localize.Table.Logout,
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
     };
@@ -95,7 +96,7 @@ public partial class ArchiveSelector : Pannel
 
     private void RefreshSelector()
     {
-        Selector.ArchiveInfoList = LocalArchives.ArchiveInfoList;
+        Selector.ItemList = LocalArchives.ArchiveInfoList.Select(x => x.WorldName).ToList();
         Selector.Redraw();
         Selector.Invalidate();
     }

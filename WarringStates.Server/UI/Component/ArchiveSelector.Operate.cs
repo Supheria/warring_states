@@ -34,19 +34,19 @@ partial class ArchiveSelector
 
     private async void BuildButton_Click(object? sender, EventArgs e)
     {
-        if (Progressor.Progressing)
+        if (Progressor.Visible)
         {
             MessageBox.Show("world is in building");
             return;
         }
         var data = new AltitudeMapData(new(300, 300), new(3, 3), new(8, 8), RiverLayout.Types.Horizontal, 2.25, 60000, 0.66f);
         //var data = new AltitudeMapData(new(1000, 1000), new(6, 8), new(8, 8), RiverLayout.Types.ForwardSlash, 7, 650000, 0.75f);
-        Progressor.Progressing = true;
+        Progressor.Visible = true;
         SetSize();
         Invalidate(true);
         await Task.Run(() => LocalArchive.CreateArchive(data, "new world", Progressor));
         Selector.Redraw();
-        Progressor.Progressing = false;
+        Progressor.Visible = false;
         SetSize();
         Invalidate(true);
     }

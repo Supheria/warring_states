@@ -28,7 +28,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
+    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) /*where TArgs : ICallbackArgs*/
     {
         try
         {
@@ -64,7 +64,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : ICallbackArgs
+    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) /*where TArgs : ICallbackArgs*/
     {
         try
         {
@@ -90,7 +90,7 @@ public class LocalEvents
         return true;
     }
 
-    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : ICallbackArgs
+    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) /*where TArgs : ICallbackArgs*/
     {
         try
         {
@@ -138,6 +138,7 @@ public class LocalEvents
     {
         ArchiveListRefreshed,
         CurrentArchiveChange,
+        SourceLandTypesCanBuild,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

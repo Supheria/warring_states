@@ -4,12 +4,17 @@ using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 
-internal class OwnerSite()
+internal class OwnerSite(Coordinate site, SourceLandTypes type, string playerId)
 {
     [TableField(IsPrimaryKey = true)]
-    public Coordinate Site { get; set; } = new();
+    public Coordinate Site { get; set; } = site;
 
-    public LandTypes Type { get; set; } = LandTypes.None;
+    public SourceLandTypes LandType { get; set; } = type;
 
-    public string PlayerId { get; set; } = "";
+    public string PlayerId { get; set; } = playerId;
+
+    public OwnerSite() : this(new(), SourceLandTypes.None, "")
+    {
+
+    }
 }

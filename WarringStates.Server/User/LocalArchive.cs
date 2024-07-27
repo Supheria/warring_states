@@ -101,8 +101,8 @@ internal partial class LocalArchive
             WorldName = info.WorldName,
             WorldSize = landMap.WorldSize,
             CurrentSpan = LoadCurrentSpan(info),
-            VisibleLands = GetVisibleLands(info, landMap, playerId),
-            //VisibleLands = landMap.GetAllSingleLands(),
+            //VisibleLands = GetVisibleLands(info, landMap, playerId),
+            VisibleLands = landMap.GetAllSingleLands(),
         };
     }
 
@@ -112,7 +112,7 @@ internal partial class LocalArchive
         var ownerSites = GetOwnerSites(info, playerId);
         foreach (var ownerSite in ownerSites)
         {
-            landMap.GetRoundLands(ownerSite.Site, visibleLands);
+            landMap.GetSurroundLands(ownerSite.Site, visibleLands);
         }
         return visibleLands;
     }
@@ -126,7 +126,7 @@ internal partial class LocalArchive
         var ownerSites = GetOwnerSites(info);
         foreach (var ownerSite in ownerSites)
         {
-            if (!landMap.AddSouceLand(ownerSite.Site, ownerSite.Type))
+            if (!landMap.AddSouceLand(ownerSite.Site, ownerSite.LandType))
                 RemoveOwnerSite(info, ownerSite.Site);
         }
         return landMap;

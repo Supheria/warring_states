@@ -26,6 +26,8 @@ public partial class ClientService : NetService
         HandleCommands[CommandCode.Message] = HandleMessage;
         HandleCommands[CommandCode.Player] = HandlePlayer;
         HandleCommands[CommandCode.Archive] = HandleArchive;
+        HandleCommands[CommandCode.SpanFlow] = HandleTimer;
+        HandleCommands[CommandCode.Land] = HandleLand;
     }
 
     public override void HandleCommand(CommandReceiver receiver)

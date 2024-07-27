@@ -2,7 +2,7 @@
 
 public class GridData
 {
-    public double GuideLineWidth { get; set; } = 1.75;
+    public float GuideLineWidth { get; set; } = 1.75f;
 
     public Color GuideLineColor { get; set; } = Color.Red;
 

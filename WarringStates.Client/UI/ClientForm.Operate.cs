@@ -8,6 +8,7 @@ partial class ClientForm
     protected override void AddOperation()
     {
         base.AddOperation();
+        KeyPreview = true;
         SendButton.Click += SendButton_Click;
         FilePathButton.Click += FilePathButton_Click;
         UploadButton.Click += UploadButton_Click;
@@ -22,6 +23,12 @@ partial class ClientForm
         LocalNet.Service.OnProcessing += UpdateFormText;
         LocalNet.Service.OnUpdatePlayerList += Client_OnUpdateUserList;
         LocalEvents.TryAddListener(LocalEvents.UserInterface.StartGamePlay, StartGame);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.KeyPressed, e);
     }
 
     protected override void OnClosed(EventArgs e)

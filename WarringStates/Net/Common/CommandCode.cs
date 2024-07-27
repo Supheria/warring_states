@@ -13,4 +13,6 @@ public enum CommandCode : byte
     Archive = 8,
     Message = 9,
     Player = 10,
+    SpanFlow = 11,
+    Land = 12,
 }

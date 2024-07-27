@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Client.Events;
 using WarringStates.Client.UI.Component;
 
 namespace WarringStates.Client.UI;
@@ -6,6 +7,8 @@ namespace WarringStates.Client.UI;
 public partial class GamePlayer : Pannel
 {
     Settings Settings { get; } = new();
+
+    LandBuilder LandOperate { get; } = new();
 
     ToolBar ToolBar { get; } = new();
 
@@ -23,38 +26,12 @@ public partial class GamePlayer : Pannel
     {
         Controls.AddRange([
             Settings,
+            LandOperate,
             ToolBar,
             Overview,
             GamePlane,
             InfoBar,
         ]);
-        //Fortest();
-    }
-
-    //private void Fortest()
-    //{
-    //    var map = SerializeTool.DeserializeFile<AltitudeMap>(new(nameof(AltitudeMap)), new SsSignTable(), "altitude map");
-    //    Atlas.Relocate(map, new(1000));
-    //}
-
-    public override void EnableListener()
-    {
-        base.EnableListener();
-        Settings.EnableListener();
-        ToolBar.EnableListener();
-        GamePlane.EnableListener();
-        Overview.EnableListener();
-        InfoBar.EnableListener();
-    }
-
-    public override void DisableListener()
-    {
-        base.DisableListener();
-        Settings.DisableListener();
-        ToolBar.DisableListener();
-        GamePlane.DisableListener();
-        Overview.DisableListener();
-        InfoBar.DisableListener();
     }
 
     protected override void SetSize()
@@ -72,7 +49,7 @@ public partial class GamePlayer : Pannel
             ClientLeft,
             ToolBar.Bottom,
             ClientWidth,
-            Height - ToolBar.Height - InfoBar.Height
+            ClientHeight - ToolBar.Height - InfoBar.Height
             );
         //
         InfoBar.Bounds = new(
@@ -89,5 +66,13 @@ public partial class GamePlayer : Pannel
             ClientHeight - ToolBar.Height);
         //
         Settings.Bounds = ClientRect;
+        //
+        var width = ClientWidth / 3;
+        LandOperate.Bounds = new(
+            ClientRight - width,
+            ClientTop,
+            width,
+            ClientHeight
+            );
     }
 }

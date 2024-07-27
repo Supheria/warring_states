@@ -11,4 +11,6 @@ public enum OperateCode : byte
     Join = 6,
     Broadcast = 7,
     List = 8,
+    Update = 9,
+    Check = 10,
 }

@@ -1,6 +1,8 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Convert;
+using WarringStates.Flow;
 using WarringStates.Net.Common;
 using WarringStates.Server.User;
 using WarringStates.User;
@@ -9,11 +11,11 @@ namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    public event NetEventHandler<CommandReceiver>? OnRelayCommand;
-
     public event NetEventHandler<CommandReceiver>? OnRequestArchive;
 
     public event NetEventHandler<CommandReceiver>? OnJoinArchive;
+
+    public PlayerGroup? PlayerGroup { get; set; } = null;
 
     private void HandleHeartBeats(CommandReceiver receiver)
     {
@@ -79,7 +81,7 @@ partial class ServerService
                 SendCommand(sender);
             }
             else
-                OnRelayCommand?.Invoke(receiver);
+                PlayerGroup?.RelayCommand(receiver);
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -93,7 +95,7 @@ partial class ServerService
             else
             {
                 ReceiveCallback(receiver);
-                OnRelayCommand?.Invoke(receiver);
+                PlayerGroup?.RelayCommand(receiver);
             }
         }
         else if (operateCode is OperateCode.Broadcast)
@@ -122,21 +124,6 @@ partial class ServerService
     {
         try
         {
-            //var playerArchiveInfoList = new List<PlayerArchive>();
-            //var index = 0;
-            //while (LocalArchives.TryGetArchiveInfo(index, out var info))
-            //{
-            //    var players = info.LoadPlayers();
-            //    var sourceLands = info.LoadSourceLands();
-            //    if (!sourceLands.TryGetValue(Player.Id, out var ownLands))
-            //        ownLands = [];
-            //    var playerArchiveInfo = new PlayerArchive(info.Id, info.WorldName, info.WorldSize, players.Count, ownLands);
-            //    playerArchiveInfoList.Add(playerArchiveInfo);
-            //    index++;
-            //}
-            //var data = SerializeTool.Serialize(playerArchiveInfoList, new(ServiceKey.ArchiveList), SignTable, null);
-            //var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
-            //SendCommand(sender);
             var data = SerializeTool.Serialize(LocalArchive.Archives.ToArray(), new(), SignTable, null);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
             SendCommand(sender);
@@ -175,6 +162,47 @@ partial class ServerService
         catch (Exception ex)
         {
             this.HandleException(ex);
+        }
+    }
+
+    public void UpdateCurrentDate(SpanFlowTickOnArgs args)
+    {
+        try
+        {
+            var date = args.CurrentDate;
+            var format = ArrayString.ToArrayString(date.Year, date.Month, date.Day, date.Type);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.SpanFlow, (byte)OperateCode.Update)
+                .AppendArgs(ServiceKey.Date, format)
+                .AppendArgs(ServiceKey.Span, args.CurrentSpan);
+            SendCommand(sender);
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
+    }
+
+    private void HandleTimer(CommandReceiver receiver)
+    {
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Update)
+        {
+            ReceiveCallback(receiver);
+        }
+    }
+
+    private void HandleLand(CommandReceiver receiver)
+    {
+
+        var operateCode = (OperateCode)receiver.OperateCode;
+        if (operateCode is OperateCode.Check)
+        {
+            var site = receiver.GetArgs<Coordinate>(ServiceKey.Site) ??
+                throw new NetException(ServiceCode.MissingCommandArgs);
+            var types = PlayerGroup!.LandMap.CanBuildTypes(site);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
+                .AppendArgs(ServiceKey.List, types);
+            CallbackSuccess(sender);
         }
     }
 }

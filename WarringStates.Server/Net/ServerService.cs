@@ -4,6 +4,7 @@ using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Net.Sockets;
 using System.Text;
+using WarringStates.Flow;
 using WarringStates.Net;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -30,6 +31,8 @@ internal partial class ServerService : NetService, IRosterItem<string>
         HandleCommands[CommandCode.Message] = HandleMessage;
         HandleCommands[CommandCode.Player] = ReceiveCallback;
         HandleCommands[CommandCode.Archive] = HandleArchive;
+        HandleCommands[CommandCode.SpanFlow] = HandleTimer;
+        HandleCommands[CommandCode.Land] = HandleLand;
     }
 
     public override void HandleCommand(CommandReceiver receiver)

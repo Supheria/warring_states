@@ -1,11 +1,14 @@
 ﻿using LocalUtilities.TypeGeneral;
+using WarringStates.Client.UI;
 using WarringStates.Events;
 
 namespace WarringStates.Client.Events;
 
-public sealed class GridCellPointedOnArgs(Coordinate terrainPoint, Directions realPointOnPart) : ICallbackArgs
+public sealed class GridCellPointedOnArgs(MouseOperates mouseOperate, Coordinate site, Directions realPointOnPart) : ICallbackArgs
 {
-    public Coordinate TerrainPoint { get; } = terrainPoint;
+    public MouseOperates MouseOperate { get; set; } = mouseOperate;
+
+    public Coordinate Site { get; } = site;
 
     public Directions PointOnCellPart { get; } = realPointOnPart;
 }

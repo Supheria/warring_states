@@ -1,8 +1,11 @@
 ﻿using AltitudeMapGenerator;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Security.Policy;
 using System.Text;
 using WarringStates.Map;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace WarringStates.Server.Map;
 
@@ -16,13 +19,13 @@ internal class LandMapEx : LandMap
                 return sourceLand;
             if (SingleLands.TryGetValue(point, out var singleLand))
                 return singleLand;
-            return new SingleLand(point, LandTypes.Plain);
+            return new SingleLand(point, SingleLandTypes.Plain);
         }
     }
 
-    Dictionary<LandTypes, int> LandTypesCount { get; } = [];
+    Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
 
-    public bool AddSouceLand(Coordinate site, LandTypes landType)
+    public bool AddSouceLand(Coordinate site, SourceLandTypes landType)
     {
         var sourceLands = BuildSourceLands(site, landType);
         if (sourceLands.Count is 0)
@@ -31,7 +34,7 @@ internal class LandMapEx : LandMap
         return true;
     }
 
-    public string GetLandTypeCount(LandTypes type)
+    public string GetLandTypeCount(SingleLandTypes type)
     {
         var total = LandTypesCount.Values.Sum();
         if (LandTypesCount.TryGetValue(type, out var count))
@@ -51,9 +54,9 @@ internal class LandMapEx : LandMap
         WorldSize = worldSize;
         foreach (var point in landPoints)
         {
-            LandTypes type;
+            SingleLandTypes type;
             if (point.Type is PointTypes.River)
-                type = LandTypes.Stream;
+                type = SingleLandTypes.Stream;
             else
                 type = AltitudeFilter(point.AltitudeRatio, randomTable.Next());
             var singleLand = new SingleLand(point.Coordinate, type);
@@ -64,33 +67,33 @@ internal class LandMapEx : LandMap
                 LandTypesCount[type] = 1;
         }
         var area = WorldWidth * WorldHeight;
-        LandTypesCount[LandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is LandTypes.Plain ? 0 : x.Value);
+        LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
     }
 
-    private static LandTypes AltitudeFilter(double altitudeRatio, double random)
+    private static SingleLandTypes AltitudeFilter(double altitudeRatio, double random)
     {
         if (altitudeRatio.ApproxLessThan(0.05))
         {
             if (random.ApproxLessThan(0.33))
-                return LandTypes.Plain;
+                return SingleLandTypes.Plain;
             if (random.ApproxLessThan(0.9))
-                return LandTypes.Wood;
+                return SingleLandTypes.Wood;
         }
         else if (altitudeRatio.ApproxLessThan(0.15))
         {
             if (random.ApproxLessThan(0.33))
-                return LandTypes.Wood;
+                return SingleLandTypes.Wood;
             if (random.ApproxLessThan(0.95))
-                return LandTypes.Hill;
+                return SingleLandTypes.Hill;
         }
         else
         {
             if (random.ApproxLessThan(0.8))
-                return LandTypes.Hill;
+                return SingleLandTypes.Hill;
             if (random.ApproxLessThan(0.99))
-                return LandTypes.Wood;
+                return SingleLandTypes.Wood;
         }
-        return LandTypes.Stream;
+        return SingleLandTypes.Stream;
     }
 
     /// <summary>
@@ -99,35 +102,55 @@ internal class LandMapEx : LandMap
     /// <param name="site"></param>
     /// <param name="targetType"></param>
     /// <returns>return empty if build failed</returns>
-    public List<SourceLand> BuildSourceLands(Coordinate site, LandTypes targetType)
+    public List<SourceLand> BuildSourceLands(Coordinate site, SourceLandTypes targetType)
     {
-        if (!GetTerrains(site, out var counts, out var points))
+        if (!CheckSurround(site, out var counts, out var points))
             return [];
-        var canBuild = targetType switch
-        {
-            LandTypes.HorseLand => counts[LandTypes.Plain] + counts[LandTypes.Stream] is 9,
-            LandTypes.MineLand => counts[LandTypes.Wood] + counts[LandTypes.Hill] is 9,
-            LandTypes.FarmLand => counts[LandTypes.Plain] > 3,
-            LandTypes.MulberryLand => counts[LandTypes.Plain] > 3,
-            LandTypes.WoodLand => counts[LandTypes.Wood] > 3,
-            LandTypes.FishLand => counts[LandTypes.Stream] > 3,
-            LandTypes.TerraceLand => counts[LandTypes.Hill] > 3,
-            _ => false
-        };
+        var canBuild = CanBuild(targetType, counts);
         if (!canBuild)
             return [];
         return points.Select(p => new SourceLand(p.Key, p.Value, targetType)).ToList();
     }
 
-    private bool GetTerrains(Coordinate site, out Dictionary<LandTypes, int> counts, out Dictionary<Coordinate, Directions> points)
+    public SourceLandTypes[] CanBuildTypes(Coordinate site)
+    {
+        if (!CheckSurround(site, out var counts, out var points))
+            return [];
+        var result = new List<SourceLandTypes>();
+        foreach (var type in Enum.GetValues<SourceLandTypes>())
+        {
+            if (CanBuild(type, counts))
+                result.Add(type);
+        }
+        return result.ToArray();
+    }
+
+    private static bool CanBuild(SourceLandTypes type, Dictionary<SingleLandTypes, int> counts)
+    {
+        return type switch
+        {
+            SourceLandTypes.HorseLand => counts[SingleLandTypes.Plain] + counts[SingleLandTypes.Stream] is 9
+            && Math.Min(counts[SingleLandTypes.Plain], counts[SingleLandTypes.Stream]) is not 0,
+            SourceLandTypes.MineLand => counts[SingleLandTypes.Wood] + counts[SingleLandTypes.Hill] is 9
+            && Math.Min(counts[SingleLandTypes.Wood], counts[SingleLandTypes.Hill]) is not 0,
+            SourceLandTypes.FarmLand => counts[SingleLandTypes.Plain] > 3,
+            SourceLandTypes.MulberryLand => counts[SingleLandTypes.Plain] > 3,
+            SourceLandTypes.WoodLand => counts[SingleLandTypes.Wood] > 3,
+            SourceLandTypes.FishLand => counts[SingleLandTypes.Stream] > 3,
+            SourceLandTypes.TerraceLand => counts[SingleLandTypes.Hill] > 3,
+            _ => false
+        };
+    }
+
+    private bool CheckSurround(Coordinate site, out Dictionary<SingleLandTypes, int> counts, out Dictionary<Coordinate, Directions> points)
     {
         points = [];
         counts = new()
         {
-            [LandTypes.Plain] = 0,
-            [LandTypes.Stream] = 0,
-            [LandTypes.Wood] = 0,
-            [LandTypes.Hill] = 0,
+            [SingleLandTypes.Plain] = 0,
+            [SingleLandTypes.Stream] = 0,
+            [SingleLandTypes.Wood] = 0,
+            [SingleLandTypes.Hill] = 0,
         };
         var left = site.X - 1;
         var top = site.Y - 1;
@@ -160,7 +183,7 @@ internal class LandMapEx : LandMap
         return true;
     }
 
-    public void GetRoundLands(Coordinate site, VisibleLands visibleLands)
+    public void GetSurroundLands(Coordinate site, VisibleLands visibleLands)
     {
         var left = site.X - 2;
         var top = site.Y - 2;
@@ -207,5 +230,23 @@ internal class LandMapEx : LandMap
         var lands = new VisibleLands();
         SingleLands.ToList().ForEach(x => lands.AddLand(x));
         return lands;
+    }
+
+    public OwnerSite SetRandomSite(string playerId)
+    {
+        var random = new Random();
+        var gen = PointGenerator.GeneratePoint(random, 0, 0, WorldWidth, WorldHeight, 1);
+        var site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
+        var type = (SourceLandTypes)(random.Next() % 8);
+        var lands = BuildSourceLands(site, type);
+        while (lands.Count < 1)
+        {
+            gen = PointGenerator.GeneratePoint(random, 0, 0, WorldWidth, WorldHeight, 1);
+            site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
+            type = (SourceLandTypes)(random.Next() % 8);
+            lands = BuildSourceLands(site, type);
+        }
+        SourceLands.AddArange(lands);
+        return new(site, type, playerId);
     }
 }

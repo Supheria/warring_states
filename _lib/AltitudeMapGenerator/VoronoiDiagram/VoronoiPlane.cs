@@ -2,6 +2,7 @@
 using AltitudeMapGenerator.VoronoiDiagram.Data;
 using AltitudeMapGenerator.VoronoiDiagram.Model;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.VoronoiDiagram;
@@ -36,13 +37,14 @@ internal class VoronoiPlane(Size size)
             excludes[key] = site;
         }
         var sites = new List<Coordinate>();
+        var random = new Random();
         for (int i = 0; i < segmentNumber.Width; i++)
         {
             for (int j = 0; j < segmentNumber.Height; j++)
             {
                 if (excludes.ContainsKey((i, j)))
                     continue;
-                var (X, Y) = GeneratePoint(widthSegment * i, heightSegment * j, widthSegment * (i + 1), heightSegment * (j + 1), 1).First();
+                var (X, Y) = PointGenerator.GeneratePoint(random, widthSegment * i, heightSegment * j, widthSegment * (i + 1), heightSegment * (j + 1), 1).First();
                 sites.Add(new(X.ToRoundInt(), Y.ToRoundInt()));
             }
         }
@@ -50,38 +52,7 @@ internal class VoronoiPlane(Size size)
         return sites;
     }
 
-    public static List<(double X, double Y)> GeneratePoint(double minX, double minY, double maxX, double maxY, int count)
-    {
-        var sites = new List<(double X, double Y)>(count);
-        var random = new Random();
-        for (int i = 0; i < count; i++)
-        {
-            sites.Add(new(
-                nextGaussianRandom(random, minX, maxX),
-                nextGaussianRandom(random, minY, maxY)
-                ));
-        }
-        return sites;
-        double nextGaussianRandom(Random random, double min, double max)
-        {
-            // Box-Muller transform
-            // From: https://stackoverflow.com/a/218600
-            const double stdDev = 1.0 / 3.0; // this covers 99.73% of cases in (-1..1) range
-            var mid = (max + min) / 2;
-            do
-            {
-                var u1 = 1.0 - random.NextDouble(); //uniform(0,1] random doubles
-                var u2 = 1.0 - random.NextDouble();
-                var randStdNormal =
-                    Math.Sqrt(-2.0 * Math.Log(u1)) *
-                    Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
-                double value = stdDev * randStdNormal;
-                double coord = mid + value * mid;
-                if (coord > min && coord < max)
-                    return coord;
-            } while (true);
-        }
-    }
+    
 
     /// <summary>
     /// The generated sites are guaranteed not to lie on the border of the plane (although they may be very close).

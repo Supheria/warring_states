@@ -4,13 +4,13 @@ public class SourceLandColors : ColorSelector
 {
     protected override Dictionary<Enum, Color> Colors { get; set; } = new()
     {
-        [LandTypes.None] = Color.White,
-        [LandTypes.HorseLand] = Color.LightSalmon,
-        [LandTypes.MineLand] = Color.DarkSlateGray,
-        [LandTypes.FarmLand] = Color.Gold,
-        [LandTypes.MulberryLand] = Color.MediumPurple,
-        [LandTypes.WoodLand] = Color.ForestGreen,
-        [LandTypes.FishLand] = Color.RoyalBlue,
-        [LandTypes.TerraceLand] = Color.YellowGreen,
+        [SourceLandTypes.None] = Color.Black,
+        [SourceLandTypes.HorseLand] = Color.LightSalmon,
+        [SourceLandTypes.MineLand] = Color.DarkSlateGray,
+        [SourceLandTypes.FarmLand] = Color.Gold,
+        [SourceLandTypes.MulberryLand] = Color.MediumPurple,
+        [SourceLandTypes.WoodLand] = Color.ForestGreen,
+        [SourceLandTypes.FishLand] = Color.RoyalBlue,
+        [SourceLandTypes.TerraceLand] = Color.YellowGreen,
     };
 }

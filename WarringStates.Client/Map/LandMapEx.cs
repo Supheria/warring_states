@@ -13,7 +13,7 @@ internal class LandMapEx : LandMap
                 return sourceLand;
             if (SingleLands.TryGetValue(point, out var singleLand))
                 return singleLand;
-            return new SingleLand(point, LandTypes.None);
+            return new SingleLand(point, SingleLandTypes.None);
         }
     }
 

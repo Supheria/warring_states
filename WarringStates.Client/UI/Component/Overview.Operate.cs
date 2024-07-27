@@ -1,4 +1,5 @@
 ﻿using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 
 namespace WarringStates.Client.UI.Component;
@@ -12,6 +13,31 @@ partial class Overview
     Point DragStartPoint { get; set; } = new();
 
     public DrawImageHandler? OnDragImage { get; set; }
+
+    public override void EnableListener()
+    {
+        base.EnableListener();
+        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+    }
+
+    public override void DisableListener()
+    {
+        base.DisableListener();
+        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+    }
+
+    private void Relocate(GridRedrawArgs args)
+    {
+        if (Width is 0 || Height is 0)
+            return;
+        GridDrawRect = args.DrawRect;
+        GridOrigin = args.Origin;
+        BeginInvoke(() =>
+        {
+            Redraw();
+            Invalidate();
+        });
+    }
 
     protected override void OnMouseDoubleClick(MouseEventArgs e)
     {

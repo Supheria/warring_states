@@ -2,9 +2,9 @@
 
 namespace WarringStates.Map;
 
-public class SourceLand(Coordinate site, Directions direction, LandTypes type/*, List<Product> products*/) : Land
+public class SourceLand(Coordinate site, Directions direction, SourceLandTypes type/*, List<Product> products*/) : Land
 {
-    public override LandTypes LandType { get; set; } = type;
+    public SourceLandTypes LandType { get; set; } = type;
 
     //public Dictionary<Product.Types, Product> Products { get; } = [];
 
@@ -16,7 +16,7 @@ public class SourceLand(Coordinate site, Directions direction, LandTypes type/*,
 
     public Directions Direction { get; set; } = direction;
 
-    public SourceLand() : this(new(), Directions.None, LandTypes.None)
+    public SourceLand() : this(new(), Directions.None, SourceLandTypes.None)
     {
 
     }
