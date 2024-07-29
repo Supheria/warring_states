@@ -4,6 +4,7 @@ using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
+using WarringStates.Client.Map;
 using WarringStates.Client.UI;
 
 namespace WarringStates.Client.Graph;
@@ -37,6 +38,10 @@ public partial class GridDrawer : IInitializeable
     public static Size CellCenterSizeAddOnePadding { get; private set; } = new(CellCenterSize.Width + CellCenterPadding, CellCenterSize.Height + CellCenterPadding);
 
     public static Coordinate Origin { get; private set; } = new();
+
+    public static int GridWidth { get; private set; } = Atlas.Width * CellEdgeLength;
+
+    public static int GridHeight { get; private set; } = Atlas.Width * CellEdgeLength;
 
     public string InitializeName => nameof(GridDrawer);
 

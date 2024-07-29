@@ -10,6 +10,8 @@ partial class GamePlane
 {
     public delegate void DrawImageHandler();
 
+    public static Color FocusColor { get; } = Color.Red;
+
     public static Color SelectColor { get; } = Color.Red;
 
     bool DoDragGraph { get; set; } = false;
@@ -43,12 +45,12 @@ partial class GamePlane
     {
         base.OnMouseUp(e);
         DoDragGraph = false;
+        //GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor, e.Location);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
-        MouseLocation = e.Location;
         if (DoDragGraph)
         {
             var dX = e.X - DragStartPoint.X;
@@ -60,15 +62,6 @@ partial class GamePlane
             // HACK: for test
             GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
         GridDrawer.RedrawSelectAsync(Image, BackColor, e.Location);
-        Invalidate();
-    }
-
-    protected override void OnMouseLeave(EventArgs e)
-    {
-        base.OnMouseLeave(e);
-        MouseLocation = null;
-        Redraw();
-        Invalidate();
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)

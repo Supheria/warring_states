@@ -7,38 +7,35 @@ partial class GridDrawer
 {
     public sealed class Cell
     {
-        public static Coordinate GridOrigin { get; set; } = new();
+        private Coordinate GridPoint { get; }
 
-        public Rectangle RealRect { get; } 
+        public Coordinate Site { get; }
 
-        public Rectangle PartRealRect { get; private set; } = new();
+        public Directions Part { get; } = Directions.Center;
 
-        public Color PartShading { get; private set; } = new();
+        public Color PartShading { get; } = new();
 
-        public Coordinate Site { get; } 
-
-        public Directions Part { get; private set; }
-
-        public Cell(Coordinate latticePoint)
+        public Cell(Coordinate gridPoint)
         {
-            RealRect = GetRealRect(latticePoint);
-            Site = Atlas.SetPointWithin(latticePoint);
-            SetPart(Directions.Center);
+            GridPoint = gridPoint;
+            Site = Atlas.SetPointWithin(gridPoint);
+            Part = Directions.None;
+            PartShading = new();
         }
 
-        public Cell(Point realPoint) : this(RealPointToLatticePoint(realPoint))
+        public Cell(Point realPoint)
         {
-            SetPart(GetRealPointOnPart(realPoint));
+            GridPoint = RealPointToGridPoint(realPoint);
+            Site = Atlas.SetPointWithin(GridPoint);
+            Part = GetRealPointOnPart(realPoint);
+            PartShading = Part switch
+            {
+                Directions.Center => Color.Orange,
+                _ => Color.Gray,
+            };
         }
 
-        public void SetPart(Directions part)
-        {
-            Part = part;
-            PartRealRect = GetPartRealRect(part);
-            PartShading = GetCellPartShading(part);
-        }
-
-        private static Coordinate RealPointToLatticePoint(Point realPoint)
+        private static Coordinate RealPointToGridPoint(Point realPoint)
         {
             var dX = realPoint.X - Origin.X;
             var x = dX / CellEdgeLength;
@@ -51,74 +48,67 @@ partial class GridDrawer
             return new(x, y);
         }
 
-        private static Rectangle GetRealRect(Coordinate latticePoint)
+        private (int, int) GridPointToRealLeftTop()
         {
-            var sX = CellEdgeLength * latticePoint.X;
-            var x = sX + GridOrigin.X;
-            var sY = CellEdgeLength * latticePoint.Y;
-            var y = sY + GridOrigin.Y;
-            return new(x, y, CellEdgeLength, CellEdgeLength);
+            var x = (CellEdgeLength * GridPoint.X + Origin.X) % GridWidth;
+            if (x < -CellEdgeLength)
+                x += GridWidth;
+            else if (x > GridWidth - CellEdgeLength)
+                x -= GridWidth;
+            var y = (CellEdgeLength * GridPoint.Y + Origin.Y) % GridHeight;
+            if (y < -CellEdgeLength) 
+                y += GridHeight;
+            else if (y > GridHeight - CellEdgeLength)
+                y -= GridHeight;
+            return new(x, y);
         }
 
-        private Rectangle GetPartRealRect(Directions part)
+        public Rectangle GetBounds()
         {
-            var centerRealRect = new Rectangle(new(RealRect.Left + CellCenterPadding, RealRect.Top + CellCenterPadding), CellCenterSize);
+            var (left, top) = GridPointToRealLeftTop();
+            return new(left, top, CellEdgeLength, CellEdgeLength);
+        }
+
+        public Rectangle GetPartBounds(Directions part)
+        {
+            var (left, top) = GridPointToRealLeftTop();
+            var centerRealRect = new Rectangle(new(left + CellCenterPadding, top + CellCenterPadding), CellCenterSize);
             return part switch
             {
                 Directions.Center => centerRealRect,
-                Directions.Left => new Rectangle(RealRect.Left, centerRealRect.Top, CellCenterPadding, CellCenterSize.Height),
-                Directions.Top => new Rectangle(centerRealRect.Left, RealRect.Top, CellCenterSize.Width, CellCenterPadding),
+                Directions.Left => new Rectangle(left, centerRealRect.Top, CellCenterPadding, CellCenterSize.Height),
+                Directions.Top => new Rectangle(centerRealRect.Left, top, CellCenterSize.Width, CellCenterPadding),
                 Directions.Right => new Rectangle(centerRealRect.Right, centerRealRect.Top, CellCenterPadding, centerRealRect.Height),
                 Directions.Bottom => new Rectangle(centerRealRect.Left, centerRealRect.Bottom, centerRealRect.Width, CellCenterPadding),
-                Directions.LeftTop => new Rectangle(RealRect.Left, RealRect.Top, CellCenterPadding, CellCenterPadding),
-                Directions.TopRight => new Rectangle(centerRealRect.Right, RealRect.Top, CellCenterPadding, CellCenterPadding),
+                Directions.LeftTop => new Rectangle(left, top, CellCenterPadding, CellCenterPadding),
+                Directions.TopRight => new Rectangle(centerRealRect.Right, top, CellCenterPadding, CellCenterPadding),
                 Directions.BottomRight => new Rectangle(centerRealRect.Right, centerRealRect.Bottom, CellCenterPadding, CellCenterPadding),
-                Directions.LeftBottom => new Rectangle(RealRect.Left, centerRealRect.Bottom, CellCenterPadding, CellCenterPadding),
+                Directions.LeftBottom => new Rectangle(left, centerRealRect.Bottom, CellCenterPadding, CellCenterPadding),
                 _ => new()
             };
         }
 
         private Directions GetRealPointOnPart(Point realpoint)
         {
-            if (GetPartRealRect(Directions.Center).Contains(realpoint))
+            if (GetPartBounds(Directions.Center).Contains(realpoint))
                 return Directions.Center;
-            if (GetPartRealRect(Directions.Left).Contains(realpoint))
+            if (GetPartBounds(Directions.Left).Contains(realpoint))
                 return Directions.Left;
-            if (GetPartRealRect(Directions.Top).Contains(realpoint))
+            if (GetPartBounds(Directions.Top).Contains(realpoint))
                 return Directions.Top;
-            if (GetPartRealRect(Directions.Right).Contains(realpoint))
+            if (GetPartBounds(Directions.Right).Contains(realpoint))
                 return Directions.Right;
-            if (GetPartRealRect(Directions.Bottom).Contains(realpoint))
+            if (GetPartBounds(Directions.Bottom).Contains(realpoint))
                 return Directions.Bottom;
-            if (GetPartRealRect(Directions.LeftTop).Contains(realpoint))
+            if (GetPartBounds(Directions.LeftTop).Contains(realpoint))
                 return Directions.LeftTop;
-            if (GetPartRealRect(Directions.TopRight).Contains(realpoint))
+            if (GetPartBounds(Directions.TopRight).Contains(realpoint))
                 return Directions.TopRight;
-            if (GetPartRealRect(Directions.BottomRight).Contains(realpoint))
+            if (GetPartBounds(Directions.BottomRight).Contains(realpoint))
                 return Directions.BottomRight;
-            if (GetPartRealRect(Directions.LeftBottom).Contains(realpoint))
+            if (GetPartBounds(Directions.LeftBottom).Contains(realpoint))
                 return Directions.LeftBottom;
             return Directions.None;
         }
-
-        private Color GetCellPartShading(Directions direction)
-        {
-            if (CellPartShading.TryGetValue(Part, out var shading))
-                return shading;
-            return new();
-        }
-
-        private static Dictionary<Directions, Color> CellPartShading = new()
-        {
-            [Directions.Center] = Color.Orange,
-            [Directions.Left] = Color.Gray,
-            [Directions.Top] = Color.Gray,
-            [Directions.Right] = Color.Gray,
-            [Directions.Bottom] = Color.Gray,
-            [Directions.LeftTop] = Color.Gray,
-            [Directions.TopRight] = Color.Gray,
-            [Directions.LeftBottom] = Color.Gray,
-            [Directions.BottomRight] = Color.Gray,
-        };
     }
 }

@@ -6,9 +6,7 @@ namespace WarringStates.Client.UI.Component;
 
 public partial class GamePlane : Displayer
 {
-    public static Color FocusColor { get; } = Color.Red;
-
-    Point? MouseLocation { get; set; } = null;
+    //Point? MouseLocation { get; set; } = null;
 
     public override void EnableListener()
     {
@@ -34,7 +32,7 @@ public partial class GamePlane : Displayer
 
     private void BeginDrawGrid()
     {
-        GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor, MouseLocation);
+        GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor);
     }
 
     private void EndDrawGrid(GridRedrawArgs args)
