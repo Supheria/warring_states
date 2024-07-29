@@ -5,34 +5,30 @@ namespace WarringStates.Client.Graph;
 
 partial class GridDrawer
 {
-    public sealed class Cell
+    private sealed class Cell
     {
         private Coordinate GridPoint { get; }
 
-        public Coordinate Site { get; }
+        public Coordinate LandSite { get; }
 
-        public Directions Part { get; } = Directions.Center;
+        public Directions PointOnPart { get; } = Directions.Center;
 
         public Color PartShading { get; } = new();
 
         public Cell(Coordinate gridPoint)
         {
             GridPoint = gridPoint;
-            Site = Atlas.SetPointWithin(gridPoint);
-            Part = Directions.None;
+            LandSite = Atlas.SetPointWithin(gridPoint);
+            PointOnPart = Directions.None;
             PartShading = new();
         }
 
         public Cell(Point realPoint)
         {
             GridPoint = RealPointToGridPoint(realPoint);
-            Site = Atlas.SetPointWithin(GridPoint);
-            Part = GetRealPointOnPart(realPoint);
-            PartShading = Part switch
-            {
-                Directions.Center => Color.Orange,
-                _ => Color.Gray,
-            };
+            LandSite = Atlas.SetPointWithin(GridPoint);
+            PointOnPart = GetRealPointOnPart(realPoint);
+            PartShading = GetPartShading(PointOnPart); 
         }
 
         private static Coordinate RealPointToGridPoint(Point realPoint)
@@ -50,16 +46,16 @@ partial class GridDrawer
 
         private (int, int) GridPointToRealLeftTop()
         {
-            var x = (CellEdgeLength * GridPoint.X + Origin.X) % GridWidth;
-            if (x < -CellEdgeLength)
-                x += GridWidth;
-            else if (x > GridWidth - CellEdgeLength)
-                x -= GridWidth;
-            var y = (CellEdgeLength * GridPoint.Y + Origin.Y) % GridHeight;
-            if (y < -CellEdgeLength) 
-                y += GridHeight;
-            else if (y > GridHeight - CellEdgeLength)
-                y -= GridHeight;
+            var x = CellEdgeLength * GridPoint.X + Origin.X;
+            if (x < GridDrawRange.Left)
+                x += GridSize.Width;
+            else if (x > GridDrawRange.Right)
+                x -= GridSize.Width;
+            var y = CellEdgeLength * GridPoint.Y + Origin.Y;
+            if (y < GridDrawRange.Top)
+                y += GridSize.Height;
+            else if (y > GridDrawRange.Bottom)
+                y -= GridSize.Height;
             return new(x, y);
         }
 
@@ -109,6 +105,15 @@ partial class GridDrawer
             if (GetPartBounds(Directions.LeftBottom).Contains(realpoint))
                 return Directions.LeftBottom;
             return Directions.None;
+        }
+
+        private Color GetPartShading(Directions part)
+        {
+            return part switch
+            {
+                Directions.Center => Color.Orange,
+                _ => Color.Gray,
+            };
         }
     }
 }

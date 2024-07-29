@@ -61,7 +61,7 @@ partial class GamePlane
         }
             // HACK: for test
             GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
-        GridDrawer.RedrawSelectAsync(Image, BackColor, e.Location);
+        GridDrawer.DrawSelectAsync(Image, BackColor, e.Location);
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -81,7 +81,7 @@ partial class GamePlane
         if (e.Button == MouseButtons.Left)
         {
             GridDrawer.PointOnCell(e.Location, MouseOperates.LeftDoubleClick);
-            GridDrawer.RedrawSelectAsync(Image, BackColor, e.Location);
+            GridDrawer.DrawSelectAsync(Image, BackColor, e.Location);
             Invalidate();
         }
     }

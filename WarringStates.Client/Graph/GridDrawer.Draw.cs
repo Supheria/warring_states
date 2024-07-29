@@ -14,69 +14,52 @@ partial class GridDrawer
 {
     static Rectangle DrawRect { get; set; }
 
-    static bool IsDrawing { get; set; } = false;
-    static bool IsDrawingSelect { get; set; } = false;
+    static bool IsRedrawing { get; set; } = false;
 
     static bool IsWaiting { get; set; } = false;
-    static bool IsWaitingSelect { get; set; } = false;
 
-    //static Coordinate SelectCell { get; set; } = null;
+    static bool IsDrawingSelect { get; set; } = false;
+
+    static bool IsWaitingSelect { get; set; } = false;
 
     static Cell? LastSelectCell { get; set; } = null;
 
     public static void OffsetOrigin(Coordinate offset)
     {
-        GridWidth = Atlas.Width * CellEdgeLength;
-        GridHeight = Atlas.Height * CellEdgeLength;
-        var x = (Origin.X + offset.X) % GridWidth;
+        GridSize = new(Atlas.Width * CellEdgeLength, Atlas.Height * CellEdgeLength);
+        GridDrawRange = new(-CellEdgeLength, -CellEdgeLength, GridSize.Width, GridSize.Height);
+        var x = (Origin.X + offset.X) % GridSize.Width;
         if (x < 0)
-            x += GridWidth;
-        var y = (Origin.Y + offset.Y) % GridHeight;
+            x += GridSize.Width;
+        var y = (Origin.Y + offset.Y) % GridSize.Height;
         if (y < 0)
-            y += GridHeight;
+            y += GridSize.Height;
         Origin = new(x, y);
         LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginReset);
     }
 
-    public static async void RedrawAsync(int width, int height, Color backColor/*, Point? select*/)
+    public static async void RedrawAsync(int width, int height, Color backColor)
     {
         if (width <= 0 || height <= 0)
             return;
-        //if (select is not null)
-        //    SelectCell = new(select.Value);
-        if (IsDrawing)
+        if (IsRedrawing)
         {
             IsWaiting = true;
             return;
         }
-        IsDrawing = true;
+        IsRedrawing = true;
         var source = new Bitmap(width, height);
         DrawRect = new(new(0, 0), source.Size);
-        //LastSelectCell = null;
         await Task.Run(() => Redraw(source, backColor));
         var sendArgs = new GridRedrawArgs(source, DrawRect, Origin);
         LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
-        IsDrawing = false;
+        IsRedrawing = false;
         if (IsWaiting)
         {
-            RedrawAsync(width, height, backColor/*, select*/);
+            RedrawAsync(width, height, backColor);
             IsWaiting = false;
         }
     }
-
-    //public static void Redraw(int width, int height, Color backColor, Point? select)
-    //{
-    //    if (select is not null)
-    //        SelectCell = new(select.Value);
-    //    IsDrawing = true;
-    //    var source = new Bitmap(width, height);
-    //    DrawRect = new(new(0, 0), source.Size);
-    //    LastSelectCell = null;
-    //    Redraw(source, backColor);
-    //    var sendArgs = new GridRedrawArgs(source, DrawRect, Origin);
-    //    LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
-    //    IsDrawing = false;
-    //}
 
     private static void Redraw(Image source, Color backColor)
     {
@@ -89,7 +72,7 @@ partial class GridDrawer
             for (var j = 0; j < size.Height; j++)
             {
                 var cell = new Cell(new(i - offset.X, j - offset.Y));
-                var land = Atlas.GetLand(cell.Site);
+                var land = Atlas.GetLand(cell.LandSite);
                 DrawLand(g, land, cell);
             }
         }
@@ -98,7 +81,7 @@ partial class GridDrawer
         DrawGuideLine(g);
     }
 
-    public static async void RedrawSelectAsync(Image image, Color backColor, Point select)
+    public static async void DrawSelectAsync(Image image, Color backColor, Point select)
     {
         if (IsDrawingSelect)
         {
@@ -107,8 +90,8 @@ partial class GridDrawer
         }
         var cell = new Cell(select);
         if (LastSelectCell is not null &&
-            LastSelectCell.Site == cell.Site &&
-            LastSelectCell.Part == cell.Part)
+            LastSelectCell.LandSite == cell.LandSite &&
+            LastSelectCell.PointOnPart == cell.PointOnPart)
             return;
         IsDrawingSelect = true;
         var source = (Image)image.Clone();
@@ -120,22 +103,21 @@ partial class GridDrawer
         IsDrawingSelect = false;
         if (IsWaiting)
         {
-            RedrawSelectAsync(image, backColor, select);
+            DrawSelectAsync(image, backColor, select);
             IsWaitingSelect = false;
         }
     }
 
     private static void DrawSelect(Image source, Color backColor, Cell selectCell, Cell? lastSelectCell)
     {
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("select bounds", selectCell.GetBounds().ToArrayString()));
         using var g = Graphics.FromImage(source);
         if (lastSelectCell is not null)
         {
             g.FillRectangle(new SolidBrush(backColor), lastSelectCell.GetBounds());
-            var lastLand = Atlas.GetLand(lastSelectCell.Site);
+            var lastLand = Atlas.GetLand(lastSelectCell.LandSite);
             DrawLand(g, lastLand, lastSelectCell);
         }
-        if (!GeometryTool.CutRectInRange(selectCell.GetPartBounds(selectCell.Part), DrawRect, out var rect))
+        if (!GeometryTool.CutRectInRange(selectCell.GetPartBounds(selectCell.PointOnPart), DrawRect, out var rect))
             return;
         var pSource = new PointBitmap((Bitmap)source);
         pSource.LockBits();

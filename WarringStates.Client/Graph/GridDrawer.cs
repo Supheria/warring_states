@@ -39,9 +39,9 @@ public partial class GridDrawer : IInitializeable
 
     public static Coordinate Origin { get; private set; } = new();
 
-    public static int GridWidth { get; private set; } = Atlas.Width * CellEdgeLength;
+    public static Size GridSize { get; private set; } = new(Atlas.Width * CellEdgeLength, Atlas.Height * CellEdgeLength);
 
-    public static int GridHeight { get; private set; } = Atlas.Width * CellEdgeLength;
+    public static Rectangle GridDrawRange { get; private set; } = new(-CellEdgeLength, -CellEdgeLength, GridSize.Width, GridSize.Height);
 
     public string InitializeName => nameof(GridDrawer);
 
@@ -73,37 +73,7 @@ public partial class GridDrawer : IInitializeable
     public static void PointOnCell(Point realPoint, MouseOperates mouseOperate)
     {
         var cell = new Cell(realPoint);
-        var sendArgs = new GridCellPointedOnArgs(mouseOperate, cell.Site, cell.Part);
+        var sendArgs = new GridCellPointedOnArgs(mouseOperate, cell.LandSite, cell.PointOnPart);
         LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnCell, sendArgs);
     }
-
-    //private static Coordinate RealPointToLatticePoint(Point realPoint)
-    //{
-    //    var dX = realPoint.X - Origin.X;
-    //    var x = dX / CellEdgeLength;
-    //    if (dX < 0)
-    //        x--;
-    //    var dY = realPoint.Y - Origin.Y;
-    //    var y = dY / CellEdgeLength;
-    //    if (dY < 0)
-    //        y--;
-    //    return new(x, y);
-    //}
-
-    //public void Serialize(SsSerializer serializer)
-    //{
-    //    serializer.WriteTag(nameof(Origin), Origin.ToString());
-    //    serializer.WriteObject(GridData);
-    //    serializer.WriteObject(CellData);
-    //    serializer.WriteTag(nameof(CellEdgeLength), CellEdgeLength.ToString());
-    //}
-
-    //public void Deserialize(SsDeserializer deserializer)
-    //{
-    //    Origin = deserializer.ReadTag(nameof(Origin), Coordinate.Parse);
-    //    OriginOffset = Origin;
-    //    deserializer.ReadObject(GridData);
-    //    deserializer.ReadObject(CellData);
-    //    CellEdgeLength = deserializer.ReadTag(nameof(CellEdgeLength), int.Parse);
-    //}
 }
