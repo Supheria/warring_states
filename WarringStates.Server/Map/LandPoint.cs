@@ -5,7 +5,7 @@ namespace WarringStates.Server.Map;
 
 public class LandPoint(Coordinate coordinate, double altitudeRatio, PointTypes type)
 {
-    [TableField(IsPrimaryKey = true)]
+    [TableField(IsPrimaryKey = true, Name = "Site")]
     public Coordinate Coordinate { get; private set; } = coordinate;
 
     public double AltitudeRatio { get; private set; } = altitudeRatio;

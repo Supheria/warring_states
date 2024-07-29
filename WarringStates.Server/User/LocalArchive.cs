@@ -101,8 +101,8 @@ internal partial class LocalArchive
             WorldName = info.WorldName,
             WorldSize = landMap.WorldSize,
             CurrentSpan = LoadCurrentSpan(info),
-            //VisibleLands = GetVisibleLands(info, landMap, playerId),
-            VisibleLands = landMap.GetAllSingleLands(),
+            VisibleLands = GetVisibleLands(info, landMap, playerId),
+            //VisibleLands = landMap.GetAllSingleLands(),
         };
     }
 
