@@ -28,7 +28,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) /*where TArgs : ICallbackArgs*/
+    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : EventArgs
     {
         try
         {
@@ -64,7 +64,7 @@ public class LocalEvents
         }
     }
 
-    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) /*where TArgs : ICallbackArgs*/
+    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : EventArgs
     {
         try
         {
@@ -90,7 +90,7 @@ public class LocalEvents
         return true;
     }
 
-    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) /*where TArgs : ICallbackArgs*/
+    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : EventArgs
     {
         try
         {
@@ -116,8 +116,9 @@ public class LocalEvents
         ClearValue,
     }
 
-    public enum Global
+    public enum Map
     {
+        AtlasUpdate,
     }
 
     public enum Graph
@@ -130,7 +131,7 @@ public class LocalEvents
         PointOnCell,
         GridOriginToOffset,
         GridOriginToReset,
-        GridOriginReset,
+        GridReset,
 
     }
 
@@ -138,7 +139,7 @@ public class LocalEvents
     {
         ArchiveListRefreshed,
         CurrentArchiveChange,
-        SourceLandTypesCanBuild,
+        SourceLandCanBuild,
 
         GamePlayControlOnDraw,
         SettingsOnSetBounds,

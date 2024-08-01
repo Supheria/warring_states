@@ -17,14 +17,14 @@ internal partial class ServerService : NetService, IRosterItem<string>
 
     public string TimeStamp { get; } = DateTime.Now.ToString(DateTimeFormat.Data);
 
-    protected override DaemonThread DaemonThread { get; init; }
+    protected DaemonThread DaemonThread { get; init; }
 
     public string Signature => Player.Id;
 
     public ServerService() : base(new ServerProtocol())
     {
         DaemonThread = new(ConstTabel.SocketTimeoutMilliseconds, CheckTimeout);
-        HandleCommands[CommandCode.HeartBeats] = HandleHeartBeats;
+        Protocol.OnDisposed += DaemonThread.Stop;
         HandleCommands[CommandCode.Login] = HandleLogin;
         HandleCommands[CommandCode.UploadFile] = HandleUploadFile;
         HandleCommands[CommandCode.DownloadFile] = HandleDownloadFile;

@@ -2,7 +2,7 @@
 
 partial class Selector
 {
-    public event EventHandler? SelectedChanged;
+    public event EventHandler? IndexChanged;
 
     enum DragPart
     {
@@ -34,7 +34,7 @@ partial class Selector
             SelectedIndex = -1;
         Redraw();
         Invalidate();
-        SelectedChanged?.Invoke(this, EventArgs.Empty);
+        IndexChanged?.Invoke(this, EventArgs.Empty);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)

@@ -28,7 +28,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback)/* where TArgs : ICallbackArgs*/
+    public static bool TryAddListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : EventArgs
     {
         try
         {
@@ -64,7 +64,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback)/* where TArgs : ICallbackArgs*/
+    public static bool TryRemoveListener<TArgs>(Enum eventType, Callback<TArgs> callback) where TArgs : EventArgs
     {
         try
         {
@@ -97,7 +97,7 @@ internal static class LocalEvents
         }
     }
 
-    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) /*where TArgs : ICallbackArgs*/
+    public static bool TryBroadcast<TArgs>(Enum eventType, TArgs args) where TArgs : EventArgs
     {
         try
         {

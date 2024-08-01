@@ -42,7 +42,7 @@ public partial class Selector : Displayer
         set
         {
             _selectedIndex = value < 0 ? -1 : value;
-            SelectedChanged?.Invoke(this, EventArgs.Empty);
+            IndexChanged?.Invoke(this, EventArgs.Empty);
         }
     }
     int _selectedIndex = -1;

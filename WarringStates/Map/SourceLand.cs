@@ -1,12 +1,11 @@
 ﻿using LocalUtilities.TypeGeneral;
+using System.Linq;
 
 namespace WarringStates.Map;
 
 public class SourceLand(Coordinate site, Directions direction, SourceLandTypes type/*, List<Product> products*/) : Land
 {
     public SourceLandTypes LandType { get; set; } = type;
-
-    //public Dictionary<Product.Types, Product> Products { get; } = [];
 
     public override Coordinate Site { get; set; } = site;
 
@@ -19,5 +18,52 @@ public class SourceLand(Coordinate site, Directions direction, SourceLandTypes t
     public SourceLand() : this(new(), Directions.None, SourceLandTypes.None)
     {
 
+    }
+
+    public Coordinate[] GetAllSites()
+    {
+        var leftTop = GetLeftTopSite();
+        var sites = new List<Coordinate>();
+        for (var i = 0; i < 3; i++)
+        {
+            for (var j = 0; j < 3; j++)
+            {
+                sites.Add(new(leftTop.X + i, leftTop.Y + j));
+            }
+        }
+        return sites.ToArray();
+    }
+
+    private Coordinate GetLeftTopSite()
+    {
+        return Direction switch
+        {
+            Directions.Center => Site - (1, 1),
+            Directions.Left => Site - (0, 1),
+            Directions.Top => Site - (1, 0),
+            Directions.Right => Site - (2, 1),
+            Directions.Bottom => Site - (1, 2),
+            Directions.LeftTop => Site,
+            Directions.TopRight => Site - (2, 0),
+            Directions.LeftBottom => Site - (0, 2),
+            Directions.BottomRight => Site - (2, 2),
+            _ => Site
+        };
+    } 
+
+    public Coordinate GetCenterSite()
+    {
+        return Direction switch
+        {
+            Directions.Left => Site + (1, 0),
+            Directions.Top => Site + (0, 1),
+            Directions.Right => Site - (1, 0),
+            Directions.Bottom => Site - (0, 1),
+            Directions.LeftTop => Site + (1, 1),
+            Directions.TopRight => Site + (1, -1),
+            Directions.LeftBottom => Site + (1, -1),
+            Directions.BottomRight => Site - (1, 1),
+            _ => Site
+        };
     }
 }

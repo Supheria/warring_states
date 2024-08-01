@@ -1,28 +1,13 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
+using WarringStates.Map;
 
 namespace WarringStates.Client.UI.Component;
 
 public partial class GamePlane : Displayer
 {
     //Point? MouseLocation { get; set; } = null;
-
-    public override void EnableListener()
-    {
-        base.EnableListener();
-        LocalEvents.TryAddListener(LocalEvents.Graph.GridOriginReset, BeginDrawGrid);
-        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
-        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
-    }
-
-    public override void DisableListener()
-    {
-        base.DisableListener();
-        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridOriginReset, BeginDrawGrid);
-        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
-        LocalEvents.TryRemoveListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
-    }
 
     public override void Redraw()
     {
@@ -32,13 +17,16 @@ public partial class GamePlane : Displayer
 
     private void BeginDrawGrid()
     {
-        GridDrawer.RedrawAsync(ClientWidth, ClientHeight, BackColor);
+        GridDrawer.Redraw(ClientSize, BackColor);
     }
 
     private void EndDrawGrid(GridRedrawArgs args)
     {
-        Image?.Dispose();
-        Image = args.Source;
-        Update();
+        Invoke(() =>
+        {
+            Image?.Dispose();
+            Image = (Image)args.Source.Clone();
+            Update();
+        });
     }
 }

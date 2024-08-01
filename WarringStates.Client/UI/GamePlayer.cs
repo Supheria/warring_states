@@ -8,7 +8,7 @@ public partial class GamePlayer : Pannel
 {
     Settings Settings { get; } = new();
 
-    LandBuilder LandOperate { get; } = new();
+    LandBuilder LandBuilder { get; } = new();
 
     ToolBar ToolBar { get; } = new();
 
@@ -26,7 +26,7 @@ public partial class GamePlayer : Pannel
     {
         Controls.AddRange([
             Settings,
-            LandOperate,
+            LandBuilder,
             ToolBar,
             Overview,
             GamePlane,
@@ -68,8 +68,8 @@ public partial class GamePlayer : Pannel
         Settings.Bounds = ClientRect;
         //
         var width = ClientWidth / 3;
-        LandOperate.Bounds = new(
-            ClientRight - width,
+        LandBuilder.Bounds = new(
+            ClientLeft,
             ClientTop,
             width,
             ClientHeight

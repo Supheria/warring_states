@@ -1,5 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using WarringStates.Client.Events;
 using WarringStates.Map;
 using WarringStates.User;
 
@@ -34,6 +35,12 @@ public static class Atlas
     public static Coordinate SetPointWithin(Coordinate Point)
     {
         return LandMap.SetPointWithin(Point);
+    }
+
+    public static void AddVision(VisibleLands vision)
+    {
+        LandMap.AddVision(vision);
+        LocalEvents.TryBroadcast(LocalEvents.Map.AtlasUpdate);
     }
 
     public static Bitmap GetOverview(Size size)

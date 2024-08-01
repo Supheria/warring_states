@@ -74,14 +74,14 @@ internal class TestForm : ResizeableForm
         Dock = DockStyle.Fill,
     };
 
-    public class StringInfo(string name, string info) : ICallbackArgs
+    public class StringInfo(string name, string info) : EventArgs
     {
         public string Name { get; } = name;
 
         public string Info { get; } = info;
     }
 
-    public class ValueInfo(string name, int value) : ICallbackArgs
+    public class ValueInfo(string name, int value) : EventArgs
     {
         public string Name { get; } = name;
 

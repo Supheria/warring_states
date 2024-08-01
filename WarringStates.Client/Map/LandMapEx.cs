@@ -25,4 +25,10 @@ internal class LandMapEx : LandMap
         SourceLands.AddArange(visibleLands.SourceLands);
         WorldSize = worldSize;
     }
+
+    public void AddVision(VisibleLands visibleLands)
+    {
+        SingleLands.AddArange(visibleLands.SingleLands);
+        SourceLands.AddArange(visibleLands.SourceLands);
+    }
 }

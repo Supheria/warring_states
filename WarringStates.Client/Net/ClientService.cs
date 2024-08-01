@@ -14,11 +14,8 @@ public partial class ClientService : NetService
 {
     AutoResetEvent LoginDone { get; } = new(false);
 
-    protected override DaemonThread DaemonThread { get; init; }
-
     public ClientService() : base(new ClientProtocol())
     {
-        DaemonThread = new(ConstTabel.HeartBeatsInterval, HeartBeats);
         HandleCommands[CommandCode.HeartBeats] = ReceiveCallback;
         HandleCommands[CommandCode.Login] = HandleLogin;
         HandleCommands[CommandCode.UploadFile] = HandleUploadFile;

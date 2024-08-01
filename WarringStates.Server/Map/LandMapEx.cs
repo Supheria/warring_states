@@ -2,6 +2,7 @@
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using WarringStates.Map;
@@ -25,15 +26,6 @@ internal class LandMapEx : LandMap
 
     Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
 
-    public bool AddSouceLand(Coordinate site, SourceLandTypes landType)
-    {
-        var sourceLands = BuildSourceLands(site, landType);
-        if (sourceLands.Count is 0)
-            return false;
-        sourceLands.ForEach(s => SourceLands.TryAdd(s));
-        return true;
-    }
-
     public string GetLandTypeCount(SingleLandTypes type)
     {
         var total = LandTypesCount.Values.Sum();
@@ -49,7 +41,7 @@ internal class LandMapEx : LandMap
             return "0";
     }
 
-    internal LandMapEx(Size worldSize, RandomTable randomTable, List<LandPoint> landPoints)
+    public LandMapEx(Size worldSize, RandomTable randomTable, List<LandPoint> landPoints)
     {
         WorldSize = worldSize;
         foreach (var point in landPoints)
@@ -68,6 +60,11 @@ internal class LandMapEx : LandMap
         }
         var area = WorldWidth * WorldHeight;
         LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
+    }
+
+    public LandMapEx()
+    {
+
     }
 
     private static SingleLandTypes AltitudeFilter(double altitudeRatio, double random)
@@ -96,13 +93,34 @@ internal class LandMapEx : LandMap
         return SingleLandTypes.Stream;
     }
 
+    public void RemoveSourceLand(SourceLand sourceLand)
+    {
+        var sites = sourceLand.GetAllSites();
+    }
+
+    public bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
+    {
+        var surrounds = GetSurrounds(site, targetType);
+        if (surrounds.Count is not 9)
+            return false;
+        foreach (var land in surrounds)
+        {
+            if (!SourceLands.TryAdd(land))
+            {
+                surrounds.ForEach(s => SourceLands.TryRemove(s));
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="site"></param>
     /// <param name="targetType"></param>
     /// <returns>return empty if build failed</returns>
-    public List<SourceLand> BuildSourceLands(Coordinate site, SourceLandTypes targetType)
+    private List<SourceLand> GetSurrounds(Coordinate site, SourceLandTypes targetType)
     {
         if (!CheckSurround(site, out var counts, out var points))
             return [];
@@ -112,7 +130,21 @@ internal class LandMapEx : LandMap
         return points.Select(p => new SourceLand(p.Key, p.Value, targetType)).ToList();
     }
 
-    public SourceLandTypes[] CanBuildTypes(Coordinate site)
+    public void GetVision(Coordinate site, VisibleLands vision)
+    {
+        var left = site.X - 2;
+        var top = site.Y - 2;
+        for (var i = 0; i < 5; i++)
+        {
+            for (var j = 0; j < 5; j++)
+            {
+                var point = SetPointWithin(new(left + i, top + j));
+                vision.AddLand(this[point]);
+            }
+        }
+    }
+
+    public SourceLandTypes[] GetCanBuildTypes(Coordinate site)
     {
         if (!CheckSurround(site, out var counts, out var points))
             return [];
@@ -183,20 +215,6 @@ internal class LandMapEx : LandMap
         return true;
     }
 
-    public void GetSurroundLands(Coordinate site, VisibleLands visibleLands)
-    {
-        var left = site.X - 2;
-        var top = site.Y - 2;
-        for (var i = 0; i < 5; i++)
-        {
-            for (var j = 0; j < 5; j++)
-            {
-                var point = SetPointWithin(new(left + i, top + j));
-                visibleLands.AddLand(this[point]);
-            }
-        }
-    }
-
     public static List<LandPoint> ConvertLandPoints(AltitudeMap altitudeMap)
     {
         var landPoints = new Dictionary<Coordinate, LandPoint>();
@@ -238,13 +256,13 @@ internal class LandMapEx : LandMap
         var gen = PointGenerator.GeneratePoint(random, 0, 0, WorldWidth, WorldHeight, 1);
         var site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
         var type = (SourceLandTypes)(random.Next() % 8);
-        var lands = BuildSourceLands(site, type);
+        var lands = GetSurrounds(site, type);
         while (lands.Count < 1)
         {
             gen = PointGenerator.GeneratePoint(random, 0, 0, WorldWidth, WorldHeight, 1);
             site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
             type = (SourceLandTypes)(random.Next() % 8);
-            lands = BuildSourceLands(site, type);
+            lands = GetSurrounds(site, type);
         }
         SourceLands.AddArange(lands);
         return new(site, type, playerId);

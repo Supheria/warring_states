@@ -13,22 +13,18 @@ namespace WarringStates.Client.UI.Component;
 
 internal partial class LandBuilder
 {
-    Coordinate PointOnCellSite { get; set; } = new();
-
-    SourceLandTypes[] CanbuildTypes { get; set; } = [];
+    SourceLandCanBuildArgs BuildArgs { get; set; } = new();
 
     public override void EnableListener()
     {
         base.EnableListener();
-        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
-        LocalEvents.TryAddListener<SourceLandTypes[]>(LocalEvents.UserInterface.SourceLandTypesCanBuild, ShowCanBuildTypes);
+        LocalEvents.TryAddListener<SourceLandCanBuildArgs>(LocalEvents.UserInterface.SourceLandCanBuild, ShowCanBuildTypes);
     }
 
     public override void DisableListener()
     {
         base.DisableListener();
-        LocalEvents.TryRemoveListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
-        LocalEvents.TryRemoveListener<SourceLandTypes[]>(LocalEvents.UserInterface.SourceLandTypesCanBuild, ShowCanBuildTypes);
+        LocalEvents.TryRemoveListener<SourceLandCanBuildArgs>(LocalEvents.UserInterface.SourceLandCanBuild, ShowCanBuildTypes);
     }
 
     protected override void AddOperation()
@@ -36,17 +32,31 @@ internal partial class LandBuilder
         base.AddOperation();
         CloseButton.Click += CloseButton_Click;
         BuildButton.Click += BuildButton_Click;
+        BuildTypeSelector.IndexChanged += BuildTypeSelector_IndexChanged;
+    }
+
+    private void BuildTypeSelector_IndexChanged(object? sender, EventArgs e)
+    {
+        if (BuildTypeSelector.SelectedIndex is -1)
+            BuildButton.CanSelect = false;
+        else
+            BuildButton.CanSelect = true;
     }
 
     private void BuildButton_Click(object? sender, EventArgs e)
     {
-        LocalNet.Service.CheckBuildLand(PointOnCellSite);
+        LocalNet.Service.BuildLand(BuildArgs.Site, BuildArgs.CanbuildTypes[BuildTypeSelector.SelectedIndex]);
     }
 
-    private void ShowCanBuildTypes(SourceLandTypes[] types)
+    private void ShowCanBuildTypes(SourceLandCanBuildArgs args)
     {
-        CanbuildTypes = types;
-        BeginInvoke(Relocate);
+        BeginInvoke(() =>
+        {
+            Visible = true;
+            Bounds = Range;
+            BuildArgs = args;
+            Relocate();
+        });
     }
 
     private void CloseButton_Click(object? sender, EventArgs e)
@@ -55,32 +65,16 @@ internal partial class LandBuilder
         Bounds = Range;
     }
 
-    private void PointOnCell(GridCellPointedOnArgs args)
-    {
-        if (args.MouseOperate is MouseOperates.LeftDoubleClick)
-        {
-            Visible = true;
-            Bounds = Range;
-            PointOnCellSite = args.Site;
-            LocalNet.Service.CheckBuildLand(PointOnCellSite);
-        }
-    }
-
     public void Relocate()
     {
-        if (CanbuildTypes.Length is 0)
-        {
-            BuildButton.CanSelect = false;
+        if (BuildArgs.CanbuildTypes.Length is 0)
             BuildButton.Text = Localize.Table.NoBuildableType;
-        }
         else
-        {
-            BuildButton.CanSelect = true;
             BuildButton.Text = Localize.Table.BuildLand;
-        }
         BuildButton.Redraw();
         BuildButton.Invalidate();
-        BuildTypeSelector.ItemList = CanbuildTypes.Select(x => Localize.Table.ConvertEnum(x)).ToList();
+        BuildTypeSelector.ItemList = BuildArgs.CanbuildTypes.Select(x => Localize.Table.ConvertEnum(x)).ToList();
+        BuildTypeSelector.SelectedIndex = -1;
         BuildTypeSelector.Redraw();
         BuildTypeSelector.Invalidate();
     }

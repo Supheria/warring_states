@@ -112,7 +112,7 @@ internal partial class LocalArchive
         var ownerSites = GetOwnerSites(info, playerId);
         foreach (var ownerSite in ownerSites)
         {
-            landMap.GetSurroundLands(ownerSite.Site, visibleLands);
+            landMap.GetVision(ownerSite.Site, visibleLands);
         }
         return visibleLands;
     }

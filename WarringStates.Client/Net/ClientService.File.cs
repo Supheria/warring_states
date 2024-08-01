@@ -24,7 +24,7 @@ partial class ClientService
             };
             HandleUploadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Request)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                .AppendArgs(ServiceKey.Args, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -48,7 +48,7 @@ partial class ClientService
             };
             HandleDownloadStart();
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Request)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                .AppendArgs(ServiceKey.Args, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -91,7 +91,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.Args) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             var fileStream = new FileStream(fileArgs.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var autoFile = new AutoDisposeFileStream(fileStream, fileArgs.StartTime);
             if (!AutoFiles.TryAdd(autoFile))
@@ -99,7 +99,7 @@ partial class ClientService
             fileArgs.FileLength = autoFile.Length;
             fileArgs.PacketLength = autoFile.Length > DataLengthMax ? DataLengthMax : autoFile.Length;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                .AppendArgs(ServiceKey.Args, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -112,7 +112,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.Args) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, fileArgs.FilePath);
             var data = new byte[fileArgs.PacketLength];
@@ -121,7 +121,7 @@ partial class ClientService
             fileArgs.FileLength = autoFile.Length;
             fileArgs.FilePosition = autoFile.Position;
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.UploadFile, (byte)OperateCode.Continue, data, 0, count)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                .AppendArgs(ServiceKey.Args, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -134,7 +134,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.Args) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, fileArgs.FilePath);
             autoFile.Dispose();
@@ -150,7 +150,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.Args) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             File.Delete(fileArgs.FilePath);
             var fileStream = new FileStream(fileArgs.FilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
             var autoFile = new AutoDisposeFileStream(fileStream, fileArgs.StartTime);
@@ -158,7 +158,7 @@ partial class ClientService
             if (!AutoFiles.TryAdd(autoFile))
                 throw new NetException(ServiceCode.CannotAddFileToProcess, fileArgs.FilePath);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
-                .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                .AppendArgs(ServiceKey.Args, fileArgs);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -171,7 +171,7 @@ partial class ClientService
     {
         try
         {
-            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.FileTransferArgs) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
+            var fileArgs = receiver.GetArgs<FileTransferArgs>(ServiceKey.Args) ?? throw new NetException(ServiceCode.MissingCommandArgs, nameof(FileTransferArgs));
             if (!AutoFiles.TryGetValue(fileArgs.StartTime, out var autoFile))
                 throw new NetException(ServiceCode.FileExpired, fileArgs.FilePath);
             autoFile.Write(receiver.Data);
@@ -183,7 +183,7 @@ partial class ClientService
             {
                 HandleDownloading(fileArgs.FileLength, autoFile.Position);
                 var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Continue)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                    .AppendArgs(ServiceKey.Args, fileArgs);
                 SendCommand(sender);
             }
             else
@@ -192,7 +192,7 @@ partial class ClientService
                 HandleDownloaded(fileArgs.StartTime);
                 var startTime = BitConverter.GetBytes(fileArgs.StartTime.ToBinary());
                 var sender = new CommandSender(DateTime.Now, (byte)CommandCode.DownloadFile, (byte)OperateCode.Finish)
-                    .AppendArgs(ServiceKey.FileTransferArgs, fileArgs);
+                    .AppendArgs(ServiceKey.Args, fileArgs);
                 SendCommand(sender);
             }
         }

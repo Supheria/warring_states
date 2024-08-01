@@ -1,14 +1,19 @@
 ﻿//#define MOUSE_DRAG_FREE
 
+using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
+using WarringStates.Client.Net;
+using WarringStates.Map;
 
 namespace WarringStates.Client.UI.Component;
 
 partial class GamePlane
 {
     public delegate void DrawImageHandler();
+
+    Coordinate PointOnCellSite { get; set; } = new();
 
     public static Color FocusColor { get; } = Color.Red;
 
@@ -20,14 +25,38 @@ partial class GamePlane
 
     public DrawImageHandler? OnDragImage { get; set; }
 
+    public override void EnableListener()
+    {
+        base.EnableListener();
+        LocalEvents.TryAddListener(LocalEvents.Graph.GridReset, BeginDrawGrid);
+        LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
+        LocalEvents.TryAddListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
+        LocalEvents.TryAddListener<SourceLandCanBuildArgs>(LocalEvents.UserInterface.SourceLandCanBuild, ShowCanBuildTypes);
+        LocalEvents.TryAddListener(LocalEvents.Map.AtlasUpdate, BeginDrawGrid);
+    }
+
+    public override void DisableListener()
+    {
+        base.DisableListener();
+        LocalEvents.TryRemoveListener(LocalEvents.Graph.GridReset, BeginDrawGrid);
+        LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, EndDrawGrid);
+        LocalEvents.TryRemoveListener<GridCellPointedOnArgs>(LocalEvents.Graph.PointOnCell, PointOnCell);
+        LocalEvents.TryRemoveListener<SourceLandCanBuildArgs>(LocalEvents.UserInterface.SourceLandCanBuild, ShowCanBuildTypes);
+        LocalEvents.TryRemoveListener(LocalEvents.Map.AtlasUpdate, BeginDrawGrid);
+    }
+
+    private void ShowCanBuildTypes(SourceLandCanBuildArgs args)
+    {
+        GridDrawer.DrawFocus(ClientSize, BackColor, args.Site);
+    }
+
     private void PointOnCell(GridCellPointedOnArgs args)
     {
-        var land = args.Site.GetLand();
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("point", args.Site.ToString()));
-        //LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("terrain", land.LandType.ToString()));
-        LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("cell part", args.PointOnCellPart.ToString()));
-        //if (land is SourceLand sourceLand)
-        //    LocalEvents.TryBroadcast(LocalEvents.Test.AddSingleInfo, new TestForm.StringInfo("land part", sourceLand[args.TerrainPoint].ToString()));
+        if (args.MouseOperate is MouseOperates.LeftDoubleClick)
+        {
+            PointOnCellSite = args.Site;
+            LocalNet.Service.CheckBuildLand(PointOnCellSite);
+        }
     }
 
     protected override void OnMouseDown(MouseEventArgs e)
@@ -61,7 +90,7 @@ partial class GamePlane
         }
             // HACK: for test
             GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
-        GridDrawer.DrawSelectAsync(Image, BackColor, e.Location);
+        GridDrawer.DrawSelect(ClientSize, BackColor, e.Location);
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -81,7 +110,7 @@ partial class GamePlane
         if (e.Button == MouseButtons.Left)
         {
             GridDrawer.PointOnCell(e.Location, MouseOperates.LeftDoubleClick);
-            GridDrawer.DrawSelectAsync(Image, BackColor, e.Location);
+            GridDrawer.DrawSelect(ClientSize, BackColor, e.Location);
             Invalidate();
         }
     }

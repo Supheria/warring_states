@@ -1,6 +1,7 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Flow;
+using WarringStates.Map;
 using WarringStates.Net.Common;
 using WarringStates.Server.Data;
 using WarringStates.Server.Map;
@@ -24,13 +25,19 @@ internal class PlayerGroup : IRosterItem<string>
 
     SpanFlow SpanFlow { get; } = new();
 
-    internal PlayerGroup(ArchiveInfo archiveInfo)
+    public PlayerGroup(ArchiveInfo archiveInfo)
     {
         ArchiveInfo = archiveInfo;
         LandMap = LocalArchive.InitializeLandMap(archiveInfo);
         SpanFlow.Relocate(LocalArchive.LoadCurrentSpan(archiveInfo));
         SpanFlow.Tick += UpdateCurrentDate;
         SpanFlow.Start();
+    }
+
+    public PlayerGroup()
+    {
+        ArchiveInfo = new();
+        LandMap = new();
     }
 
     public void BroadcastMessage(string message)
@@ -96,7 +103,18 @@ internal class PlayerGroup : IRosterItem<string>
     {
         Parallel.ForEach(Group, service =>
         {
-            service.UpdateCurrentDate(args);
+            if (service.Joined)
+                service.UpdateCurrentDate(args);
         });
+    }
+
+    public bool BuildLand(Coordinate site, SourceLandTypes type, string playerId, out VisibleLands vision)
+    {
+        vision = new();
+        if (!LandMap.AddSouceLand(site, type))
+            return false;
+        LocalArchive.SetOwnerSites(ArchiveInfo, site, type, playerId);
+        LandMap.GetVision(site, vision);
+        return true;
     }
 }

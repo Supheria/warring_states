@@ -73,7 +73,7 @@ public partial class GridDrawer : IInitializeable
     public static void PointOnCell(Point realPoint, MouseOperates mouseOperate)
     {
         var cell = new Cell(realPoint);
-        var sendArgs = new GridCellPointedOnArgs(mouseOperate, cell.LandSite, cell.PointOnPart);
+        var sendArgs = new GridCellPointedOnArgs(mouseOperate, cell.Site, cell.PointOnPart);
         LocalEvents.TryBroadcast(LocalEvents.Graph.PointOnCell, sendArgs);
     }
 }

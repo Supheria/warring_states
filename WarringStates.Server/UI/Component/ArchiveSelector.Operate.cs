@@ -13,7 +13,7 @@ partial class ArchiveSelector
         BuildButton.Click += BuildButton_Click;
         SwitchButton.Click += SwitchButton_Click;
         DeleteButton.Click += DeleteButton_Click;
-        Selector.SelectedChanged += Selector_SelectedChanged;
+        Selector.IndexChanged += Selector_SelectedChanged;
         LocalNet.Server.OnStart += Server_OnStart; ;
         LocalNet.Server.OnClose += Server_OnClose; ;
     }

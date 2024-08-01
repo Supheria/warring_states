@@ -26,7 +26,7 @@ public class ToolBar : Displayer
     private void SetDate(SpanFlowTickOnArgs args)
     {
         CurrentDate = args.CurrentDate;
-        BeginInvoke(() =>
+        Invoke(() =>
         {
             Redraw();
             Invalidate();

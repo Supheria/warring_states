@@ -12,16 +12,15 @@ partial class ArchiveSelector
         LoginButton.Click += (_, _) => LocalNet.Login();
         LogoutButton.Click += (_, _) => LocalNet.Logout();
         JoinButton.Click += JoinButton_Click;
-        Selector.SelectedChanged += Selector_SelectedChanged;
+        Selector.IndexChanged += Selector_SelectedChanged;
         LocalNet.Service.OnLogined += Service_OnLogined;
         LocalNet.Service.OnClosed += Service_OnClosed;
     }
 
     private void JoinButton_Click(object? sender, EventArgs e)
     {
-        if (LocalArchives.CurrentArchive is null)
-            return;
-        LocalNet.Service.JoinArchive(LocalArchives.CurrentArchive.ArchiveId);
+        if (LocalArchives.CurrentArchive is not null)
+            LocalNet.Service.JoinArchive(LocalArchives.CurrentArchive.ArchiveId);
     }
 
     private void Service_OnLogined()

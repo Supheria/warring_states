@@ -1,20 +1,18 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Convert;
 using LocalUtilities.TypeToolKit.Graph;
-using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.Client.UI;
 using WarringStates.Map;
-using static WarringStates.Client.Graph.GridDrawer;
 
 namespace WarringStates.Client.Graph;
 
 partial class GridDrawer
 {
+    static Coordinate DrawOrigin { get; set; } = new();
+
     static Rectangle DrawRect { get; set; }
 
-    static bool IsRedrawing { get; set; } = false;
+    static bool IsDrawing { get; set; } = false;
 
     static bool IsWaiting { get; set; } = false;
 
@@ -22,7 +20,15 @@ partial class GridDrawer
 
     static bool IsWaitingSelect { get; set; } = false;
 
-    static Cell? LastSelectCell { get; set; } = null;
+    static bool IsDrawingFocus { get; set; } = false;
+
+    static bool IsWaitingFocus { get; set; } = false;
+
+    static Cell? SelectCell { get; set; } = null;
+
+    static Cell? FocusCell { get; set; } = null;
+
+    static Color FocusColor { get; set; } = Color.Red;
 
     public static void OffsetOrigin(Coordinate offset)
     {
@@ -35,25 +41,49 @@ partial class GridDrawer
         if (y < 0)
             y += GridSize.Height;
         Origin = new(x, y);
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridOriginReset);
+        LocalEvents.TryBroadcast(LocalEvents.Graph.GridReset);
     }
 
-    public static async void RedrawAsync(int width, int height, Color backColor)
+    public static void Redraw(Size imageSize, Color backColor)
+    {
+        RedrawAsync(imageSize.Width, imageSize.Height, backColor);
+    }
+
+    public static void DrawSelect(Size imageSize, Color backColor, Point select)
+    {
+        var cell = new Cell(select);
+        if (SelectCell?.Site == cell.Site && SelectCell?.PointOnPart == cell.PointOnPart)
+            return;
+        SelectCell = cell;
+        RedrawAsync(imageSize.Width, imageSize.Height, backColor);
+    }
+
+    public static void DrawFocus(Size imageSize, Color backColor, Coordinate? select)
+    {
+        var cell = select is null ? null : new Cell(select);
+        if (FocusCell?.Site == cell?.Site)
+            return;
+        FocusCell = cell;
+        RedrawAsync(imageSize.Width, imageSize.Height, backColor);
+    }
+
+    private static async void RedrawAsync(int width, int height, Color backColor)
     {
         if (width <= 0 || height <= 0)
             return;
-        if (IsRedrawing)
+        if (IsDrawing)
         {
             IsWaiting = true;
             return;
         }
-        IsRedrawing = true;
-        var source = new Bitmap(width, height);
+        IsDrawing = true;
+        using var source = new Bitmap(width, height);
         DrawRect = new(new(0, 0), source.Size);
+        DrawOrigin = Origin;
         await Task.Run(() => Redraw(source, backColor));
         var sendArgs = new GridRedrawArgs(source, DrawRect, Origin);
         LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
-        IsRedrawing = false;
+        IsDrawing = false;
         if (IsWaiting)
         {
             RedrawAsync(width, height, backColor);
@@ -64,6 +94,27 @@ partial class GridDrawer
     private static void Redraw(Image source, Color backColor)
     {
         using var g = Graphics.FromImage(source);
+        DrawGrid(source, backColor);
+        if (SelectCell is not null)
+        {
+            DrawCellShading(source, SelectCell.GetPartBounds(SelectCell.PointOnPart), SelectCell.PartShading);
+        }
+        if (FocusCell is not null)
+        {
+            var rect = FocusCell.GetBounds();
+            if (!rect.IsEmpty)
+            {
+                var x = rect.Left + rect.Width / 2;
+                var y = rect.Top + rect.Height / 2;
+                DrawCrossLine(g, x, y, GridData.FocusLineColor, GridData.FocusLineWidth);
+            }
+        }
+        DrawCrossLine(g, DrawOrigin.X, DrawOrigin.Y, GridData.GuideLineColor, GridData.GuideLineWidth);
+    }
+
+    private static void DrawGrid(Image source, Color backColor)
+    {
+        using var g = Graphics.FromImage(source);
         g.Clear(backColor);
         var size = new Size(DrawRect.Width / CellEdgeLength + 2, DrawRect.Height / CellEdgeLength + 2);
         var offset = new Coordinate(Origin.X / CellEdgeLength + 1, Origin.Y / CellEdgeLength + 1);
@@ -72,53 +123,23 @@ partial class GridDrawer
             for (var j = 0; j < size.Height; j++)
             {
                 var cell = new Cell(new(i - offset.X, j - offset.Y));
-                var land = Atlas.GetLand(cell.LandSite);
-                DrawLand(g, land, cell);
+                DrawCell(g, cell);
             }
         }
-        if (LastSelectCell is not null)
-            DrawSelect(source, backColor, LastSelectCell, null);
-        DrawGuideLine(g);
     }
 
-    public static async void DrawSelectAsync(Image image, Color backColor, Point select)
+    private static void DrawCell(Graphics g, Cell cell)
     {
-        if (IsDrawingSelect)
-        {
-            IsWaitingSelect = true;
-            return;
-        }
-        var cell = new Cell(select);
-        if (LastSelectCell is not null &&
-            LastSelectCell.LandSite == cell.LandSite &&
-            LastSelectCell.PointOnPart == cell.PointOnPart)
-            return;
-        IsDrawingSelect = true;
-        var source = (Image)image.Clone();
-        DrawRect = new(new(0, 0), source.Size);
-        await Task.Run(() => DrawSelect(source, backColor, cell, LastSelectCell));
-        LastSelectCell = cell;
-        var sendArgs = new GridRedrawArgs(source, DrawRect, Origin);
-        LocalEvents.TryBroadcast(LocalEvents.Graph.GridRedraw, sendArgs);
-        IsDrawingSelect = false;
-        if (IsWaiting)
-        {
-            DrawSelectAsync(image, backColor, select);
-            IsWaitingSelect = false;
-        }
+        if (cell.Land is SingleLand singleLand && singleLand.LandType is not SingleLandTypes.None)
+            g.FillRectangle(new SolidBrush(cell.Land.Color), cell.GetPartBounds(Directions.Center));
+        else if (cell.Land is SourceLand sourceLand && sourceLand.LandType is not SourceLandTypes.None)
+            g.FillRectangle(new SolidBrush(cell.Land.Color), cell.GetBoundsInDirection(sourceLand.Direction));
+        else
+            g.DrawRectangle(new Pen(cell.Land.Color), cell.GetPartBounds(Directions.Center));
     }
 
-    private static void DrawSelect(Image source, Color backColor, Cell selectCell, Cell? lastSelectCell)
+    private static void DrawCellShading(Image source, Rectangle rect, Color shading)
     {
-        using var g = Graphics.FromImage(source);
-        if (lastSelectCell is not null)
-        {
-            g.FillRectangle(new SolidBrush(backColor), lastSelectCell.GetBounds());
-            var lastLand = Atlas.GetLand(lastSelectCell.LandSite);
-            DrawLand(g, lastLand, lastSelectCell);
-        }
-        if (!GeometryTool.CutRectInRange(selectCell.GetPartBounds(selectCell.PointOnPart), DrawRect, out var rect))
-            return;
         var pSource = new PointBitmap((Bitmap)source);
         pSource.LockBits();
         for (var i = 0; i < rect.Width; i++)
@@ -127,55 +148,16 @@ partial class GridDrawer
             {
                 var x = rect.Left + i;
                 var y = rect.Top + j;
-                var color = BitmapTool.GetMixedColor(pSource.GetPixel(x, y), selectCell.PartShading);
-                pSource.SetPixel(x, y, color);
+                pSource.SetPixel(x, y, BitmapTool.GetMixedColor(pSource.GetPixel(x, y), shading));
             }
         }
         pSource.UnlockBits();
     }
 
-    private static void DrawLand(Graphics g, Land land, Cell cell)
+    private static void DrawCrossLine(Graphics g, int x, int y, Color color, float witdh)
     {
-        if (land is SingleLand singleLand && singleLand.LandType is not SingleLandTypes.None)
-        {
-            if (GeometryTool.CutRectInRange(cell.GetPartBounds(Directions.Center), DrawRect, out var rect))
-                g.FillRectangle(new SolidBrush(land.Color), rect);
-        }
-        else if (land is SourceLand sourceLand && sourceLand.LandType is not SourceLandTypes.None)
-        {
-            if (GeometryTool.CutRectInRange(GetSourceLandBounds(sourceLand.Direction, cell), DrawRect, out var rect))
-                g.FillRectangle(new SolidBrush(land.Color), rect);
-        }
-        else
-        {
-            if (GeometryTool.CutRectInRange(cell.GetPartBounds(Directions.Center), DrawRect, out var rect))
-                g.DrawRectangle(new Pen(land.Color), rect);
-        }
-    }
-
-    private static Rectangle GetSourceLandBounds(Directions direction, Cell cell)
-    {
-        var bounds = cell.GetBounds();
-        var centerBounds = cell.GetPartBounds(Directions.Center);
-        return direction switch
-        {
-            Directions.LeftTop => new(new(centerBounds.Left, centerBounds.Top), CellCenterSizeAddOnePadding),
-            Directions.Top => new(bounds.Left, centerBounds.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-            Directions.TopRight => new(new(bounds.Left, centerBounds.Top), CellCenterSizeAddOnePadding),
-            Directions.Left => new(centerBounds.Left, bounds.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-            Directions.Center => bounds,
-            Directions.Right => new(bounds.Left, bounds.Top, CellCenterSizeAddOnePadding.Width, CellEdgeLength),
-            Directions.LeftBottom => new(new(centerBounds.Left, bounds.Top), CellCenterSizeAddOnePadding),
-            Directions.Bottom => new(bounds.Left, bounds.Top, CellEdgeLength, CellCenterSizeAddOnePadding.Height),
-            Directions.BottomRight => new(new(bounds.Left, bounds.Top), CellCenterSizeAddOnePadding),
-            _ => new()
-        };
-    }
-
-    private static void DrawGuideLine(Graphics g)
-    {
-        using var pen = new Pen(GridData.GuideLineColor, GridData.GuideLineWidth);
-        g.DrawLine(pen, new(Origin.X, DrawRect.Top), new(Origin.X, DrawRect.Bottom));
-        g.DrawLine(pen, new(DrawRect.Left, Origin.Y), new(DrawRect.Right, Origin.Y));
+        using var pen = new Pen(color, witdh);
+        g.DrawLine(pen, new(x, DrawRect.Top), new(x, DrawRect.Bottom));
+        g.DrawLine(pen, new(DrawRect.Left, y), new(DrawRect.Right, y));
     }
 }

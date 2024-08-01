@@ -36,8 +36,6 @@ public abstract class NetService : INetLogger
 
     protected AutoDisposeItemCollection<AutoDisposeFileStream> AutoFiles { get; } = [];
 
-    protected abstract DaemonThread DaemonThread { get; init; }
-
     protected Protocol Protocol { get; }
 
     protected Dictionary<CommandCode, CommandHandler> HandleCommands { get; } = [];
@@ -52,20 +50,22 @@ public abstract class NetService : INetLogger
         {
             foreach (var autoFile in AutoFiles)
                 autoFile.Dispose();
-            DaemonThread.Stop();
             IsLogined = false;
             this.HandleLog("close");
             OnClosed?.Invoke();
         };
-        Protocol.OnReceiveCommand += ReceiveCommand;
+        Protocol.OnReceiveCommand += ReceiveAsync;
     }
 
-    private void ReceiveCommand(CommandReceiver receiver)
+    private void ReceiveAsync(CommandReceiver receiver)
     {
         try
         {
             if ((CommandCode)receiver.CommandCode is not CommandCode.ComposeCommand)
-                throw new NetException(ServiceCode.WrongCommandFormat);
+            {
+                HandleCommand(receiver);
+                return;
+            }
             var operateCode = (OperateCode)receiver.OperateCode;
             if (operateCode is OperateCode.Start)
             {
@@ -98,18 +98,14 @@ public abstract class NetService : INetLogger
         }
     }
 
-    public abstract void HandleCommand(CommandReceiver receiver);
-
-    public abstract string GetLog(string message);
-
-    public void Dispose()
-    {
-        Protocol.Dispose();
-    }
-
     private void SendAsync(CommandSender sender)
     {
         var packet = sender.GetPacket();
+        if (packet.Length <= CommandLengthMax)
+        {
+            Protocol.SendAsync(sender);
+            return;
+        }
         var timeStamp = sender.TimeStamp;
         var commandInfo = new byte[2] { sender.CommandCode, sender.OperateCode };
         sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Start, commandInfo, 0, 2);
@@ -124,6 +120,15 @@ public abstract class NetService : INetLogger
         }
         sender = new CommandSender(timeStamp, (byte)CommandCode.ComposeCommand, (byte)OperateCode.Finish);
         Protocol.SendAsync(sender);
+    }
+
+    public abstract void HandleCommand(CommandReceiver receiver);
+
+    public abstract string GetLog(string message);
+
+    public void Dispose()
+    {
+        Protocol.Dispose();
     }
 
     /// <summary>
@@ -175,6 +180,7 @@ public abstract class NetService : INetLogger
         if (callbackCode is ServiceCode.Success)
             return;
         var errorMessage = receiver.GetArgs<string>(ServiceKey.ErrorMessage);
+        // TODO: classify and handle different exception types
         throw new NetException(callbackCode, errorMessage);
     }
 

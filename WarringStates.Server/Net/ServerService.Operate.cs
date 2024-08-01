@@ -2,7 +2,9 @@
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Convert;
+using WarringStates.Data;
 using WarringStates.Flow;
+using WarringStates.Map;
 using WarringStates.Net.Common;
 using WarringStates.Server.User;
 using WarringStates.User;
@@ -15,31 +17,25 @@ partial class ServerService
 
     public event NetEventHandler<CommandReceiver>? OnJoinArchive;
 
-    public PlayerGroup? PlayerGroup { get; set; } = null;
+    public PlayerGroup PlayerGroup { get; set; } = new();
 
-    private void HandleHeartBeats(CommandReceiver receiver)
-    {
-        var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-        CallbackSuccess(sender);
-    }
+    public bool Joined { get; private set; } = false;
 
     private void HandleLogin(CommandReceiver receiver)
     {
         try
         {
             if (IsLogined)
-                throw new NetException(ServiceCode.UserAlreadyLogined);
-            var name = receiver.GetArgs<string>(ServiceKey.UserName);
+                throw new NetException(ServiceCode.PlayerAlreadyLogined);
+            var name = receiver.GetArgs<string>(ServiceKey.Name);
             var password = receiver.GetArgs<string>(ServiceKey.Password);
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(password))
-                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.UserName, ServiceKey.Password);
             if (!LocalNet.CheckLogin(name, password, out var player, out var code))
                 throw new NetException(code);
             Player = player;
             IsLogined = true;
             HandleLogined();
-            var data = SerializeTool.Serialize(Player, new(), SignTable, null);
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
+                .AppendArgs(ServiceKey.Player, Player);
             CallbackSuccess(sender);
             UpdateArchiveList();
         }
@@ -110,8 +106,8 @@ partial class ServerService
     {
         try
         {
-            var data = SerializeTool.Serialize(playerList, new(), SignTable, null);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Player, (byte)OperateCode.List, data, 0, data.Length);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Player, (byte)OperateCode.List)
+                .AppendArgs(ServiceKey.List, playerList);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -124,8 +120,8 @@ partial class ServerService
     {
         try
         {
-            var data = SerializeTool.Serialize(LocalArchive.Archives.ToArray(), new(), SignTable, null);
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List, data, 0, data.Length);
+            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List)
+                .AppendArgs(ServiceKey.List, LocalArchive.Archives.ToArray());
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -149,14 +145,20 @@ partial class ServerService
         {
             OnJoinArchive?.Invoke(receiver);
         }
+        else if (operateCode is OperateCode.Callback)
+        {
+            Joined = true;
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            CallbackSuccess(sender);
+        }
     }
 
     public void ResbonseArchiveRequestOrJoin(CommandReceiver receiver, PlayerArchive playerArchive)
     {
         try
         {
-            var data = SerializeTool.Serialize(playerArchive, new(), SignTable, null);
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode, data, 0, data.Length);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
+                .AppendArgs(ServiceKey.Archive, playerArchive);
             CallbackSuccess(sender);
         }
         catch (Exception ex)
@@ -169,11 +171,8 @@ partial class ServerService
     {
         try
         {
-            var date = args.CurrentDate;
-            var format = ArrayString.ToArrayString(date.Year, date.Month, date.Day, date.Type);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.SpanFlow, (byte)OperateCode.Update)
-                .AppendArgs(ServiceKey.Date, format)
-                .AppendArgs(ServiceKey.Span, args.CurrentSpan);
+                .AppendArgs(ServiceKey.Args, args);
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -197,12 +196,24 @@ partial class ServerService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.Check)
         {
-            var site = receiver.GetArgs<Coordinate>(ServiceKey.Site) ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
-            var types = PlayerGroup!.LandMap.CanBuildTypes(site);
+            var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
+            var types = PlayerGroup.LandMap.GetCanBuildTypes(site);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.List, types);
+                .AppendArgs(ServiceKey.Args, new SourceLandCanBuildArgs(site, types));
             CallbackSuccess(sender);
+        }
+        else if (operateCode is OperateCode.Update)
+        {
+            var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
+            var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            if (!PlayerGroup.BuildLand(site, type, Player.Id, out var vision))
+                CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
+            else
+            {
+                sender.AppendArgs(ServiceKey.Object, vision);
+                CallbackSuccess(sender);
+            }
         }
     }
 }

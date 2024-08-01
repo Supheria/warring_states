@@ -18,12 +18,14 @@ partial class Overview
     {
         base.EnableListener();
         LocalEvents.TryAddListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+        LocalEvents.TryAddListener(LocalEvents.Map.AtlasUpdate, Relocate);
     }
 
     public override void DisableListener()
     {
         base.DisableListener();
         LocalEvents.TryRemoveListener<GridRedrawArgs>(LocalEvents.Graph.GridRedraw, Relocate);
+        LocalEvents.TryRemoveListener(LocalEvents.Map.AtlasUpdate, Relocate);
     }
 
     private void Relocate(GridRedrawArgs args)
@@ -35,6 +37,16 @@ partial class Overview
         BeginInvoke(() =>
         {
             Redraw();
+            Invalidate();
+        });
+    }
+
+    private void Relocate()
+    {
+        BeginInvoke(() =>
+        {
+            RedrawOverview();
+            RedrawFocus();
             Invalidate();
         });
     }

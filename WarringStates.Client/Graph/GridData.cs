@@ -2,9 +2,11 @@
 
 public class GridData
 {
-    public float GuideLineWidth { get; set; } = 1.75f;
+    public float GuideLineWidth { get; set; } = 2f;
 
-    public Color GuideLineColor { get; set; } = Color.Red;
+    public Color GuideLineColor { get; set; } = Color.SlateGray;
 
-    public SolidBrush GuideLineBrush { get; } = new(Color.Transparent);
+    public float FocusLineWidth { get; set; } = 1.75f;
+
+    public Color FocusLineColor { get; set; } = Color.Red;
 }

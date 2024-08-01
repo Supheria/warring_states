@@ -56,14 +56,22 @@ public partial class Overview : Displayer
         if (OverviewCache is not null && Size == OverviewCache.Size)
             Image = (Bitmap)OverviewCache.Clone();
         else
-        {
-            OverviewCache?.Dispose();
-            OverviewCache = Atlas.GetOverview(ClientSize);
-            var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
-            OverviewCache.Dispose();
-            OverviewCache = temp;
-            Image = (Bitmap)OverviewCache.Clone();
-        }
+            RedrawOverview();
+        RedrawFocus();
+    }
+
+    private void RedrawOverview()
+    {
+        OverviewCache?.Dispose();
+        OverviewCache = Atlas.GetOverview(ClientSize);
+        var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
+        OverviewCache.Dispose();
+        OverviewCache = temp;
+        Image = (Bitmap)OverviewCache.Clone();
+    }
+
+    private void RedrawFocus()
+    {
         var edgeLength = (double)GridDrawer.CellEdgeLength;
         var width = GridDrawRect.Width / edgeLength;
         var height = GridDrawRect.Height / edgeLength;

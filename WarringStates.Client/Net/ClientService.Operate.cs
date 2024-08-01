@@ -11,25 +11,13 @@ using WarringStates.Net.Common;
 using WarringStates.User;
 using LocalUtilities.TypeGeneral;
 using WarringStates.Map;
+using WarringStates.Client.Map;
 
 namespace WarringStates.Client.Net;
 
 partial class ClientService
 {
     public event NetEventHandler<string[]>? OnUpdatePlayerList;
-
-    private void HeartBeats()
-    {
-        try
-        {
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.HeartBeats, (byte)OperateCode.None);
-            SendCommand(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
 
     public void Login(string address, int port, string name, string password)
     {
@@ -41,7 +29,7 @@ partial class ClientService
             if (!((ClientProtocol)Protocol).Connect(host))
                 throw new NetException(ServiceCode.NoConnection);
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Login, (byte)OperateCode.None)
-               .AppendArgs(ServiceKey.UserName, name)
+               .AppendArgs(ServiceKey.Name, name)
                .AppendArgs(ServiceKey.Password, password);
             SendCommand(sender);
             LoginDone?.WaitOne(ConstTabel.BlockkMilliseconds);
@@ -56,12 +44,10 @@ partial class ClientService
     private void HandleLogin(CommandReceiver receiver)
     {
         ReceiveCallback(receiver);
-        Player = SerializeTool.Deserialize<Player>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ??
-            throw new NetException(ServiceCode.MissingCommandArgs, nameof(Player));
+        Player = receiver.GetArgs<Player>(ServiceKey.Player);
         IsLogined = true;
         LoginDone.Set();
         HandleLogined();
-        DaemonThread.Start();
     }
 
     public void SendMessage(string message, string receivePlayerId)
@@ -114,8 +100,7 @@ partial class ClientService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.List)
         {
-            var playerList = SerializeTool.Deserialize<string[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
+            var playerList = receiver.GetArgs<string[]>(ServiceKey.List);
             OnUpdatePlayerList?.Invoke(playerList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
@@ -141,24 +126,31 @@ partial class ClientService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.List)
         {
-            var infoList = SerializeTool.Deserialize<ArchiveInfo[]>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null);
-            LocalArchives.ReLocate(infoList ?? []);
+            var infoList = receiver.GetArgs<ArchiveInfo[]>(ServiceKey.List);
+            LocalArchives.ReLocate(infoList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
         }
         else if (operateCode is OperateCode.Request)
         {
             ReceiveCallback(receiver);
-            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
-            LocalArchives.SetCurrentArchive(playerArchive);
+            Task.Run(() =>
+            {
+                var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
+                LocalArchives.SetCurrentArchive(playerArchive);
+            });
         }
         else if (operateCode is OperateCode.Join)
         {
             ReceiveCallback(receiver);
-            var playerArchive = SerializeTool.Deserialize<PlayerArchive>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null) ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
+            var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
             LocalArchives.StartPlayArchive(playerArchive);
+            var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Callback);
+            SendCommand(sender);
+        }
+        else if (operateCode is OperateCode.Callback)
+        {
+            ReceiveCallback(receiver);
         }
     }
 
@@ -167,14 +159,8 @@ partial class ClientService
         var operateCode = (OperateCode)receiver.OperateCode;
         if (operateCode is OperateCode.Update)
         {
-            var array = receiver.GetArgs<string>(ServiceKey.Date).ToArray() ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
-            _ = int.TryParse(array[0], out var year);
-            _ = int.TryParse(array[1], out var month);
-            _ = int.TryParse(array[2], out var day);
-            _ = Enum.TryParse<DateType>(array[3], true, out var dateType);
-            var currentSpan = receiver.GetArgs<long>(ServiceKey.Span);
-            LocalEvents.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, new SpanFlowTickOnArgs(currentSpan, new(year, month, day, dateType)));
+            var args = receiver.GetArgs<SpanFlowTickOnArgs>(ServiceKey.Args);
+            LocalEvents.TryBroadcast(LocalEvents.Flow.SpanFlowTickOn, args);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
         }
@@ -187,6 +173,14 @@ partial class ClientService
         SendCommand(sender);
     }
 
+    public void BuildLand(Coordinate site, SourceLandTypes type)
+    {
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Land, (byte)OperateCode.Update)
+           .AppendArgs(ServiceKey.Site, site)
+           .AppendArgs(ServiceKey.Type, type);
+        SendCommand(sender);
+    }
+
     private void HandleLand(CommandReceiver receiver)
     {
 
@@ -194,9 +188,14 @@ partial class ClientService
         if (operateCode is OperateCode.Check)
         {
             ReceiveCallback(receiver);
-            var types = receiver.GetArgs<SourceLandTypes[]>(ServiceKey.List) ??
-                throw new NetException(ServiceCode.MissingCommandArgs);
-            LocalEvents.TryBroadcast(LocalEvents.UserInterface.SourceLandTypesCanBuild, types);
+            var args = receiver.GetArgs<SourceLandCanBuildArgs>(ServiceKey.Args);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.SourceLandCanBuild, args);
+        }
+        else if (operateCode is OperateCode.Update)
+        {
+            ReceiveCallback(receiver);
+            var vision = receiver.GetArgs<VisibleLands>(ServiceKey.Object);
+            Atlas.AddVision(vision);
         }
     }
 }

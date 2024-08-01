@@ -2,4 +2,4 @@
 
 public delegate void Callback();
 
-public delegate void Callback<TArgs>(TArgs args);/* where TArgs : ICallbackArgs;*/
+public delegate void Callback<TArgs>(TArgs args) where TArgs : EventArgs;
