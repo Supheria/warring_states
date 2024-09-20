@@ -6,7 +6,7 @@ using WarringStates.Data;
 using WarringStates.Flow;
 using WarringStates.Map;
 using WarringStates.Net.Common;
-using WarringStates.Server.User;
+using WarringStates.Server.Map;
 using WarringStates.User;
 
 namespace WarringStates.Server.Net;
@@ -17,7 +17,7 @@ partial class ServerService
 
     public event NetEventHandler<CommandReceiver>? OnJoinArchive;
 
-    public PlayerGroup PlayerGroup { get; set; } = new();
+    public ServiceManager Server { get; set; } = new();
 
     public bool Joined { get; private set; } = false;
 
@@ -77,7 +77,7 @@ partial class ServerService
                 SendCommand(sender);
             }
             else
-                PlayerGroup?.RelayCommand(receiver);
+                Server?.RelayCommand(receiver);
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -91,7 +91,7 @@ partial class ServerService
             else
             {
                 ReceiveCallback(receiver);
-                PlayerGroup?.RelayCommand(receiver);
+                Server?.RelayCommand(receiver);
             }
         }
         else if (operateCode is OperateCode.Broadcast)
@@ -121,7 +121,7 @@ partial class ServerService
         try
         {
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List)
-                .AppendArgs(ServiceKey.List, LocalArchive.Archives.ToArray());
+                .AppendArgs(ServiceKey.List, Atlas.Archives.ToArray());
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -139,7 +139,14 @@ partial class ServerService
         }
         else if (operateCode is OperateCode.Request)
         {
-            OnRequestArchive?.Invoke(receiver);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            if (Atlas.GetPlayerArchive(Player.Name, out var archive))
+            {
+                sender.AppendArgs(ServiceKey.Archive, archive);
+                CallbackSuccess(sender);
+            }
+            else
+                CallbackFailure(sender, new NetException(ServiceCode.ServerNotStartYet));
         }
         else if (operateCode is OperateCode.Join)
         {
@@ -197,7 +204,7 @@ partial class ServerService
         if (operateCode is OperateCode.Check)
         {
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
-            var types = PlayerGroup.LandMap.GetCanBuildTypes(site);
+            var types = Atlas.GetCanBuildTypes(site);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.Args, new SourceLandCanBuildArgs(site, types));
             CallbackSuccess(sender);
@@ -207,7 +214,7 @@ partial class ServerService
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
             var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (!PlayerGroup.BuildLand(site, type, Player.Id, out var vision))
+            if (!Server.BuildLand(site, type, Player.Name, out var vision))
                 CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
             else
             {

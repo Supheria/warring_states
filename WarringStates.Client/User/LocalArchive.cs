@@ -4,7 +4,7 @@ using WarringStates.User;
 
 namespace WarringStates.Client.User;
 
-internal static class LocalArchives
+internal static class LocalArchive
 {
     public static ArchiveInfoRoster ArchiveInfoList { get; } = [];
 

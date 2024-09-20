@@ -4,12 +4,11 @@ public class ServiceKey
 {
     public const string None = nameof(None);
     public const string Object = nameof(Object);
-    public const string Id = nameof(Id);
+    public const string Name = nameof(Name);
     public const string Type = nameof(Type);
     public const string Command = nameof(Command);
     public const string CommandCode = nameof(CommandCode);
     public const string OperateCode = nameof(OperateCode);
-    public const string Name = nameof(Name);
     public const string Password = nameof(Password);
     public const string Player = nameof(Player);
     public const string Args = nameof(Args);

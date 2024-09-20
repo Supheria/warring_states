@@ -83,12 +83,12 @@ public partial class ArchiveSelector : Pannel
 
     private void SetPlayerArchive()
     {
-        if (LocalArchives.CurrentArchive is null)
+        if (LocalArchive.CurrentArchive is null)
             Thumbnail.SetThumbnailVoid();
         else
         {
             var thumbnail = Atlas.GetOverview(Thumbnail.ClientSize);
-            Thumbnail.SetThumbnail(thumbnail, LocalArchives.CurrentArchive.CurrentSpan);
+            Thumbnail.SetThumbnail(thumbnail, LocalArchive.CurrentArchive.CurrentSpan);
         }
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
@@ -96,7 +96,7 @@ public partial class ArchiveSelector : Pannel
 
     private void RefreshSelector()
     {
-        Selector.ItemList = LocalArchives.ArchiveInfoList.Select(x => x.WorldName).ToList();
+        Selector.ItemList = LocalArchive.ArchiveInfoList.Select(x => x.WorldName).ToList();
         Selector.Redraw();
         Selector.Invalidate();
     }

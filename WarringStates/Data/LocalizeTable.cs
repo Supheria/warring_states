@@ -25,6 +25,7 @@ public class LocalizeTable
     public virtual string FishLand { get; set; } = "渔场";
     public virtual string TerraceLand { get; set; } = "梯田";
     public virtual string BuildSourceLandFailed { get; set; } = "场地建造失败";
+    public virtual string NoArchiveSelected { get; set; } = "未选择存档";
 
     public string ConvertEnum(Enum type)
     {

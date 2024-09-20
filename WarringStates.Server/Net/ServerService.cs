@@ -19,7 +19,7 @@ internal partial class ServerService : NetService, IRosterItem<string>
 
     protected DaemonThread DaemonThread { get; init; }
 
-    public string Signature => Player.Id;
+    public string Signature => Player.Name;
 
     public ServerService() : base(new ServerProtocol())
     {

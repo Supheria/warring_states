@@ -19,8 +19,8 @@ partial class ArchiveSelector
 
     private void JoinButton_Click(object? sender, EventArgs e)
     {
-        if (LocalArchives.CurrentArchive is not null)
-            LocalNet.Service.JoinArchive(LocalArchives.CurrentArchive.ArchiveId);
+        if (LocalArchive.CurrentArchive is not null)
+            LocalNet.Service.JoinArchive(LocalArchive.CurrentArchive.ArchiveId);
     }
 
     private void Service_OnLogined()
@@ -37,7 +37,7 @@ partial class ArchiveSelector
         LogoutButton.CanSelect = false;
         LogoutButton.Redraw();
         LogoutButton.Invalidate();
-        LocalArchives.ReLocate([]);
+        LocalArchive.ReLocate([]);
     }
 
     private void Selector_SelectedChanged(object? sender, EventArgs e)
@@ -46,7 +46,7 @@ partial class ArchiveSelector
             JoinButton.CanSelect = false;
         else
             JoinButton.CanSelect = true;
-        if (LocalArchives.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info))
+        if (LocalArchive.ArchiveInfoList.TryGetValue(Selector.SelectedIndex, out var info))
             LocalNet.Service.FetchArchive(info.Id);
         else
         {

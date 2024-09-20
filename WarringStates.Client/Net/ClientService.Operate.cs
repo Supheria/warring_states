@@ -110,14 +110,14 @@ partial class ClientService
     public void FetchArchive(string archiveId)
     {
         var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Request)
-            .AppendArgs(ServiceKey.Id, archiveId);
+            .AppendArgs(ServiceKey.Name, archiveId);
         SendCommand(sender);
     }
 
     public void JoinArchive(string archiveId)
     {
         var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join)
-            .AppendArgs(ServiceKey.Id, archiveId);
+            .AppendArgs(ServiceKey.Name, archiveId);
         SendCommand(sender);
     }
 
@@ -127,7 +127,7 @@ partial class ClientService
         if (operateCode is OperateCode.List)
         {
             var infoList = receiver.GetArgs<ArchiveInfo[]>(ServiceKey.List);
-            LocalArchives.ReLocate(infoList);
+            LocalArchive.ReLocate(infoList);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
         }
@@ -137,14 +137,14 @@ partial class ClientService
             Task.Run(() =>
             {
                 var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
-                LocalArchives.SetCurrentArchive(playerArchive);
+                LocalArchive.SetCurrentArchive(playerArchive);
             });
         }
         else if (operateCode is OperateCode.Join)
         {
             ReceiveCallback(receiver);
             var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
-            LocalArchives.StartPlayArchive(playerArchive);
+            LocalArchive.StartPlayArchive(playerArchive);
             var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Callback);
             SendCommand(sender);
         }

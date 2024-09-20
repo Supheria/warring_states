@@ -5,9 +5,12 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using WarringStates.Flow;
+using WarringStates.Map;
 using WarringStates.Net.Common;
 using WarringStates.Server.Events;
-using WarringStates.Server.User;
+using WarringStates.Server.Map;
+using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
@@ -25,11 +28,14 @@ internal class ServiceManager : INetLogger
 
     public bool IsStart { get; private set; } = false;
 
-    ServiceRoster PlayerMap { get; } = [];
+    Roster<string, ServerService> Players { get; } = [];
 
-    ConcurrentDictionary<string, CacheArchive> CacheArchives { get; } = [];
+    SpanFlow SpanFlow { get; } = new();
 
-    PlayerGroupRoster PlayerGroups { get; } = [];
+    public ServiceManager()
+    {
+        SpanFlow.Tick += UpdateCurrentDate;
+    }
 
     public string GetLog(string message)
     {
@@ -51,7 +57,6 @@ internal class ServiceManager : INetLogger
         {
             if (IsStart)
                 throw new NetException(ServiceCode.ServerHasStarted);
-            // 使用0.0.0.0作为绑定IP，则本机所有的IPv4地址都将绑定
             var localEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), port);
             Socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             Socket.Bind(localEndPoint);
@@ -61,6 +66,8 @@ internal class ServiceManager : INetLogger
             EnableListener();
             this.HandleLog("start");
             OnStart?.Invoke();
+            SpanFlow.Relocate(Atlas.LoadCurrentSpan());
+            SpanFlow.Start();
         }
         catch (Exception ex)
         {
@@ -74,13 +81,14 @@ internal class ServiceManager : INetLogger
         {
             if (!IsStart)
                 throw new NetException(ServiceCode.ServerNotStartYet);
-            foreach (var service in PlayerMap)
+            foreach (var service in Players)
                 service.Dispose();
             Socket?.Close();
             IsStart = false;
             DisableListener();
             this.HandleLog("close");
             OnClose?.Invoke();
+            // TODO: stop spanflow
         }
         catch (Exception ex)
         {
@@ -102,7 +110,7 @@ internal class ServiceManager : INetLogger
 
     private void BroadcastArchiveList()
     {
-        Parallel.ForEach(PlayerMap, service =>
+        Parallel.ForEach(Players, service =>
         {
             service.UpdateArchiveList();
         });
@@ -129,140 +137,102 @@ internal class ServiceManager : INetLogger
             goto ACCEPT;
         var service = new ServerService();
         service.OnLog += this.HandleLog;
-        service.OnLogined += () => AddService(service);
-        service.OnClosed += () => RemoveService(service);
-        service.OnRequestArchive += (receiver) => RequestArchive(receiver, service);
-        service.OnJoinArchive += (receiver) => JoinArchive(receiver, service);
+        service.OnLogined += () => AddPlayer(service);
+        service.OnClosed += () => RemovePlayer(service);
         service.Accept(acceptArgs.AcceptSocket);
     ACCEPT:
         if (acceptArgs.SocketError is SocketError.Success)
             AcceptAsync(acceptArgs);
     }
 
-    private void RequestArchive(CommandReceiver receiver, ServerService service)
+    private void AddPlayer(ServerService service)
     {
-        try
-        {
-            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ??
-                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.Id);
-            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info))
-                throw new NetException(ServiceCode.NoMatchArchiveId);
-            if (CacheArchives.TryGetValue(archiveId, out var cache))
-            {
-                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, cache.LandMap, service.Player.Id));
-                return;
-            }
-            if (PlayerGroups.TryGetValue(archiveId, out var group))
-            {
-                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
-                return;
-            }
-            cache = new(info);
-            cache.OnDisposed += () => CacheArchives.TryRemove(archiveId, out _);
-            CacheArchives.TryAdd(archiveId, cache);
-            service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, cache.LandMap, service.Player.Id));
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
-    private void AddService(ServerService service)
-    {
-        if (!PlayerMap.TryAdd(service))
+        if (!Players.TryAdd(service))
         {
             service.Dispose();
             return;
         }
+        service.OnClosed += () =>
+        {
+            RemovePlayer(service);
+        };
+        service.Server = this;
+        CheckNewPlayer(service);
         HandleUpdateConnection();
     }
 
-    private void RemoveService(ServerService service)
+    private void RemovePlayer(ServerService service)
     {
-        if (!(PlayerMap.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
+        if (!(Players.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
             return;
-        PlayerMap.TryRemove(service);
+        Players.TryRemove(service);
         HandleUpdateConnection();
     }
-
-    private void JoinArchive(CommandReceiver receiver, ServerService service)
-    {
-        try
-        {
-            var archiveId = receiver.GetArgs<string>(ServiceKey.Id) ??
-                throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.Id);
-            if (!LocalArchive.Archives.TryGetValue(archiveId, out var info))
-                return;
-            if (PlayerGroups.TryGetValue(archiveId, out var group))
-            {
-                group.AddPlayer(service);
-                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
-                return;
-            }
-            if (CacheArchives.TryGetValue(archiveId, out var cache))
-                cache.Dispose();
-            group = new(info);
-            group.AddPlayer(service);
-            if (!PlayerGroups.TryAdd(group))
-                group.RemovePlayer(service);
-            else
-                service.ResbonseArchiveRequestOrJoin(receiver, LocalArchive.GetPlayerArchive(info, group.LandMap, service.Player.Id));
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
-    private void LeaveArchive(string archiveId, ServerService service)
-    {
-        if (!PlayerGroups.TryGetValue(archiveId, out var group))
-            return;
-        group.RemovePlayer(service);
-        if (group.PlayerCount < 1)
-            PlayerGroups.TryRemove(group);
-    }
-
-    //private void RelayCommand(CommandRelayArgs args)
-    //{
-    //    try
-    //    {
-    //        var userId = (OperateCode)args.Receiver.OperateCode switch
-    //        {
-    //            OperateCode.Request => args.Receiver.GetArgs<string>(ServiceKey.ReceivePlayer),
-    //            OperateCode.Callback => args.Receiver.GetArgs<string>(ServiceKey.SendPlayer),
-    //            _ => null,
-    //        } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceivePlayer, ServiceKey.SendPlayer);
-    //        if (!PlayerMap.TryGetValue(userId, out var user))
-    //            throw new NetException(ServiceCode.PlayerNotExist);
-    //        user.HandleCommand(args.Receiver);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        this.HandleException(ex);
-    //    }
-    //}
 
     public void BroadcastMessage(string message)
     {
-        Parallel.ForEach(PlayerMap, service =>
+        Parallel.ForEach(Players, service =>
         {
             service.SendMessage(message);
         });
     }
 
-    public void UpdatePlayerGroupList()
+    public void RelayCommand(CommandReceiver receiver)
     {
-        var players = new Dictionary<string, string>();
-        //foreach
-        //foreach (var service in PlayerMap.Values)
-        //    service.UpdatePlayerList(players);
+        try
+        {
+            var name = (OperateCode)receiver.OperateCode switch
+            {
+                OperateCode.Request => receiver.GetArgs<string>(ServiceKey.ReceiveName),
+                OperateCode.Callback => receiver.GetArgs<string>(ServiceKey.SendName),
+                _ => null,
+            } ?? throw new NetException(ServiceCode.MissingCommandArgs, ServiceKey.ReceiveName, ServiceKey.SendName);
+            if (!Players.TryGetValue(name, out var user))
+                throw new NetException(ServiceCode.PlayerNotExist);
+            user.HandleCommand(receiver);
+        
+        }
+        catch (Exception ex)
+        {
+            this.HandleException(ex);
+        }
+    }
+
+    private static void CheckNewPlayer(ServerService service)
+    {
+        var owners = Atlas.GetOwnerSites(service.Player.Name);
+        if (owners.Count is 0)
+            Atlas.SetRandomSite(service.Player.Name);
+        var owner = Atlas.SetRandomSite(service.Player.Name);
+        Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
+    }
+
+    private void UpdateCurrentDate(SpanFlowTickOnArgs args)
+    {
+        Parallel.ForEach(Players, service =>
+        {
+            if (service.Joined)
+                service.UpdateCurrentDate(args);
+        });
+    }
+
+    public bool BuildLand(Coordinate site, SourceLandTypes type, string playerId, out VisibleLands vision)
+    {
+        vision = new();
+        if (!Atlas.AddSouceLand(site, type))
+            return false;
+        Atlas.SetOwnerSites(site, type, playerId);
+        Atlas.GetVision(site, vision);
+        return true;
     }
 
     public void HandleUpdateConnection()
     {
-        OnConnectionCountChange?.Invoke(PlayerMap.Count);
-        //BroadcastUserList();
+        OnConnectionCountChange?.Invoke(Players.Count);
+        var playerList = Players.Select(x => x.Player.Name).ToArray();
+        Parallel.ForEach(Players, service =>
+        {
+            service.UpdatePlayerList(playerList);
+        });
     }
 }
