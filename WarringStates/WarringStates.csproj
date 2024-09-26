@@ -20,8 +20,6 @@
 
   <ItemGroup>
     <Compile Update="UI\ImageButton.cs" />
-    <Compile Update="UI\Selector.cs" />
-    <Compile Update="UI\Selector.Operate.cs" />
     <Compile Update="UI\Thumbnail.cs" />
   </ItemGroup>
 

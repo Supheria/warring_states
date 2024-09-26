@@ -124,12 +124,10 @@ public partial class ArchiveSelector : Pannel
             colWidth,
             ButtonHeight);
         //
-        var buttonWidth = colWidth - Padding.Width * 2;
-        //
         DeleteButton.Bounds = new(
-            left + Padding.Width,
+            left,
             BuildButton.Bottom + buttonPadding,
-            buttonWidth,
+            colWidth,
             ButtonHeight);
         //
         if (Progressor.Visible)

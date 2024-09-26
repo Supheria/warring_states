@@ -30,4 +30,5 @@ public enum ServiceCode
     EmptyUserInfo,
     NoConnection,
     NoMatchArchiveId,
+    NoSelectedArchive,
 }

@@ -77,12 +77,7 @@ partial class ArchiveSelector
 
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
-        if (LocalNet.Server.IsStart)
-            LocalNet.Close();
-        else if (Atlas.CurrentArchiveInfo is null)
-            MessageBox.Show(Localize.Table.NoArchiveSelected);
-        else
-            LocalNet.Start();
+        LocalNet.Switch();
     }
 
     private void DeleteButton_Click(object? sender, EventArgs e)
@@ -91,6 +86,7 @@ partial class ArchiveSelector
         Selector.SelectedIndex = -1;
 
     }
+
     private void Selector_SelectedChanged(object? sender, EventArgs e)
     {
         if (Selector.SelectedIndex is -1)
@@ -101,9 +97,7 @@ partial class ArchiveSelector
             Thumbnail.Invalidate();
         }
         else
-        {
             DeleteButton.CanSelect = true;
-            Atlas.SetCurrentArchive(Selector.SelectedIndex);
-        }
+        Atlas.SetCurrentArchive(Selector.SelectedIndex);
     }
 }

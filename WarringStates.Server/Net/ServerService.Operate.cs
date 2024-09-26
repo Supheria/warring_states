@@ -13,10 +13,6 @@ namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    public event NetEventHandler<CommandReceiver>? OnRequestArchive;
-
-    public event NetEventHandler<CommandReceiver>? OnJoinArchive;
-
     public ServiceManager Server { get; set; } = new();
 
     public bool Joined { get; private set; } = false;
@@ -137,7 +133,7 @@ partial class ServerService
         {
             ReceiveCallback(receiver);
         }
-        else if (operateCode is OperateCode.Request)
+        else if (operateCode is OperateCode.Join)
         {
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             if (Atlas.GetPlayerArchive(Player.Name, out var archive))
@@ -148,29 +144,11 @@ partial class ServerService
             else
                 CallbackFailure(sender, new NetException(ServiceCode.ServerNotStartYet));
         }
-        else if (operateCode is OperateCode.Join)
-        {
-            OnJoinArchive?.Invoke(receiver);
-        }
         else if (operateCode is OperateCode.Callback)
         {
             Joined = true;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
-        }
-    }
-
-    public void ResbonseArchiveRequestOrJoin(CommandReceiver receiver, PlayerArchive playerArchive)
-    {
-        try
-        {
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.Archive, playerArchive);
-            CallbackSuccess(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
         }
     }
 

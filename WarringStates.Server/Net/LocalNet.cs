@@ -4,6 +4,7 @@ using LocalUtilities.TypeGeneral;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Net.Common;
 using WarringStates.Server.Data;
+using WarringStates.Server.Map;
 using WarringStates.User;
 
 namespace WarringStates.Server.Net;
@@ -14,14 +15,12 @@ internal class LocalNet
 
     public static int Port { get; set; } = 60;
 
-    public static void Start()
+    public static void Switch()
     {
-        Server.Start(Port);
-    }
-
-    public static void Close()
-    {
-        Server.Close();
+        if (Server.IsStart)
+            Server.Close();
+        else
+            Server.Start(Port);
     }
 
     public static bool CheckLogin(string name, string passwordText, [NotNullWhen(true)] out Player? player, out ServiceCode code)

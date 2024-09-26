@@ -5,26 +5,7 @@ namespace WarringStates.Client.UI;
 
 public partial class ClientForm : ResizeableForm
 {
-    TextBox Address { get; } = new()
-    {
-        Text = LocalNet.ServerAddress
-    };
-
-    NumericUpDown Port { get; } = new()
-    {
-        Value = LocalNet.ServerPort
-    };
-
-    TextBox PlayerName { get; } = new()
-    {
-        Text = LocalNet.PlayerName
-    };
-
-    TextBox Password { get; } = new()
-    {
-        Text = LocalNet.PlayerPassword
-    };
-
+    
     RichTextBox MessageBox { get; } = new();
 
     TextBox SendBox { get; } = new()
@@ -63,7 +44,7 @@ public partial class ClientForm : ResizeableForm
 
     Pannel OperatePannel { get; set; }
 
-    ArchiveSelector ArchiveSelector { get; } = new();
+    LoginForm Login { get; } = new();
 
     GamePlayer GamePlayer { get; } = new();
 
@@ -76,12 +57,8 @@ public partial class ClientForm : ResizeableForm
         InitializeName = initializeName;
         Text = "Client";
         MinimumSize = new(800, 550);
-        OperatePannel = ArchiveSelector;
+        OperatePannel = Login;
         Controls.AddRange([
-            Address,
-            Port,
-            PlayerName,
-            Password,
             MessageBox,
             UserList,
             SendBox,
@@ -93,59 +70,27 @@ public partial class ClientForm : ResizeableForm
             DownloadButton,
             OperatePannel,
             ]);
-        ArchiveSelector.EnableListener();
+        Login.EnableListener();
     }
 
     protected override void Redraw()
     {
         base.Redraw();
-        var width = (ClientWidth - Padding * 5) / 4;
         var top = ClientTop + Padding;
-        var height = Address.Height;
-        //
-        Address.Bounds = new(
-            ClientLeft + Padding,
-            top,
-            width,
-            height
-            );
-        //
-        Port.Bounds = new(
-            Address.Right + Padding,
-            top,
-            width,
-            height
-            );
-        //
-        PlayerName.Bounds = new(
-            Port.Right + Padding,
-            top,
-            width,
-            height
-            );
-        //
-        Password.Bounds = new(
-            PlayerName.Right + Padding,
-            top,
-            width,
-            height
-            );
-        //
-        width = (ClientWidth - Padding * 5) / 6;
-        top = Password.Bottom + Padding;
-        height = ClientHeight - Address.Height - SendBox.Height - FilePath.Height - Padding * 6;
+        var width = (ClientWidth - Padding * 4) / 10;
+        var height = ClientHeight - SendBox.Height - FilePath.Height - Padding * 6;
         //
         OperatePannel.Bounds = new(
             ClientLeft + Padding,
             top,
-            width * 4,
+            width * 6,
             height
             );
         //
         MessageBox.Bounds = new(
             OperatePannel.Right + Padding,
             top,
-            width,
+            width * 3,
             height
             );
         //

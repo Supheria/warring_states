@@ -55,7 +55,9 @@ internal class ServiceManager : INetLogger
     {
         try
         {
-            if (IsStart)
+            if (Atlas.CurrentArchiveInfo is null)
+                throw new NetException(ServiceCode.NoSelectedArchive);
+            else if (IsStart)
                 throw new NetException(ServiceCode.ServerHasStarted);
             var localEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), port);
             Socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -161,6 +163,15 @@ internal class ServiceManager : INetLogger
         HandleUpdateConnection();
     }
 
+    private static void CheckNewPlayer(ServerService service)
+    {
+        var owners = Atlas.GetOwnerSites(service.Player.Name);
+        if (owners.Count is 0)
+            Atlas.SetRandomSite(service.Player.Name);
+        //var owner = Atlas.SetRandomSite(service.Player.Name);
+        //Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
+    }
+
     private void RemovePlayer(ServerService service)
     {
         if (!(Players.TryGetValue(service.Signature, out var toCheck) && toCheck.TimeStamp == service.TimeStamp))
@@ -196,15 +207,6 @@ internal class ServiceManager : INetLogger
         {
             this.HandleException(ex);
         }
-    }
-
-    private static void CheckNewPlayer(ServerService service)
-    {
-        var owners = Atlas.GetOwnerSites(service.Player.Name);
-        if (owners.Count is 0)
-            Atlas.SetRandomSite(service.Player.Name);
-        var owner = Atlas.SetRandomSite(service.Player.Name);
-        Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
     }
 
     private void UpdateCurrentDate(SpanFlowTickOnArgs args)
