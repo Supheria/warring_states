@@ -55,7 +55,9 @@ internal class ServiceManager : INetLogger
     {
         try
         {
-            if (IsStart)
+            if (Atlas.CurrentArchiveInfo is null)
+                throw new NetException(ServiceCode.NoSelectedArchive);
+            else if (IsStart)
                 throw new NetException(ServiceCode.ServerHasStarted);
             var localEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), port);
             Socket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

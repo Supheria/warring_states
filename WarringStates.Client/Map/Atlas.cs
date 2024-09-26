@@ -21,15 +21,9 @@ public static class Atlas
         return LandMap[coordinate];
     }
 
-    //public static string GetLandTypeCount(this Enum type)
-    //{
-    //    return LandMap.GetLandTypeCount(type);
-    //}
-
     public static void Relocate(PlayerArchive playerArchive)
     {
         LandMap.Relocate(playerArchive.VisibleLands, playerArchive.WorldSize);
-        // TODO: broadcast event
     }
 
     public static Coordinate SetPointWithin(Coordinate Point)

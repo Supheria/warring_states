@@ -77,24 +77,28 @@ partial class Atlas
 
     public static void SetCurrentArchive(int index)
     {
-        if (Archives.TryGetValue(index, out var info))
-            SetCurrentArchive(info);
+        Archives.TryGetValue(index, out var info);
+        SetCurrentArchive(info);
     }
 
-    [MemberNotNull(nameof(CurrentArchiveInfo))]
-    private static void SetCurrentArchive(ArchiveInfo info)
+    private static void SetCurrentArchive(ArchiveInfo? info)
     {
         CurrentArchiveInfo = info;
-        var worldSize = LoadWorldSize();
-        var randomTable = LoadRandomTable();
-        using var query = GetArchiveQuery();
-        var landPoints = LoadLandPoints();
-        LandMap = new(worldSize, randomTable, landPoints);
-        var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
-        foreach (var ownerSite in ownerSites)
+        if (CurrentArchiveInfo is null)
+            LandMap = new();
+        else
         {
-            if (!LandMap.AddSouceLand(ownerSite.Site, ownerSite.LandType))
-                RemoveOwnerSite(ownerSite.Site);
+            var worldSize = LoadWorldSize();
+            var randomTable = LoadRandomTable();
+            using var query = GetArchiveQuery();
+            var landPoints = LoadLandPoints();
+            LandMap = new(worldSize, randomTable, landPoints);
+            var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
+            foreach (var ownerSite in ownerSites)
+            {
+                if (!LandMap.AddSouceLand(ownerSite.Site, ownerSite.LandType))
+                    RemoveOwnerSite(ownerSite.Site);
+            }
         }
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.CurrentArchiveChange);
     }

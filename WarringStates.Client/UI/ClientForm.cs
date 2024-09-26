@@ -63,7 +63,7 @@ public partial class ClientForm : ResizeableForm
 
     Pannel OperatePannel { get; set; }
 
-    ArchiveSelector ArchiveSelector { get; } = new();
+    LoginForm ArchiveSelector { get; } = new();
 
     GamePlayer GamePlayer { get; } = new();
 

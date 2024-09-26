@@ -138,7 +138,6 @@ public class LocalEvents
     public enum UserInterface
     {
         ArchiveListRefreshed,
-        CurrentArchiveChange,
         SourceLandCanBuild,
 
         GamePlayControlOnDraw,
