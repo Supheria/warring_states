@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WarringStates.Map;
+using System.IO;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.Server.Map;
 
@@ -23,71 +25,105 @@ partial class Atlas
 
     static SsSignTable SignTable { get; } = new();
 
-    public static string GetArchiveRootPath()
+    public static bool GetArchiveRootPath(out string path)
     {
+        path = string.Empty;
         if (CurrentArchiveInfo is null)
-            throw new ArgumentNullException(nameof(CurrentArchiveInfo));
-        return Path.Combine(RootPath, CurrentArchiveInfo.Id);
+            return false;
+        path = Path.Combine(RootPath, CurrentArchiveInfo.Id);
+        return true;
     }
 
-    public static string GetCurrentSpanPath()
+    public static bool GetCurrentSpanPath(out string path)
     {
-        return Path.Combine(GetArchiveRootPath(), CURRENT_SPAN);
+        path = string.Empty;
+        if (!GetArchiveRootPath(out var root))
+            return false;
+        path = Path.Combine(root, CURRENT_SPAN);
+        return true;
     }
 
-    public static string GetRandomTablePath()
+    public static bool GetRandomTablePath(out string path)
     {
-        return Path.Combine(GetArchiveRootPath(), RADOM_TABLE);
+        path = string.Empty;
+        if (!GetArchiveRootPath(out var root))
+            return false;
+        path = Path.Combine(root, RADOM_TABLE);
+        return true;
     }
 
-    public static string GetWorldSizePath()
+    public static bool GetWorldSizePath(out string path)
     {
-        return Path.Combine(GetArchiveRootPath(), WORLD_SIZE);
+        path = string.Empty;
+        if (!GetArchiveRootPath(out var root))
+            return false;
+        path = Path.Combine(root, WORLD_SIZE);
+        return true;
     }
 
-    public static string GetThumbnailPath()
+    public static bool GetThumbnailPath(out string path)
     {
-        return Path.Combine(GetArchiveRootPath(), THUMBNAIL);
+        path = string.Empty;
+        if (!GetArchiveRootPath(out var root))
+            return false;
+        path = Path.Combine(root, THUMBNAIL);
+        return true;
     }
 
-    private static SQLiteQuery GetArchiveQuery()
+    private static SQLiteQuery? GetArchiveQuery()
     {
-        return new SQLiteQuery(Path.Combine(GetArchiveRootPath(), DATABASE));
+        if (GetArchiveRootPath(out var root))
+            return new SQLiteQuery(Path.Combine(root, DATABASE));
+        return null;
     }
 
     public static void SaveCurrentSpan(long currentSpan)
     {
-        SerializeTool.SerializeFile(currentSpan, new(CURRENT_SPAN), SignTable, true, GetCurrentSpanPath());
+        if (GetCurrentSpanPath(out var path))
+            SerializeTool.SerializeFile(currentSpan, new(CURRENT_SPAN), SignTable, true, path);
     }
 
     public static long LoadCurrentSpan()
     {
-        return SerializeTool.DeserializeFile<long>(new(CURRENT_SPAN), SignTable, GetCurrentSpanPath());
+        if (GetCurrentSpanPath(out var path))
+            return SerializeTool.DeserializeFile<long>(new(CURRENT_SPAN), SignTable, path);
+        else
+            return 0;
     }
 
     public static void SaveRandomTable(RandomTable randomTable)
     {
-        SerializeTool.SerializeFile(randomTable, new(RADOM_TABLE), SignTable, true, GetRandomTablePath());
+        if (GetRandomTablePath(out var path))
+            SerializeTool.SerializeFile(randomTable, new(RADOM_TABLE), SignTable, true, path);
     }
 
     public static RandomTable LoadRandomTable()
     {
-        return SerializeTool.DeserializeFile<RandomTable>(new(RADOM_TABLE), SignTable, GetRandomTablePath()) ?? new();
+        if (GetRandomTablePath(out var path))
+            return SerializeTool.DeserializeFile<RandomTable>(new(RADOM_TABLE), SignTable, path) ?? new();
+        else
+            return new();
     }
 
     public static void SaveWorldSize(Size wordSize)
     {
-        SerializeTool.SerializeFile(wordSize, new(WORLD_SIZE), SignTable, true, GetWorldSizePath());
+        if (GetWorldSizePath(out var path))
+            SerializeTool.SerializeFile(wordSize, new(WORLD_SIZE), SignTable, true, path);
     }
 
     public static Size LoadWorldSize()
     {
-        return SerializeTool.DeserializeFile<Size>(new(WORLD_SIZE), SignTable, GetWorldSizePath());
+        if (GetWorldSizePath(out var path))
+            return SerializeTool.DeserializeFile<Size>(new(WORLD_SIZE), SignTable, path);
+        else
+            return new();
     }
 
     public static void SaveLandPoints(List<LandPoint> landPoints)
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return;
         query.CreateTable<LandPoint>(LAND_POINTS);
         query.InsertItems(LAND_POINTS, landPoints.ToArray());
     }
@@ -95,29 +131,24 @@ partial class Atlas
     public static List<LandPoint> LoadLandPoints()
     {
         using var query = GetArchiveQuery();
-        return query.SelectItems<LandPoint>(LAND_POINTS, null).ToList();
-    }
-
-    public static void SaveThumbnail(Bitmap thumbnail)
-    {
-        thumbnail.Save(GetThumbnailPath());
-    }
-
-    public static Bitmap LoadThumbnail()
-    {
-        using var stream = File.OpenRead(GetThumbnailPath());
-        return (Bitmap)Image.FromStream(stream);
+        if (query is null)
+            return [];
+        return query.SelectItems<LandPoint>(LAND_POINTS, null).ToList() ?? [];
     }
 
     public static void InitOwnerSites()
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return;
         query.CreateTable<OwnerSite>(OWNER_SITES);
     }
 
     public static void SetOwnerSites(Coordinate site, SourceLandTypes landType, string playerName)
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return;
         query.CreateTable<OwnerSite>(OWNER_SITES);
         var ownerSite = new OwnerSite() { Site = site, LandType = landType, PlayerName = playerName };
         if (query.Exist(OWNER_SITES, ownerSite))
@@ -129,6 +160,8 @@ partial class Atlas
     public static List<OwnerSite> GetOwnerSites(string playerName)
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return [];
         var ownerSite = new OwnerSite() { PlayerName = playerName };
         var condition = SQLiteQuery.GetCondition(ownerSite, Operators.Equal, nameof(OwnerSite.PlayerName));
         return query.SelectItems<OwnerSite>(OWNER_SITES, condition).ToList();
@@ -137,12 +170,16 @@ partial class Atlas
     public static List<OwnerSite> GetOwnerSites()
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return [];
         return query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
     }
 
     public static void RemoveOwnerSite(Coordinate site)
     {
         using var query = GetArchiveQuery();
+        if (query is null)
+            return;
         var ownerSite = new OwnerSite() { Site = site };
         var condition = SQLiteQuery.GetCondition(ownerSite, Operators.Equal, nameof(OwnerSite.Site));
         query.DeleteItems(OWNER_SITES, condition);

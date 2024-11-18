@@ -25,7 +25,7 @@ partial class ArchiveSelector
 
     private void ResetThumbnail()
     {
-        Thumbnail.SetThumbnail(Atlas.LoadThumbnail(), Atlas.LoadCurrentSpan());
+        Thumbnail.SetThumbnail(Atlas.GetThumbnail(), Atlas.LoadCurrentSpan());
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
     }
@@ -34,8 +34,8 @@ partial class ArchiveSelector
     protected override void AddOperation()
     {
         base.AddOperation();
-        BuildButton.Click += BuildButton_Click;
         SwitchButton.Click += SwitchButton_Click;
+        BuildButton.Click += BuildButton_Click;
         DeleteButton.Click += DeleteButton_Click;
         Selector.IndexChanged += Selector_SelectedChanged;
         LocalNet.Server.OnStart += Server_OnStart;
@@ -47,6 +47,8 @@ partial class ArchiveSelector
         SwitchButton.Text = "关闭";
         SwitchButton.Redraw();
         SwitchButton.Invalidate();
+        BuildButton.CanSelect = false;
+        DeleteButton.CanSelect = false;
     }
 
     private void Server_OnClose()
@@ -54,6 +56,8 @@ partial class ArchiveSelector
         SwitchButton.Text = "开启";
         SwitchButton.Redraw();
         SwitchButton.Invalidate();
+        BuildButton.CanSelect = true;
+        DeleteButton.CanSelect = true;
     }
 
     private async void BuildButton_Click(object? sender, EventArgs e)
@@ -84,20 +88,23 @@ partial class ArchiveSelector
     {
         Atlas.Delete(Selector.SelectedIndex);
         Selector.SelectedIndex = -1;
-
     }
 
     private void Selector_SelectedChanged(object? sender, EventArgs e)
     {
         if (Selector.SelectedIndex is -1)
         {
+            SwitchButton.CanSelect = false;
             DeleteButton.CanSelect = false;
             Thumbnail.SetThumbnailVoid();
             Thumbnail.Redraw();
             Thumbnail.Invalidate();
         }
         else
+        {
+            SwitchButton.CanSelect = true;
             DeleteButton.CanSelect = true;
+        }
         Atlas.SetCurrentArchive(Selector.SelectedIndex);
     }
 }

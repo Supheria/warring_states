@@ -34,21 +34,4 @@ public abstract class LandMap
     {
         return SetPointWithin(point, WorldSize);
     }
-
-    public Bitmap GetThumbnail()
-    {
-        var thumbnail = new Bitmap(WorldWidth, WorldHeight);
-        var pThumbnail = new PointBitmap(thumbnail);
-        pThumbnail.LockBits();
-        for (int i = 0; i < WorldWidth; i++)
-        {
-            for (int j = 0; j < WorldHeight; j++)
-            {
-                var color = this[new(i, j)].Color;
-                pThumbnail.SetPixel(i, j, color);
-            }
-        }
-        pThumbnail.UnlockBits();
-        return thumbnail;
-    }
 }

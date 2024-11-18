@@ -57,4 +57,23 @@ internal partial class Atlas
     {
         return LandMap.GetCanBuildTypes(site);
     }
+
+    public static Bitmap? GetThumbnail()
+    {
+        if (Width is 0 ||  Height is 0)
+            return null;
+        var thumbnail = new Bitmap(Width, Height);
+        var pThumbnail = new PointBitmap(thumbnail);
+        pThumbnail.LockBits();
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                var color = LandMap[new(i, j)].Color;
+                pThumbnail.SetPixel(i, j, color);
+            }
+        }
+        pThumbnail.UnlockBits();
+        return thumbnail;
+    }
 }

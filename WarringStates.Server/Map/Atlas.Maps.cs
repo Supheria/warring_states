@@ -53,15 +53,21 @@ partial class Atlas
             var randomTable = new RandomTable(1000);
             var landPoints = LandMapEx.ConvertLandPoints(altitudeMap);
             LandMap = new LandMapEx(altitudeMap.Size, randomTable, landPoints);
-            Directory.CreateDirectory(GetArchiveRootPath());
-            SerializeTool.SerializeFile(0, new(CURRENT_SPAN), SignTable, true, GetCurrentSpanPath());
-            SerializeTool.SerializeFile(randomTable, new(RADOM_TABLE), SignTable, true, GetRandomTablePath());
-            SerializeTool.SerializeFile(LandMap.WorldSize, new(WORLD_SIZE), SignTable, true, GetWorldSizePath());
+            if (!GetArchiveRootPath(out var rootPath) ||
+                !GetCurrentSpanPath(out var spanPath) ||
+                !GetRandomTablePath(out var randomPath) ||
+                !GetWorldSizePath(out var sizePath))
+                return;
+            Directory.CreateDirectory(rootPath);
+            SerializeTool.SerializeFile(0, new(CURRENT_SPAN), SignTable, true, spanPath);
+            SerializeTool.SerializeFile(randomTable, new(RADOM_TABLE), SignTable, true, randomPath);
+            SerializeTool.SerializeFile(LandMap.WorldSize, new(WORLD_SIZE), SignTable, true, sizePath);
             using var query = GetArchiveQuery();
+            if (query is null)
+                return;
             query.CreateTable<LandPoint>(LAND_POINTS);
             query.InsertItems(LAND_POINTS, landPoints.ToArray());
             query.CreateTable<OwnerSite>(OWNER_SITES);
-            LandMap.GetThumbnail().Save(GetThumbnailPath());
             query.CreateTable<ArchiveInfo>(LocalDataBase.ARCHIVE_INFO);
             query.InsertItem(LocalDataBase.ARCHIVE_INFO, CurrentArchiveInfo);
             using var mainQuery = LocalDataBase.NewQuery();
@@ -111,11 +117,8 @@ partial class Atlas
                 return false;
             if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                 return false;
-            try
-            {
-                Directory.Delete(GetArchiveRootPath(), true);
-            }
-            catch { }
+            if (GetArchiveRootPath(out var path))
+                Directory.Delete(path, true);
             using var query = LocalDataBase.NewQuery();
             query.DeleteItems(LocalDataBase.ARCHIVE_INFO, SQLiteQuery.GetCondition(info, Operators.Equal));
             Relocate(query);
