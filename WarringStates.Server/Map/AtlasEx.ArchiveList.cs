@@ -3,6 +3,7 @@ using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using System.Diagnostics.CodeAnalysis;
+using WarringStates.Map;
 using WarringStates.Server.Data;
 using WarringStates.Server.Events;
 using WarringStates.User;
@@ -84,15 +85,15 @@ partial class AtlasEx
     {
         CurrentArchiveInfo = info;
         if (CurrentArchiveInfo is null)
-            AtlasEx.Relocate();
+            Relocate();
         else
         {
-            AtlasEx.Relocate(LoadWorldSize(), LoadLandPoints(), LoadRandomTable());
+            Relocate(LoadWorldSize(), LoadLandPoints(), LoadRandomTable());
             using var query = GetArchiveQuery();
             var ownerSites = query?.SelectItems<OwnerSite>(OWNER_SITES, null).ToList() ?? [];
             foreach (var ownerSite in ownerSites)
             {
-                if (!AtlasEx.AddSouceLand(ownerSite.Site, ownerSite.LandType))
+                if (!AddSouceLand(ownerSite.Site, ownerSite.LandType))
                     RemoveOwnerSite(ownerSite.Site);
             }
         }
@@ -132,9 +133,17 @@ partial class AtlasEx
             WorldName = CurrentArchiveInfo.WorldName,
             WorldSize = LoadWorldSize(),
             CurrentSpan = LoadCurrentSpan(),
-            VisibleLands = AtlasEx.GetAllVision(playerName),
-            //VisibleLands = LandMap.GetAllSingleLands(),
+            //VisibleLands = GetAllVision(playerName),
+            VisibleLands = GetAllSingleLands(),
         };
         return true;
+    }
+
+    [Obsolete("for test")]
+    protected static VisibleLands GetAllSingleLands()
+    {
+        var lands = new VisibleLands();
+        SingleLands.ToList().ForEach(x => lands.AddLand(x));
+        return lands;
     }
 }
