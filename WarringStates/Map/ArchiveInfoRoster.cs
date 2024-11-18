@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
-namespace WarringStates.User;
+namespace WarringStates.Map;
 
 public class ArchiveInfoRoster : Roster<string, ArchiveInfo>, IList<ArchiveInfo>
 {

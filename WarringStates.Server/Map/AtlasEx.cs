@@ -2,6 +2,7 @@
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Drawing;
 using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
@@ -10,19 +11,23 @@ internal partial class AtlasEx : Atlas
 {
     static Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
 
+    //public static void Relocate()
+    //{
+    //    SingleLands.Clear();
+    //    SourceLands.Clear();
+    //    Size = new();
+    //}
+
     public static void Relocate()
     {
         SingleLands.Clear();
         SourceLands.Clear();
         Size = new();
-    }
-
-    public static void Relocate(Size size, List<LandPoint> landPoints, RandomTable randomTable)
-    {
-        Size = size;
-        SingleLands.Clear();
-        SourceLands.Clear();
-        foreach (var point in landPoints)
+        if (CurrentArchiveInfo is null)
+            return;
+        Size = CurrentArchiveInfo.WorldSize;
+        var randomTable = CurrentArchiveInfo.RandomTable;
+        foreach (var point in LoadLandPoints())
         {
             SingleLandTypes type;
             if (point.Type is PointTypes.River)
