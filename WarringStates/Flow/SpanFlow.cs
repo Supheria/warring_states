@@ -11,9 +11,9 @@ public class SpanFlow : Flower
     DateStepper DateStepper { get; set; } = new();
 
     bool KeepFlow { get; set; } = false;
-    
+
     long CurrentSpan { get; set; } = 0;
-    
+
     Date CurrentDate => DateStepper.GetDate();
 
     public SpanFlow() : base(1000)

@@ -2,7 +2,6 @@
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.UI;
 
 namespace WarringStates.Client.UI.Component;
 

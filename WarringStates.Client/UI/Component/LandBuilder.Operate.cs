@@ -1,10 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Client.Events;
+﻿using WarringStates.Client.Events;
 using WarringStates.Client.Net;
 using WarringStates.Data;
 using WarringStates.Map;

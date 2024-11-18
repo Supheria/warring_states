@@ -1,11 +1,10 @@
 ﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Net;
 
 namespace WarringStates.Client.UI;
 
 public partial class ClientForm : ResizeableForm
 {
-    
+
     RichTextBox MessageBox { get; } = new();
 
     TextBox SendBox { get; } = new()

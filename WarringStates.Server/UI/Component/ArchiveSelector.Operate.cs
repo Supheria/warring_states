@@ -1,6 +1,5 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
-using WarringStates.Data;
 using WarringStates.Server.Events;
 using WarringStates.Server.Map;
 using WarringStates.Server.Net;

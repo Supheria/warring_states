@@ -1,7 +1,4 @@
-﻿using WarringStates.Client.Events;
-using WarringStates.Client.Net;
-
-namespace WarringStates.Client.UI;
+﻿namespace WarringStates.Client.UI;
 
 partial class LoginForm
 {

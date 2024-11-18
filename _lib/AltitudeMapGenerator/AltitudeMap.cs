@@ -1,7 +1,6 @@
 using AltitudeMapGenerator.DLA;
 using AltitudeMapGenerator.VoronoiDiagram;
 using LocalUtilities.TypeGeneral;
-using System.Collections.Concurrent;
 
 namespace AltitudeMapGenerator;
 

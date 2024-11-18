@@ -1,6 +1,5 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing;
 using WarringStates.Client.Events;
 using WarringStates.Map;
 using WarringStates.User;

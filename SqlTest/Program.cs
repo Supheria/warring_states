@@ -3,7 +3,6 @@ using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Diagnostics;
-using System.Numerics;
 
 var stop = new Stopwatch();
 var players = new List<Player>();

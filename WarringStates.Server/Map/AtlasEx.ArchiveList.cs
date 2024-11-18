@@ -2,16 +2,10 @@
 using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WarringStates.Server.Data;
 using WarringStates.Server.Events;
 using WarringStates.User;
-using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 

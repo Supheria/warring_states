@@ -30,7 +30,7 @@ partial class GridDrawer
             Site = RealPointToSite(realPoint);
             Land = AtlasEx.GetLand(Site);
             PointOnPart = GetRealPointOnPart(realPoint);
-            PartShading = GetPartShading(PointOnPart); 
+            PartShading = GetPartShading(PointOnPart);
         }
 
         private static Coordinate RealPointToSite(Point realPoint)

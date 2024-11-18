@@ -2,7 +2,6 @@
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Drawing.Drawing2D;
-using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;
 

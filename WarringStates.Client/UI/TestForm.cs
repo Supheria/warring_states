@@ -2,7 +2,6 @@
 using LocalUtilities.TypeToolKit.Text;
 using System.Text;
 using WarringStates.Client.Events;
-using WarringStates.Events;
 
 namespace WarringStates.Client.UI;
 

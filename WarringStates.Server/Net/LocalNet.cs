@@ -4,7 +4,6 @@ using LocalUtilities.TypeGeneral;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Net.Common;
 using WarringStates.Server.Data;
-using WarringStates.Server.Map;
 using WarringStates.User;
 
 namespace WarringStates.Server.Net;
