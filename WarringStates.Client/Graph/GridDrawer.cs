@@ -39,7 +39,7 @@ public partial class GridDrawer : IInitializeable
 
     public static Coordinate Origin { get; private set; } = new();
 
-    public static Size GridSize { get; private set; } = new(Atlas.Width * CellEdgeLength, Atlas.Height * CellEdgeLength);
+    public static Size GridSize { get; private set; } = new(AtlasEx.Width * CellEdgeLength, AtlasEx.Height * CellEdgeLength);
 
     public static Rectangle GridDrawRange { get; private set; } = new(-CellEdgeLength, -CellEdgeLength, GridSize.Width, GridSize.Height);
 

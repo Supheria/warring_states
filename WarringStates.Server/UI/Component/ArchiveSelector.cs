@@ -36,7 +36,6 @@ public partial class ArchiveSelector : Pannel
         Text = "开启",
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
-        CanSelect = true,
     };
 
     ImageButton BuildButton { get; } = new()
@@ -73,7 +72,7 @@ public partial class ArchiveSelector : Pannel
 
     private void RefreshSelector()
     {
-        Selector.ItemList = Atlas.Archives.Select(x => x.WorldName).ToList();
+        Selector.ItemList = AtlasEx.Archives.Select(x => x.WorldName).ToList();
         Selector.Redraw();
         Selector.Invalidate();
     }

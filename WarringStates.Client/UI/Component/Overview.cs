@@ -35,14 +35,14 @@ public partial class Overview : Displayer
             Range = value;
             if (FullScreen)
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(AtlasEx.Size, Range.Size);
                 var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
                 base.Bounds = new(location, size);
             }
             else
             {
                 var size = new Size((int)(Range.Width * 0.25f), (int)(Range.Height * 0.25f));
-                size = Atlas.Size.ScaleSizeWithinRatio(size);
+                size = AtlasEx.Size.ScaleSizeWithinRatio(size);
                 var location = new Point(Range.Right - size.Width, Range.Top);
                 base.Bounds = new(location, size);
             }
@@ -63,7 +63,7 @@ public partial class Overview : Displayer
     private void RedrawOverview()
     {
         OverviewCache?.Dispose();
-        OverviewCache = Atlas.GetOverview(ClientSize);
+        OverviewCache = AtlasEx.GetOverview(ClientSize);
         var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
         OverviewCache.Dispose();
         OverviewCache = temp;
@@ -75,10 +75,10 @@ public partial class Overview : Displayer
         var edgeLength = (double)GridDrawer.CellEdgeLength;
         var width = GridDrawRect.Width / edgeLength;
         var height = GridDrawRect.Height / edgeLength;
-        var x = Atlas.Width - GridOrigin.X / edgeLength;
-        var y = Atlas.Height - GridOrigin.Y / edgeLength;
-        var widthRatio = Atlas.Width / (double)ClientWidth;
-        var heightRatio = Atlas.Height / (double)ClientHeight;
+        var x = AtlasEx.Width - GridOrigin.X / edgeLength;
+        var y = AtlasEx.Height - GridOrigin.Y / edgeLength;
+        var widthRatio = AtlasEx.Width / (double)ClientWidth;
+        var heightRatio = AtlasEx.Height / (double)ClientHeight;
         FocusScaleRatio = (widthRatio * edgeLength, heightRatio * edgeLength);
         FocusRect = new Rectangle((x / widthRatio).ToRoundInt(), (y / heightRatio).ToRoundInt(), (width / widthRatio).ToRoundInt(), (height / heightRatio).ToRoundInt());
         using var g = Graphics.FromImage(Image);

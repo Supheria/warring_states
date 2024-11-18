@@ -119,7 +119,7 @@ partial class ClientService
         {
             ReceiveCallback(receiver);
             var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
-            Atlas.Relocate(playerArchive);
+            AtlasEx.Relocate(playerArchive);
             var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Callback);
             SendCommand(sender);
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
@@ -171,7 +171,7 @@ partial class ClientService
         {
             ReceiveCallback(receiver);
             var vision = receiver.GetArgs<VisibleLands>(ServiceKey.Object);
-            Atlas.AddVision(vision);
+            AtlasEx.AddVision(vision);
         }
     }
 }

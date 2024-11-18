@@ -19,7 +19,7 @@ partial class ServerForm
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
-        Atlas.Relocate();
+        AtlasEx.RefreshArchiveList();
     }
 
     private void SendButton_Click(object? sender, EventArgs e)

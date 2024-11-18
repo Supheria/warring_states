@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 using WarringStates.Server.Data;
 using WarringStates.Server.Events;
 using WarringStates.User;
+using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 
-partial class Atlas
+partial class AtlasEx
 {
     public static string RootPath { get; } = Directory.CreateDirectory("saves").FullName;
 
@@ -22,12 +23,12 @@ partial class Atlas
 
     public static ArchiveInfoRoster Archives { get; } = [];
 
-    public static void Relocate()
+    public static void RefreshArchiveList()
     {
         try
         {
             using var query = LocalDataBase.NewQuery();
-            Relocate(query);
+            RefreshArchiveList(query);
         }
         catch (Exception ex)
         {
@@ -35,7 +36,7 @@ partial class Atlas
         }
     }
 
-    private static void Relocate(SQLiteQuery query)
+    private static void RefreshArchiveList(SQLiteQuery query)
     {
         Archives.Clear();
         foreach (var info in query.SelectItems<ArchiveInfo>(LocalDataBase.ARCHIVE_INFO, null))
@@ -50,9 +51,7 @@ partial class Atlas
             CurrentArchiveInfo = new(worldName);
             //SetCurrentArchive(new ArchiveInfo(worldName));
             var altitudeMap = new AltitudeMap(mapData, progressor);
-            var randomTable = new RandomTable(1000);
-            var landPoints = LandMapEx.ConvertLandPoints(altitudeMap);
-            LandMap = new LandMapEx(altitudeMap.Size, randomTable, landPoints);
+            var landPoints = AtlasEx.ConvertLandPoints(altitudeMap);
             if (!GetArchiveRootPath(out var rootPath) ||
                 !GetCurrentSpanPath(out var spanPath) ||
                 !GetRandomTablePath(out var randomPath) ||
@@ -60,8 +59,8 @@ partial class Atlas
                 return;
             Directory.CreateDirectory(rootPath);
             SerializeTool.SerializeFile(0, new(CURRENT_SPAN), SignTable, true, spanPath);
-            SerializeTool.SerializeFile(randomTable, new(RADOM_TABLE), SignTable, true, randomPath);
-            SerializeTool.SerializeFile(LandMap.WorldSize, new(WORLD_SIZE), SignTable, true, sizePath);
+            SerializeTool.SerializeFile(new RandomTable(1000), new(RADOM_TABLE), SignTable, true, randomPath);
+            SerializeTool.SerializeFile(altitudeMap.Size, new(WORLD_SIZE), SignTable, true, sizePath);
             using var query = GetArchiveQuery();
             if (query is null)
                 return;
@@ -73,7 +72,7 @@ partial class Atlas
             using var mainQuery = LocalDataBase.NewQuery();
             mainQuery.CreateTable<ArchiveInfo>(LocalDataBase.ARCHIVE_INFO);
             mainQuery.InsertItem(LocalDataBase.ARCHIVE_INFO, CurrentArchiveInfo);
-            Relocate(mainQuery);
+            RefreshArchiveList(mainQuery);
         }
         catch (Exception ex)
         {
@@ -91,18 +90,15 @@ partial class Atlas
     {
         CurrentArchiveInfo = info;
         if (CurrentArchiveInfo is null)
-            LandMap = new();
+            AtlasEx.Relocate();
         else
         {
-            var worldSize = LoadWorldSize();
-            var randomTable = LoadRandomTable();
+            AtlasEx.Relocate(LoadWorldSize(), LoadLandPoints(), LoadRandomTable());
             using var query = GetArchiveQuery();
-            var landPoints = LoadLandPoints();
-            LandMap = new(worldSize, randomTable, landPoints);
-            var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
+            var ownerSites = query?.SelectItems<OwnerSite>(OWNER_SITES, null).ToList() ?? [];
             foreach (var ownerSite in ownerSites)
             {
-                if (!LandMap.AddSouceLand(ownerSite.Site, ownerSite.LandType))
+                if (!AtlasEx.AddSouceLand(ownerSite.Site, ownerSite.LandType))
                     RemoveOwnerSite(ownerSite.Site);
             }
         }
@@ -121,7 +117,7 @@ partial class Atlas
                 Directory.Delete(path, true);
             using var query = LocalDataBase.NewQuery();
             query.DeleteItems(LocalDataBase.ARCHIVE_INFO, SQLiteQuery.GetCondition(info, Operators.Equal));
-            Relocate(query);
+            RefreshArchiveList(query);
             return true;
         }
         catch (Exception ex)
@@ -142,7 +138,7 @@ partial class Atlas
             WorldName = CurrentArchiveInfo.WorldName,
             WorldSize = LoadWorldSize(),
             CurrentSpan = LoadCurrentSpan(),
-            VisibleLands = GetVision(playerName),
+            VisibleLands = AtlasEx.GetAllVision(playerName),
             //VisibleLands = LandMap.GetAllSingleLands(),
         };
         return true;

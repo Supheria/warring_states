@@ -55,7 +55,7 @@ internal class ServiceManager : INetLogger
     {
         try
         {
-            if (Atlas.CurrentArchiveInfo is null)
+            if (AtlasEx.CurrentArchiveInfo is null)
                 throw new NetException(ServiceCode.NoSelectedArchive);
             else if (IsStart)
                 throw new NetException(ServiceCode.ServerHasStarted);
@@ -68,7 +68,7 @@ internal class ServiceManager : INetLogger
             EnableListener();
             this.HandleLog("start");
             OnStart?.Invoke();
-            SpanFlow.Relocate(Atlas.LoadCurrentSpan());
+            SpanFlow.Relocate(AtlasEx.LoadCurrentSpan());
             SpanFlow.Start();
         }
         catch (Exception ex)
@@ -165,9 +165,9 @@ internal class ServiceManager : INetLogger
 
     private static void CheckNewPlayer(ServerService service)
     {
-        var owners = Atlas.GetOwnerSites(service.Player.Name);
+        var owners = AtlasEx.GetOwnerSites(service.Player.Name);
         if (owners.Count is 0)
-            Atlas.SetRandomSite(service.Player.Name);
+            AtlasEx.SetRandomSite(service.Player.Name);
         //var owner = Atlas.SetRandomSite(service.Player.Name);
         //Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
     }
@@ -216,16 +216,6 @@ internal class ServiceManager : INetLogger
             if (service.Joined)
                 service.UpdateCurrentDate(args);
         });
-    }
-
-    public bool BuildLand(Coordinate site, SourceLandTypes type, string playerId, out VisibleLands vision)
-    {
-        vision = new();
-        if (!Atlas.AddSouceLand(site, type))
-            return false;
-        Atlas.SetOwnerSites(site, type, playerId);
-        Atlas.GetVision(site, vision);
-        return true;
     }
 
     public void HandleUpdateConnection()

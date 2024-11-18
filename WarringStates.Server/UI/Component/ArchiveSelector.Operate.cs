@@ -25,7 +25,7 @@ partial class ArchiveSelector
 
     private void ResetThumbnail()
     {
-        Thumbnail.SetThumbnail(Atlas.GetThumbnail(), Atlas.LoadCurrentSpan());
+        Thumbnail.SetThumbnail(AtlasEx.GetThumbnail(), AtlasEx.LoadCurrentSpan());
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
     }
@@ -72,7 +72,7 @@ partial class ArchiveSelector
         Progressor.Visible = true;
         SetSize();
         Invalidate(true);
-        await Task.Run(() => Atlas.CreateArchive(data, "new world", Progressor));
+        await Task.Run(() => AtlasEx.CreateArchive(data, "new world", Progressor));
         Selector.Redraw();
         Progressor.Visible = false;
         SetSize();
@@ -86,7 +86,7 @@ partial class ArchiveSelector
 
     private void DeleteButton_Click(object? sender, EventArgs e)
     {
-        Atlas.Delete(Selector.SelectedIndex);
+        AtlasEx.Delete(Selector.SelectedIndex);
         Selector.SelectedIndex = -1;
     }
 
@@ -105,6 +105,6 @@ partial class ArchiveSelector
             SwitchButton.CanSelect = true;
             DeleteButton.CanSelect = true;
         }
-        Atlas.SetCurrentArchive(Selector.SelectedIndex);
+        AtlasEx.SetCurrentArchive(Selector.SelectedIndex);
     }
 }

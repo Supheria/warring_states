@@ -117,7 +117,7 @@ partial class ServerService
         try
         {
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List)
-                .AppendArgs(ServiceKey.List, Atlas.Archives.ToArray());
+                .AppendArgs(ServiceKey.List, AtlasEx.Archives.ToArray());
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -136,7 +136,7 @@ partial class ServerService
         else if (operateCode is OperateCode.Join)
         {
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (Atlas.GetPlayerArchive(Player.Name, out var archive))
+            if (AtlasEx.GetPlayerArchive(Player.Name, out var archive))
             {
                 sender.AppendArgs(ServiceKey.Archive, archive);
                 CallbackSuccess(sender);
@@ -182,7 +182,7 @@ partial class ServerService
         if (operateCode is OperateCode.Check)
         {
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
-            var types = Atlas.GetCanBuildTypes(site);
+            var types = AtlasEx.GetCanBuildTypes(site);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.Args, new SourceLandCanBuildArgs(site, types));
             CallbackSuccess(sender);
@@ -192,11 +192,11 @@ partial class ServerService
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
             var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (!Server.BuildLand(site, type, Player.Name, out var vision))
+            if (!AtlasEx.BuildSourceLand(site, type, Player.Name))
                 CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
             else
             {
-                sender.AppendArgs(ServiceKey.Object, vision);
+                sender.AppendArgs(ServiceKey.Object, AtlasEx.GetSiteVision(site));
                 CallbackSuccess(sender);
             }
         }

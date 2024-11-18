@@ -13,7 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WarringStates.Server.Map;
 
-partial class Atlas
+partial class AtlasEx
 {
     public const string CURRENT_SPAN = "current span";
     public const string RADOM_TABLE = "random table";
