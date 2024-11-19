@@ -38,7 +38,6 @@ partial class Selector
             SelectedIndex = -1;
         Redraw();
         Invalidate();
-        IndexChanged?.Invoke(this, EventArgs.Empty);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)

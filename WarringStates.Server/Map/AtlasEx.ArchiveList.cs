@@ -14,27 +14,35 @@ partial class AtlasEx
 {
     static ArchiveInfo? CurrentArchiveInfo { get; set; } = null;
 
-    public static ArchiveInfoRoster Archives { get; } = [];
+    public static List<ArchiveInfo> Archives { get; } = [];
 
     public static void RefreshArchiveList()
     {
         try
         {
-            using var query = LocalDataBase.NewQuery();
-            RefreshArchiveList(query);
+            Archives.Clear();
+            foreach (var path in Directory.EnumerateFiles(ArchiveInfo.RootPath))
+            {
+                SQLiteQuery? query = null;
+                try
+                {
+                    query = new SQLiteQuery(path);
+                    var archiveInfo = query.SelectItems<ArchiveInfo>(ArchiveInfo.ARCHIVE_INFO, null).FirstOrDefault();
+                    if (archiveInfo is not null)
+                        Archives.Add(archiveInfo);
+                }
+                catch { }
+                finally
+                {
+                    query?.Dispose();
+                }
+            }
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
         }
         catch (Exception ex)
         {
             MessageBox.Show(ex.Message);
         }
-    }
-
-    private static void RefreshArchiveList(SQLiteQuery query)
-    {
-        Archives.Clear();
-        foreach (var info in query.SelectItems<ArchiveInfo>(LocalDataBase.ARCHIVE_INFO, null))
-            Archives.TryAdd(info);
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
 
     public static void CreateArchive(AltitudeMapData mapData, string worldName, IProgressor progressor)
@@ -47,12 +55,7 @@ partial class AtlasEx
             query.CreateTable<LandPoint>(LAND_POINTS);
             query.InsertItems(LAND_POINTS, ConvertLandPoints(altitudeMap).ToArray());
             query.CreateTable<OwnerSite>(OWNER_SITES);
-
-            // TODO: remove archiveinfo list in local.db
-            using var mainQuery = LocalDataBase.NewQuery();
-            mainQuery.CreateTable<ArchiveInfo>(LocalDataBase.ARCHIVE_INFO);
-            mainQuery.InsertItem(LocalDataBase.ARCHIVE_INFO, CurrentArchiveInfo);
-            RefreshArchiveList(mainQuery);
+            RefreshArchiveList();
         }
         catch (Exception ex)
         {
@@ -62,13 +65,9 @@ partial class AtlasEx
 
     public static void SetCurrentArchive(int index)
     {
-        Archives.TryGetValue(index, out var info);
-        SetCurrentArchive(info);
-    }
-
-    private static void SetCurrentArchive(ArchiveInfo? info)
-    {
-        CurrentArchiveInfo = info;
+        if (index < 0 || index >= Archives.Count)
+            return;
+        CurrentArchiveInfo = Archives[index];
         Relocate();
         using var query = CurrentArchiveInfo?.GetQuery();
         if (query is null)
@@ -86,13 +85,13 @@ partial class AtlasEx
     {
         try
         {
-            if (!Archives.TryGetValue(index, out var info))
+            if (index < 0 || index >= Archives.Count)
                 return false;
+            var info = Archives[index];
             if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                 return false;
             File.Delete(info.GetDatabase());
-            // TODO:
-            //RefreshArchiveList(query);
+            RefreshArchiveList();
             return true;
         }
         catch (Exception ex)

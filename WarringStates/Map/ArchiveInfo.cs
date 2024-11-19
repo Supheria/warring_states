@@ -4,7 +4,7 @@ using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.Map;
 
-public class ArchiveInfo : IRosterItem<string>
+public class ArchiveInfo
 {
     public const string ARCHIVE_INFO = "archive info";
 
@@ -24,8 +24,6 @@ public class ArchiveInfo : IRosterItem<string>
     public long CurrentSpan { get; private set; }
 
     public RandomTable RandomTable { get; private set; } = new();
-
-    public string Signature => Id;
 
     public ArchiveInfo(string worldName, Size worldSize)
     {

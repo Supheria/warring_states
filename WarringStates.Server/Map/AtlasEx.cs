@@ -27,6 +27,7 @@ internal partial class AtlasEx : Atlas
             return;
         Size = CurrentArchiveInfo.WorldSize;
         var randomTable = CurrentArchiveInfo.RandomTable;
+        randomTable.ResetIndex();
         foreach (var point in LoadLandPoints())
         {
             SingleLandTypes type;
@@ -43,22 +44,6 @@ internal partial class AtlasEx : Atlas
         }
         var area = Width * Height;
         LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
-    }
-
-    public static bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
-    {
-        var surrounds = GetSurrounds(site, targetType);
-        if (surrounds.Count is not 9)
-            return false;
-        foreach (var land in surrounds)
-        {
-            if (!SourceLands.TryAdd(land))
-            {
-                surrounds.ForEach(s => SourceLands.TryRemove(s));
-                return false;
-            }
-        }
-        return true;
     }
 
     private static SingleLandTypes AltitudeFilter(double altitudeRatio, double random)
@@ -85,6 +70,22 @@ internal partial class AtlasEx : Atlas
                 return SingleLandTypes.Wood;
         }
         return SingleLandTypes.Stream;
+    }
+
+    public static bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
+    {
+        var surrounds = GetSurrounds(site, targetType);
+        if (surrounds.Count is not 9)
+            return false;
+        foreach (var land in surrounds)
+        {
+            if (!SourceLands.TryAdd(land))
+            {
+                surrounds.ForEach(s => SourceLands.TryRemove(s));
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<LandPoint> ConvertLandPoints(AltitudeMap altitudeMap)
