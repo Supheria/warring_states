@@ -6,18 +6,14 @@ using WarringStates.Data;
 using WarringStates.Flow;
 using WarringStates.Map;
 using WarringStates.Net.Common;
-using WarringStates.Server.User;
+using WarringStates.Server.Map;
 using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
 partial class ServerService
 {
-    public event NetEventHandler<CommandReceiver>? OnRequestArchive;
-
-    public event NetEventHandler<CommandReceiver>? OnJoinArchive;
-
-    public PlayerGroup PlayerGroup { get; set; } = new();
+    public ServiceManager Server { get; set; } = new();
 
     public bool Joined { get; private set; } = false;
 
@@ -77,7 +73,7 @@ partial class ServerService
                 SendCommand(sender);
             }
             else
-                PlayerGroup?.RelayCommand(receiver);
+                Server?.RelayCommand(receiver);
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -91,7 +87,7 @@ partial class ServerService
             else
             {
                 ReceiveCallback(receiver);
-                PlayerGroup?.RelayCommand(receiver);
+                Server?.RelayCommand(receiver);
             }
         }
         else if (operateCode is OperateCode.Broadcast)
@@ -121,7 +117,7 @@ partial class ServerService
         try
         {
             var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List)
-                .AppendArgs(ServiceKey.List, LocalArchive.Archives.ToArray());
+                .AppendArgs(ServiceKey.List, AtlasEx.Archives.ToArray());
             SendCommand(sender);
         }
         catch (Exception ex)
@@ -137,33 +133,22 @@ partial class ServerService
         {
             ReceiveCallback(receiver);
         }
-        else if (operateCode is OperateCode.Request)
-        {
-            OnRequestArchive?.Invoke(receiver);
-        }
         else if (operateCode is OperateCode.Join)
         {
-            OnJoinArchive?.Invoke(receiver);
+            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
+            if (AtlasEx.GetPlayerArchive(Player.Name, out var archive))
+            {
+                sender.AppendArgs(ServiceKey.Archive, archive);
+                CallbackSuccess(sender);
+            }
+            else
+                CallbackFailure(sender, new NetException(ServiceCode.ServerNotStartYet));
         }
         else if (operateCode is OperateCode.Callback)
         {
             Joined = true;
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
             CallbackSuccess(sender);
-        }
-    }
-
-    public void ResbonseArchiveRequestOrJoin(CommandReceiver receiver, PlayerArchive playerArchive)
-    {
-        try
-        {
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
-                .AppendArgs(ServiceKey.Archive, playerArchive);
-            CallbackSuccess(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
         }
     }
 
@@ -197,7 +182,7 @@ partial class ServerService
         if (operateCode is OperateCode.Check)
         {
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
-            var types = PlayerGroup.LandMap.GetCanBuildTypes(site);
+            var types = AtlasEx.GetCanBuildTypes(site);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.Args, new SourceLandCanBuildArgs(site, types));
             CallbackSuccess(sender);
@@ -207,11 +192,11 @@ partial class ServerService
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
             var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (!PlayerGroup.BuildLand(site, type, Player.Id, out var vision))
+            if (!AtlasEx.BuildSourceLand(site, type, Player.Name))
                 CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
             else
             {
-                sender.AppendArgs(ServiceKey.Object, vision);
+                sender.AppendArgs(ServiceKey.Object, AtlasEx.GetSiteVision(site));
                 CallbackSuccess(sender);
             }
         }

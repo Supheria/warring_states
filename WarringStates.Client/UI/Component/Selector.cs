@@ -1,8 +1,7 @@
 ﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using WarringStates.User;
 
-namespace WarringStates.UI;
+namespace WarringStates.Client.UI.Component;
 
 public partial class Selector : Displayer
 {

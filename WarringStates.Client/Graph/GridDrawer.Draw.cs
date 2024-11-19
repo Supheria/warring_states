@@ -32,7 +32,7 @@ partial class GridDrawer
 
     public static void OffsetOrigin(Coordinate offset)
     {
-        GridSize = new(Atlas.Width * CellEdgeLength, Atlas.Height * CellEdgeLength);
+        GridSize = new(AtlasEx.Width * CellEdgeLength, AtlasEx.Height * CellEdgeLength);
         GridDrawRange = new(-CellEdgeLength, -CellEdgeLength, GridSize.Width, GridSize.Height);
         var x = (Origin.X + offset.X) % GridSize.Width;
         if (x < 0)

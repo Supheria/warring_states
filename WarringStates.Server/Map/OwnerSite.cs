@@ -11,7 +11,7 @@ internal class OwnerSite(Coordinate site, SourceLandTypes type, string playerId)
 
     public SourceLandTypes LandType { get; set; } = type;
 
-    public string PlayerId { get; set; } = playerId;
+    public string PlayerName { get; set; } = playerId;
 
     public OwnerSite() : this(new(), SourceLandTypes.None, "")
     {

@@ -14,23 +14,21 @@ internal class LocalNet
 
     public static int Port { get; set; } = 60;
 
-    public static void Start()
+    public static void Switch()
     {
-        Server.Start(Port);
-    }
-
-    public static void Close()
-    {
-        Server.Close();
+        if (Server.IsStart)
+            Server.Close();
+        else
+            Server.Start(Port);
     }
 
     public static bool CheckLogin(string name, string passwordText, [NotNullWhen(true)] out Player? player, out ServiceCode code)
     {
         player = null;
         using var query = LocalDataBase.NewQuery();
-        query.CreateTable<Player>(LocalDataBase.NameofPlayer);
+        query.CreateTable<Player>(LocalDataBase.PLAYER);
         var condition = new Condition(SQLiteQuery.GetFieldName<Player>(nameof(Player.Name)), name, Operators.Equal);
-        var selects = query.SelectItems<Player>(LocalDataBase.NameofPlayer, condition);
+        var selects = query.SelectItems<Player>(LocalDataBase.PLAYER, condition);
         if (selects.Length > 1)
         {
             code = ServiceCode.MultiPlayerName;
@@ -58,9 +56,9 @@ internal class LocalNet
     {
         player = null;
         using var query = LocalDataBase.NewQuery();
-        query.CreateTable<Player>(LocalDataBase.NameofPlayer);
+        query.CreateTable<Player>(LocalDataBase.PLAYER);
         var condition = new Condition(SQLiteQuery.GetFieldName<Player>(nameof(Player.Name)), name, Operators.Equal);
-        var selects = query.SelectItems<Player>(LocalDataBase.NameofPlayer, condition);
+        var selects = query.SelectItems<Player>(LocalDataBase.PLAYER, condition);
         if (selects.Length > 0)
         {
             player = null;
@@ -77,8 +75,8 @@ internal class LocalNet
             code = ServiceCode.EmptyPassword;
             return false;
         }
-        player = new Player(Player.CreateId(name), name, Player.ConvertPasswortText(passwordText));
-        query.InsertItem(LocalDataBase.NameofPlayer, player);
+        player = new Player(name, Player.ConvertPasswortText(passwordText));
+        query.InsertItem(LocalDataBase.PLAYER, player);
         code = ServiceCode.Success;
         return true;
     }

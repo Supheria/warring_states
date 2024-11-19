@@ -1,4 +1,6 @@
-﻿namespace WarringStates.UI;
+﻿using WarringStates.Server.Net;
+
+namespace WarringStates.Server.UI.Component;
 
 partial class Selector
 {
@@ -17,6 +19,8 @@ partial class Selector
 
     protected override void OnMouseDoubleClick(MouseEventArgs e)
     {
+        if (LocalNet.Server.IsStart)
+            return;
         base.OnMouseDoubleClick(e);
         using var g = Graphics.FromImage(Image);
         var isContain = false;
@@ -34,7 +38,6 @@ partial class Selector
             SelectedIndex = -1;
         Redraw();
         Invalidate();
-        IndexChanged?.Invoke(this, EventArgs.Empty);
     }
 
     protected override void OnMouseMove(MouseEventArgs e)

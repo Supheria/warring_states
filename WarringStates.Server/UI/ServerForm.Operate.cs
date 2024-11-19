@@ -1,5 +1,5 @@
-﻿using WarringStates.Server.Net;
-using WarringStates.Server.User;
+﻿using WarringStates.Server.Map;
+using WarringStates.Server.Net;
 
 namespace WarringStates.Server.UI;
 
@@ -19,7 +19,7 @@ partial class ServerForm
     protected override void OnShown(EventArgs e)
     {
         base.OnShown(e);
-        LocalArchive.Relocate();
+        AtlasEx.RefreshArchiveList();
     }
 
     private void SendButton_Click(object? sender, EventArgs e)

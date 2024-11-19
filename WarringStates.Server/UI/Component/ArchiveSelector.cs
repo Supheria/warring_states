@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
 using WarringStates.Server.Events;
-using WarringStates.Server.User;
+using WarringStates.Server.Map;
 using WarringStates.UI;
 
 namespace WarringStates.Server.UI.Component;
@@ -36,7 +36,6 @@ public partial class ArchiveSelector : Pannel
         Text = "开启",
         FrontColor = ButtonFrontColor,
         BackColor = ButtonBackColor,
-        CanSelect = true,
     };
 
     ImageButton BuildButton { get; } = new()
@@ -71,21 +70,9 @@ public partial class ArchiveSelector : Pannel
             ]);
     }
 
-    public override void EnableListener()
-    {
-        base.EnableListener();
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-    }
-
-    public override void DisableListener()
-    {
-        base.DisableListener();
-        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
-    }
-
     private void RefreshSelector()
     {
-        Selector.ItemList = LocalArchive.Archives.Select(x => x.WorldName).ToList();
+        Selector.ItemList = AtlasEx.Archives.Select(x => x.WorldName).ToList();
         Selector.Redraw();
         Selector.Invalidate();
     }
@@ -136,12 +123,10 @@ public partial class ArchiveSelector : Pannel
             colWidth,
             ButtonHeight);
         //
-        var buttonWidth = colWidth - Padding.Width * 2;
-        //
         DeleteButton.Bounds = new(
-            left + Padding.Width,
+            left,
             BuildButton.Bottom + buttonPadding,
-            buttonWidth,
+            colWidth,
             ButtonHeight);
         //
         if (Progressor.Visible)

@@ -52,7 +52,7 @@ internal class VoronoiPlane(Size size)
         return sites;
     }
 
-    
+
 
     /// <summary>
     /// The generated sites are guaranteed not to lie on the border of the plane (although they may be very close).

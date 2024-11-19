@@ -1,17 +1,14 @@
 ﻿using LocalUtilities.IocpNet;
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
-using Microsoft.VisualBasic.Logging;
-using LocalUtilities.TypeToolKit.Convert;
+using LocalUtilities.TypeGeneral;
 using System.Net;
 using WarringStates.Client.Events;
-using WarringStates.Client.User;
+using WarringStates.Client.Map;
 using WarringStates.Flow;
+using WarringStates.Map;
 using WarringStates.Net.Common;
 using WarringStates.User;
-using LocalUtilities.TypeGeneral;
-using WarringStates.Map;
-using WarringStates.Client.Map;
 
 namespace WarringStates.Client.Net;
 
@@ -107,46 +104,23 @@ partial class ClientService
         }
     }
 
-    public void FetchArchive(string archiveId)
+    public void JoinArchive()
     {
-        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Request)
-            .AppendArgs(ServiceKey.Id, archiveId);
-        SendCommand(sender);
-    }
-
-    public void JoinArchive(string archiveId)
-    {
-        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join)
-            .AppendArgs(ServiceKey.Id, archiveId);
+        var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.Join);
         SendCommand(sender);
     }
 
     private void HandleArchive(CommandReceiver receiver)
     {
         var operateCode = (OperateCode)receiver.OperateCode;
-        if (operateCode is OperateCode.List)
-        {
-            var infoList = receiver.GetArgs<ArchiveInfo[]>(ServiceKey.List);
-            LocalArchives.ReLocate(infoList);
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            CallbackSuccess(sender);
-        }
-        else if (operateCode is OperateCode.Request)
-        {
-            ReceiveCallback(receiver);
-            Task.Run(() =>
-            {
-                var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
-                LocalArchives.SetCurrentArchive(playerArchive);
-            });
-        }
-        else if (operateCode is OperateCode.Join)
+        if (operateCode is OperateCode.Join)
         {
             ReceiveCallback(receiver);
             var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
-            LocalArchives.StartPlayArchive(playerArchive);
+            AtlasEx.Relocate(playerArchive);
             var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Callback);
             SendCommand(sender);
+            LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
         }
         else if (operateCode is OperateCode.Callback)
         {
@@ -195,7 +169,7 @@ partial class ClientService
         {
             ReceiveCallback(receiver);
             var vision = receiver.GetArgs<VisibleLands>(ServiceKey.Object);
-            Atlas.AddVision(vision);
+            AtlasEx.AddVision(vision);
         }
     }
 }

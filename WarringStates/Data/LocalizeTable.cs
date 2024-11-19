@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Map;
+﻿using WarringStates.Map;
 
 namespace WarringStates.Data;
 
@@ -25,6 +19,7 @@ public class LocalizeTable
     public virtual string FishLand { get; set; } = "渔场";
     public virtual string TerraceLand { get; set; } = "梯田";
     public virtual string BuildSourceLandFailed { get; set; } = "场地建造失败";
+    public virtual string NoArchiveSelected { get; set; } = "未选择存档";
 
     public string ConvertEnum(Enum type)
     {

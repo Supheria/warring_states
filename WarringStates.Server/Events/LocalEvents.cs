@@ -142,6 +142,7 @@ internal static class LocalEvents
     public enum UserInterface
     {
         ArchiveListRefreshed,
+        CurrentArchiveChange,
 
         MainFormOnDraw,
         SettingsOnSetBounds,

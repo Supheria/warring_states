@@ -4,7 +4,6 @@ using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 using System.Net.Sockets;
 using System.Text;
-using WarringStates.Flow;
 using WarringStates.Net;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;
@@ -19,7 +18,7 @@ internal partial class ServerService : NetService, IRosterItem<string>
 
     protected DaemonThread DaemonThread { get; init; }
 
-    public string Signature => Player.Id;
+    public string Signature => Player.Name;
 
     public ServerService() : base(new ServerProtocol())
     {

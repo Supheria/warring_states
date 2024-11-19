@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.TypeGeneral;
-using System.Linq;
 
 namespace WarringStates.Map;
 
@@ -49,7 +48,7 @@ public class SourceLand(Coordinate site, Directions direction, SourceLandTypes t
             Directions.BottomRight => Site - (2, 2),
             _ => Site
         };
-    } 
+    }
 
     public Coordinate GetCenterSite()
     {

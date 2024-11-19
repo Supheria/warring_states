@@ -1,7 +1,6 @@
 ﻿using AltitudeMapGenerator.Layout;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.Test;
 

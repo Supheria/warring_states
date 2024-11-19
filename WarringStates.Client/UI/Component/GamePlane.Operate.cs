@@ -3,7 +3,6 @@
 using LocalUtilities.TypeGeneral;
 using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
-using WarringStates.Client.Map;
 using WarringStates.Client.Net;
 using WarringStates.Map;
 
@@ -88,8 +87,8 @@ partial class GamePlane
             DragStartPoint = e.Location;
             return;
         }
-            // HACK: for test
-            GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
+        // HACK: for test
+        GridDrawer.PointOnCell(e.Location, MouseOperates.MoveOn);
         GridDrawer.DrawSelect(ClientSize, BackColor, e.Location);
     }
 

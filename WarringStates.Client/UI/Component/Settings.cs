@@ -2,7 +2,6 @@
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
-using WarringStates.UI;
 
 namespace WarringStates.Client.UI.Component;
 
@@ -18,7 +17,7 @@ public class Settings : Displayer
             Range = value;
             if (Visible)
             {
-                var size = GeometryTool.ScaleSizeWithinRatio(Atlas.Size, Range.Size);
+                var size = GeometryTool.ScaleSizeWithinRatio(AtlasEx.Size, Range.Size);
                 var location = new Point((int)(Range.Left + (Range.Width - size.Width) * 0.5f), (int)(Range.Top + (Range.Height - size.Height) * 0.5f));
                 base.Bounds = new(location, size);
             }

@@ -1,21 +1,44 @@
 ﻿using AltitudeMapGenerator;
 using AltitudeMapGenerator.Layout;
+using WarringStates.Server.Events;
+using WarringStates.Server.Map;
 using WarringStates.Server.Net;
-using WarringStates.Server.User;
 
 namespace WarringStates.Server.UI.Component;
 
 partial class ArchiveSelector
 {
+    public override void EnableListener()
+    {
+        base.EnableListener();
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
+        LocalEvents.TryAddListener(LocalEvents.UserInterface.CurrentArchiveChange, ResetThumbnail);
+    }
+
+    public override void DisableListener()
+    {
+        base.DisableListener();
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, RefreshSelector);
+        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.CurrentArchiveChange, ResetThumbnail);
+    }
+
+    private void ResetThumbnail()
+    {
+        Thumbnail.SetThumbnail(AtlasEx.GetThumbnail(), AtlasEx.LoadCurrentSpan());
+        Thumbnail.Redraw();
+        Thumbnail.Invalidate();
+    }
+
+
     protected override void AddOperation()
     {
         base.AddOperation();
-        BuildButton.Click += BuildButton_Click;
         SwitchButton.Click += SwitchButton_Click;
+        BuildButton.Click += BuildButton_Click;
         DeleteButton.Click += DeleteButton_Click;
         Selector.IndexChanged += Selector_SelectedChanged;
-        LocalNet.Server.OnStart += Server_OnStart; ;
-        LocalNet.Server.OnClose += Server_OnClose; ;
+        LocalNet.Server.OnStart += Server_OnStart;
+        LocalNet.Server.OnClose += Server_OnClose;
     }
 
     private void Server_OnStart()
@@ -23,6 +46,8 @@ partial class ArchiveSelector
         SwitchButton.Text = "关闭";
         SwitchButton.Redraw();
         SwitchButton.Invalidate();
+        BuildButton.CanSelect = false;
+        DeleteButton.CanSelect = false;
     }
 
     private void Server_OnClose()
@@ -30,6 +55,8 @@ partial class ArchiveSelector
         SwitchButton.Text = "开启";
         SwitchButton.Redraw();
         SwitchButton.Invalidate();
+        BuildButton.CanSelect = true;
+        DeleteButton.CanSelect = true;
     }
 
     private async void BuildButton_Click(object? sender, EventArgs e)
@@ -44,7 +71,7 @@ partial class ArchiveSelector
         Progressor.Visible = true;
         SetSize();
         Invalidate(true);
-        await Task.Run(() => LocalArchive.CreateArchive(data, "new world", Progressor));
+        await Task.Run(() => AtlasEx.CreateArchive(data, "new world", Progressor));
         Selector.Redraw();
         Progressor.Visible = false;
         SetSize();
@@ -53,29 +80,30 @@ partial class ArchiveSelector
 
     private void SwitchButton_Click(object? sender, EventArgs e)
     {
-        if (LocalNet.Server.IsStart)
-            LocalNet.Close();
-        else
-            LocalNet.Start();
+        LocalNet.Switch();
     }
 
     private void DeleteButton_Click(object? sender, EventArgs e)
     {
-        LocalArchive.Delete(Selector.SelectedIndex);
+        AtlasEx.Delete(Selector.SelectedIndex);
         Selector.SelectedIndex = -1;
     }
 
     private void Selector_SelectedChanged(object? sender, EventArgs e)
     {
         if (Selector.SelectedIndex is -1)
+        {
+            SwitchButton.CanSelect = false;
             DeleteButton.CanSelect = false;
-        else
-            DeleteButton.CanSelect = true;
-        if (LocalArchive.Archives.TryGetValue(Selector.SelectedIndex, out var info))
-            Thumbnail.SetThumbnail(LocalArchive.LoadThumbnail(info), LocalArchive.LoadCurrentSpan(info));
-        else
             Thumbnail.SetThumbnailVoid();
-        Thumbnail.Redraw();
-        Thumbnail.Invalidate();
+            Thumbnail.Redraw();
+            Thumbnail.Invalidate();
+        }
+        else
+        {
+            SwitchButton.CanSelect = true;
+            DeleteButton.CanSelect = true;
+        }
+        AtlasEx.SetCurrentArchive(Selector.SelectedIndex);
     }
 }

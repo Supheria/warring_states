@@ -6,40 +6,30 @@ using WarringStates.User;
 
 namespace WarringStates.Client.Map;
 
-public static class Atlas
+public class AtlasEx : Atlas
 {
-    static LandMapEx LandMap { get; set; } = new();
-
-    public static Size Size => LandMap.WorldSize;
-
-    public static int Width => LandMap.WorldWidth;
-
-    public static int Height => LandMap.WorldHeight;
-
-    public static Land GetLand(this Coordinate coordinate)
+    public static Land GetLand(Coordinate point)
     {
-        return LandMap[coordinate];
+        if (SourceLands.TryGetValue(point, out var sourceLand))
+            return sourceLand;
+        if (SingleLands.TryGetValue(point, out var singleLand))
+            return singleLand;
+        return new SingleLand(point, SingleLandTypes.None);
     }
-
-    //public static string GetLandTypeCount(this Enum type)
-    //{
-    //    return LandMap.GetLandTypeCount(type);
-    //}
 
     public static void Relocate(PlayerArchive playerArchive)
     {
-        LandMap.Relocate(playerArchive.VisibleLands, playerArchive.WorldSize);
-        // TODO: broadcast event
-    }
-
-    public static Coordinate SetPointWithin(Coordinate Point)
-    {
-        return LandMap.SetPointWithin(Point);
+        SingleLands.Clear();
+        SingleLands.AddArange(playerArchive.VisibleLands.SingleLands);
+        SourceLands.Clear();
+        SourceLands.AddArange(playerArchive.VisibleLands.SourceLands);
+        Size = playerArchive.WorldSize;
     }
 
     public static void AddVision(VisibleLands vision)
     {
-        LandMap.AddVision(vision);
+        SingleLands.AddArange(vision.SingleLands);
+        SourceLands.AddArange(vision.SourceLands);
         LocalEvents.TryBroadcast(LocalEvents.Map.AtlasUpdate);
     }
 

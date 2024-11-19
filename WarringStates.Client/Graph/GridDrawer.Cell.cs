@@ -19,8 +19,8 @@ partial class GridDrawer
 
         public Cell(Coordinate site)
         {
-            Site = Atlas.SetPointWithin(site);
-            Land = Atlas.GetLand(Site);
+            Site = AtlasEx.SetPointWithin(site);
+            Land = AtlasEx.GetLand(Site);
             PointOnPart = Directions.None;
             PartShading = new();
         }
@@ -28,9 +28,9 @@ partial class GridDrawer
         public Cell(Point realPoint)
         {
             Site = RealPointToSite(realPoint);
-            Land = Atlas.GetLand(Site);
+            Land = AtlasEx.GetLand(Site);
             PointOnPart = GetRealPointOnPart(realPoint);
-            PartShading = GetPartShading(PointOnPart); 
+            PartShading = GetPartShading(PointOnPart);
         }
 
         private static Coordinate RealPointToSite(Point realPoint)
@@ -38,11 +38,11 @@ partial class GridDrawer
             var dX = realPoint.X - DrawOrigin.X;
             var x = dX / CellEdgeLength;
             if (dX < 0)
-                x += Atlas.Width - 1;
+                x += AtlasEx.Width - 1;
             var dY = realPoint.Y - DrawOrigin.Y;
             var y = dY / CellEdgeLength;
             if (dY < 0)
-                y += Atlas.Height - 1;
+                y += AtlasEx.Height - 1;
             return new(x, y);
         }
 

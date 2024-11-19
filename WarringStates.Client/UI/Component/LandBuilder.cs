@@ -1,15 +1,6 @@
 ﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WarringStates.Client.Events;
-using WarringStates.Client.Map;
 using WarringStates.Data;
 using WarringStates.UI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace WarringStates.Client.UI.Component;
 
