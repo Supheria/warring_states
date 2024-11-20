@@ -135,7 +135,7 @@ partial class ServerService
         else if (operateCode is OperateCode.Join)
         {
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (AtlasEx.GetAtlasData(Player.Name, out var archive))
+            if (AtlasEx.GetAtlasData(Player, out var archive))
             {
                 sender.AppendArgs(ServiceKey.Archive, archive);
                 CallbackSuccess(sender);
@@ -191,7 +191,7 @@ partial class ServerService
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
             var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (!AtlasEx.BuildSourceLand(site, type, Player.Name))
+            if (!AtlasEx.BuildSourceLand(site, type, Player))
                 CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
             else
             {

@@ -160,9 +160,9 @@ internal class ServiceManager : INetLogger
 
     private static void CheckNewPlayer(ServerService service)
     {
-        var owners = AtlasEx.GetOwnerSites(service.Player.Name);
+        var owners = AtlasEx.GetOwnerSites(service.Player);
         if (owners.Count is 0)
-            AtlasEx.SetRandomSite(service.Player.Name);
+            AtlasEx.SetRandomSite(service.Player);
         //var owner = Atlas.SetRandomSite(service.Player.Name);
         //Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
     }

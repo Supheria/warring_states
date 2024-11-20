@@ -22,4 +22,9 @@ public class Player(string name, string password) : IRosterItem<string>
     {
         return HashTool.ToMd5HashString(passwordText);
     }
+
+    public string GetHashId()
+    {
+        return HashTool.ToMd5HashString(Name + Password);
+    }
 }

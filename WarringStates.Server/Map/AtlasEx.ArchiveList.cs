@@ -1,4 +1,5 @@
 ﻿using AltitudeMapGenerator;
+using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
@@ -15,42 +16,29 @@ partial class AtlasEx
 
     public static List<ArchiveInfo> Archives { get; } = [];
 
-    public static long CurrentSpan
-    {
-        get => CurrentArchiveInfo?.CurrentSpan ?? 0;
-        set => CurrentArchiveInfo?.UpdateCurrentSpan(value);
-    }
-
     public static void RefreshArchiveList()
     {
         Archives.Clear();
-        foreach (var path in Directory.EnumerateFiles(ArchiveInfo.RootPath))
+        foreach (var folder in new DirectoryInfo(RootPath).GetDirectories()) 
         {
-            SQLiteQuery? query = null;
             try
             {
-                query = new SQLiteQuery(path);
-                var archiveInfo = query.SelectItems<ArchiveInfo>(ArchiveInfo.ARCHIVE_INFO, null).FirstOrDefault();
+                var archiveInfo = LoadArchiveInfo(folder.Name);
                 if (archiveInfo is not null)
                     Archives.Add(archiveInfo);
             }
             catch { }
-            finally
-            {
-                query?.Dispose();
-            }
         }
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.ArchiveListRefreshed);
     }
 
     public static void CreateArchive(AltitudeMapData mapData, string worldName, IProgressor progressor)
     {
-        CurrentArchiveInfo = new(worldName, mapData.Size);
+        var archiveInfo = new ArchiveInfo(worldName, mapData.Size);
+        Directory.CreateDirectory(GetFolderPath(archiveInfo.Id));
+        SaveArchiveInfo(archiveInfo);
         var altitudeMap = new AltitudeMap(mapData, progressor);
-        using var query = CurrentArchiveInfo.GetQuery();
-        query.CreateTable<LandPoint>(LAND_POINTS);
-        query.InsertItems(LAND_POINTS, ConvertToLandPoints(altitudeMap).ToArray());
-        query.CreateTable<OwnerSite>(OWNER_SITES);
+        SaveLandPoints(archiveInfo, ConvertToLandPoints(altitudeMap));
         RefreshArchiveList();
     }
 
@@ -87,15 +75,15 @@ partial class AtlasEx
             return;
         CurrentArchiveInfo = Archives[index];
         Relocate();
-        using var query = CurrentArchiveInfo?.GetQuery();
-        if (query is null)
-            return;
-        var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList() ?? [];
-        foreach (var ownerSite in ownerSites)
-        {
-            if (!AddSouceLand(ownerSite.Site, ownerSite.LandType))
-                RemoveOwnerSite(ownerSite.Site);
-        }
+        //using var query = CurrentArchiveInfo?.GetQuery();
+        //if (query is null)
+        //    return;
+        //var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList() ?? [];
+        //foreach (var ownerSite in ownerSites)
+        //{
+        //    if (!AddSouceLand(ownerSite.Site, ownerSite.LandType))
+        //        RemoveOwnerSite(ownerSite.Site);
+        //}
         LocalEvents.TryBroadcast(LocalEvents.UserInterface.CurrentArchiveChange);
     }
 
@@ -109,9 +97,7 @@ partial class AtlasEx
         Size = CurrentArchiveInfo.WorldSize;
         var randomTable = CurrentArchiveInfo.RandomTable;
         randomTable.ResetIndex();
-        using var query = CurrentArchiveInfo.GetQuery();
-        var landPoints = query.SelectItems<LandPoint>(LAND_POINTS, null).ToList();
-        foreach (var point in landPoints)
+        foreach (var point in LoadLandPoints(CurrentArchiveInfo))
         {
             SingleLandTypes type;
             if (point.Type is PointTypes.River)
@@ -162,7 +148,7 @@ partial class AtlasEx
         var info = Archives[index];
         if (MessageBox.Show($"要永远删除 {info.WorldName} 吗？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
             return false;
-        File.Delete(info.GetDatabase());
+        Directory.Delete(GetFolderPath(info.Id), true);
         RefreshArchiveList();
         return true;
     }

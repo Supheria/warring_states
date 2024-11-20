@@ -3,6 +3,7 @@ using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
+using WarringStates.User;
 
 namespace WarringStates.Server.Map;
 
@@ -35,7 +36,7 @@ internal partial class AtlasEx : Atlas
         return new SingleLand(point, SingleLandTypes.Plain);
     }
 
-    public static OwnerSite SetRandomSite(string playerName)
+    public static OwnerSite SetRandomSite(Player player)
     {
         var random = new Random();
         var gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
@@ -50,8 +51,8 @@ internal partial class AtlasEx : Atlas
             lands = GetSurrounds(site, type);
         }
         SourceLands.AddArange(lands);
-        var owner = new OwnerSite(site, type, playerName);
-        SetOwnerSites(owner.Site, owner.LandType, playerName);
+        var owner = new OwnerSite(site, type);
+        SetOwnerSites(owner.Site, owner.LandType, player);
         return owner;
     }
 
@@ -76,10 +77,10 @@ internal partial class AtlasEx : Atlas
         return vision;
     }
 
-    public static VisibleLands GetAllVision(string playerName)
+    public static VisibleLands GetAllVision(Player player)
     {
         var visibleLands = new VisibleLands();
-        var ownerSites = GetOwnerSites(playerName);
+        var ownerSites = GetOwnerSites(player);
         foreach (var ownerSite in ownerSites)
         {
             GetVision(ownerSite.Site, visibleLands);
@@ -87,7 +88,7 @@ internal partial class AtlasEx : Atlas
         return visibleLands;
     }
 
-    public static bool BuildSourceLand(Coordinate site, SourceLandTypes type, string playerName)
+    public static bool BuildSourceLand(Coordinate site, SourceLandTypes type, Player player)
     {
         var surrounds = GetSurrounds(site, type);
         if (surrounds.Count is not 9)
@@ -100,7 +101,7 @@ internal partial class AtlasEx : Atlas
                 return false;
             }
         }
-        SetOwnerSites(site, type, playerName);
+        SetOwnerSites(site, type, player);
         return true;
     }
 
@@ -209,7 +210,7 @@ internal partial class AtlasEx : Atlas
         return thumbnail;
     }
 
-    public static bool GetAtlasData(string playerName, [NotNullWhen(true)] out AtlasData? playerArchive)
+    public static bool GetAtlasData(Player player, [NotNullWhen(true)] out AtlasData? playerArchive)
     {
         playerArchive = null;
         if (CurrentArchiveInfo is null)
@@ -217,7 +218,7 @@ internal partial class AtlasEx : Atlas
         playerArchive = new()
         {
             WorldSize = CurrentArchiveInfo.WorldSize,
-            VisibleLands = GetAllVision(playerName),
+            VisibleLands = GetAllVision(player),
             //VisibleLands = GetAllSingleLands(),
         };
         return true;
