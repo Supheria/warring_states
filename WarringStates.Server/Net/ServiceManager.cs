@@ -63,7 +63,7 @@ internal class ServiceManager : INetLogger
             EnableListener();
             this.HandleLog("start");
             OnStart?.Invoke();
-            SpanFlow.Relocate(AtlasEx.LoadCurrentSpan());
+            SpanFlow.Relocate(AtlasEx.CurrentSpan);
             SpanFlow.Start();
         }
         catch (Exception ex)

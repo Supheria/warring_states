@@ -63,10 +63,15 @@ public partial class Overview : Displayer
     {
         OverviewCache?.Dispose();
         OverviewCache = AtlasEx.GetOverview(ClientSize);
-        var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
-        OverviewCache.Dispose();
-        OverviewCache = temp;
-        Image = (Bitmap)OverviewCache.Clone();
+        if (OverviewCache is null)
+            Image = null;
+        else
+        {
+            var temp = OverviewCache.CopyToNewSize(ClientSize, InterpolationMode.Low);
+            OverviewCache.Dispose();
+            OverviewCache = temp;
+            Image = (Bitmap)OverviewCache.Clone();
+        }
     }
 
     private void RedrawFocus()

@@ -1,7 +1,6 @@
 ﻿using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Convert;
 using WarringStates.Data;
 using WarringStates.Flow;
 using WarringStates.Map;
@@ -136,7 +135,7 @@ partial class ServerService
         else if (operateCode is OperateCode.Join)
         {
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (AtlasEx.GetPlayerArchive(Player.Name, out var archive))
+            if (AtlasEx.GetAtlasData(Player.Name, out var archive))
             {
                 sender.AppendArgs(ServiceKey.Archive, archive);
                 CallbackSuccess(sender);

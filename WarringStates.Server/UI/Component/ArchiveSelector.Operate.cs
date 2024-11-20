@@ -24,7 +24,7 @@ partial class ArchiveSelector
 
     private void ResetThumbnail()
     {
-        Thumbnail.SetThumbnail(AtlasEx.GetThumbnail(), AtlasEx.LoadCurrentSpan());
+        Thumbnail.SetThumbnail(AtlasEx.GetThumbnail(), AtlasEx.CurrentSpan);
         Thumbnail.Redraw();
         Thumbnail.Invalidate();
     }

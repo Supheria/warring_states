@@ -1,8 +1,7 @@
-﻿using AltitudeMapGenerator;
-using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing;
+using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
@@ -10,67 +9,6 @@ namespace WarringStates.Server.Map;
 internal partial class AtlasEx : Atlas
 {
     static Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
-
-    //public static void Relocate()
-    //{
-    //    SingleLands.Clear();
-    //    SourceLands.Clear();
-    //    Size = new();
-    //}
-
-    public static void Relocate()
-    {
-        SingleLands.Clear();
-        SourceLands.Clear();
-        Size = new();
-        if (CurrentArchiveInfo is null)
-            return;
-        Size = CurrentArchiveInfo.WorldSize;
-        var randomTable = CurrentArchiveInfo.RandomTable;
-        randomTable.ResetIndex();
-        foreach (var point in LoadLandPoints())
-        {
-            SingleLandTypes type;
-            if (point.Type is PointTypes.River)
-                type = SingleLandTypes.Stream;
-            else
-                type = AltitudeFilter(point.AltitudeRatio, randomTable.Next());
-            var singleLand = new SingleLand(point.Coordinate, type);
-            SingleLands[point.Coordinate] = singleLand;
-            if (LandTypesCount.TryGetValue(type, out var value))
-                LandTypesCount[type] = ++value;
-            else
-                LandTypesCount[type] = 1;
-        }
-        var area = Width * Height;
-        LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
-    }
-
-    private static SingleLandTypes AltitudeFilter(double altitudeRatio, double random)
-    {
-        if (altitudeRatio.ApproxLessThan(0.05))
-        {
-            if (random.ApproxLessThan(0.33))
-                return SingleLandTypes.Plain;
-            if (random.ApproxLessThan(0.9))
-                return SingleLandTypes.Wood;
-        }
-        else if (altitudeRatio.ApproxLessThan(0.15))
-        {
-            if (random.ApproxLessThan(0.33))
-                return SingleLandTypes.Wood;
-            if (random.ApproxLessThan(0.95))
-                return SingleLandTypes.Hill;
-        }
-        else
-        {
-            if (random.ApproxLessThan(0.8))
-                return SingleLandTypes.Hill;
-            if (random.ApproxLessThan(0.99))
-                return SingleLandTypes.Wood;
-        }
-        return SingleLandTypes.Stream;
-    }
 
     public static bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
     {
@@ -86,33 +24,6 @@ internal partial class AtlasEx : Atlas
             }
         }
         return true;
-    }
-
-    public static List<LandPoint> ConvertLandPoints(AltitudeMap altitudeMap)
-    {
-        var landPoints = new Dictionary<Coordinate, LandPoint>();
-        foreach (var (coordinate, point) in altitudeMap.AltitudePoints)
-        {
-            var site = SetPointWithin(coordinate, altitudeMap.Size);
-            landPoints[site] = new(site, point.Altitude / altitudeMap.AltitudeMax, PointTypes.Normal);
-        }
-        foreach (var coordinate in altitudeMap.RiverPoints)
-        {
-            var site = SetPointWithin(coordinate, altitudeMap.Size);
-            if (landPoints.TryGetValue(site, out var point))
-                landPoints[site] = new(site, point.AltitudeRatio, PointTypes.River);
-            else
-                landPoints[site] = new(site, 0d, PointTypes.River);
-        }
-        foreach (var coordinate in altitudeMap.OriginPoints)
-        {
-            var site = SetPointWithin(coordinate, altitudeMap.Size);
-            if (landPoints.TryGetValue(site, out var point))
-                landPoints[site] = new(site, point.AltitudeRatio, PointTypes.Origin);
-            else
-                landPoints[site] = new(site, 1d, PointTypes.Origin);
-        }
-        return landPoints.Values.ToList();
     }
 
     public static Land GetLand(Coordinate point)
@@ -168,7 +79,7 @@ internal partial class AtlasEx : Atlas
     public static VisibleLands GetAllVision(string playerName)
     {
         var visibleLands = new VisibleLands();
-        var ownerSites = AtlasEx.GetOwnerSites(playerName);
+        var ownerSites = GetOwnerSites(playerName);
         foreach (var ownerSite in ownerSites)
         {
             GetVision(ownerSite.Site, visibleLands);
@@ -296,5 +207,19 @@ internal partial class AtlasEx : Atlas
         }
         pThumbnail.UnlockBits();
         return thumbnail;
+    }
+
+    public static bool GetAtlasData(string playerName, [NotNullWhen(true)] out AtlasData? playerArchive)
+    {
+        playerArchive = null;
+        if (CurrentArchiveInfo is null)
+            return false;
+        playerArchive = new()
+        {
+            WorldSize = CurrentArchiveInfo.WorldSize,
+            VisibleLands = GetAllVision(playerName),
+            //VisibleLands = GetAllSingleLands(),
+        };
+        return true;
     }
 }

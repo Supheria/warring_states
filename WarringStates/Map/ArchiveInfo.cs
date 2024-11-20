@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.SQLiteHelper;
-using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.Map;

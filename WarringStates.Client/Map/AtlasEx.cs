@@ -2,7 +2,6 @@
 using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Map;
-using WarringStates.User;
 
 namespace WarringStates.Client.Map;
 
@@ -17,7 +16,7 @@ public class AtlasEx : Atlas
         return new SingleLand(point, SingleLandTypes.None);
     }
 
-    public static void Relocate(PlayerArchive playerArchive)
+    public static void Relocate(AtlasData playerArchive)
     {
         SingleLands.Clear();
         SingleLands.AddArange(playerArchive.VisibleLands.SingleLands);
@@ -33,8 +32,10 @@ public class AtlasEx : Atlas
         LocalEvents.TryBroadcast(LocalEvents.Map.AtlasUpdate);
     }
 
-    public static Bitmap GetOverview(Size size)
+    public static Bitmap? GetOverview(Size size)
     {
+        if (Width is 0 || Height is 0)
+            return null;
         var widthUnit = (size.Width / (double)Width).ToRoundInt();
         if (widthUnit is 0)
             widthUnit = 1;

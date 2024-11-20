@@ -8,7 +8,7 @@ namespace WarringStates.Net.Utilities;
 
 internal abstract class CommandWaitingHelper() : AutoDisposeItem(ConstTabel.CommandWaitingIntervalMilliseconds), INetLogger
 {
-    public NetEventHandler? OnWaitingFailed;
+    public NetEventHandler? OnWaitingFailed { get; set; }
 
     public NetEventHandler<string>? OnLog { get; set; }
 

@@ -116,7 +116,7 @@ partial class ClientService
         if (operateCode is OperateCode.Join)
         {
             ReceiveCallback(receiver);
-            var playerArchive = receiver.GetArgs<PlayerArchive>(ServiceKey.Archive);
+            var playerArchive = receiver.GetArgs<AtlasData>(ServiceKey.Archive);
             AtlasEx.Relocate(playerArchive);
             var sender = new CommandSender(DateTime.Now, receiver.CommandCode, (byte)OperateCode.Callback);
             SendCommand(sender);
