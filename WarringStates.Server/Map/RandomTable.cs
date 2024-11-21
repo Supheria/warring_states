@@ -1,6 +1,6 @@
 ﻿using LocalUtilities.SimpleScript;
 
-namespace WarringStates.Map;
+namespace WarringStates.Server.Map;
 
 public class RandomTable
 {

@@ -13,8 +13,6 @@ public class ArchiveInfo
 
     public Size WorldSize { get; private set; }
 
-    public RandomTable RandomTable { get; private set; } = new();
-
     public long CurrentSpan { get; set; }
 
     public ArchiveInfo(string worldName, Size worldSize)
@@ -23,7 +21,6 @@ public class ArchiveInfo
         CreateTime = DateTime.Now;
         Id = HashTool.ToMd5HashString(WorldName + CreateTime.ToBinary());
         WorldSize = worldSize;
-        RandomTable = new(1000);
         CurrentSpan = 0;
     }
 

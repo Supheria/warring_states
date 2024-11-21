@@ -1,21 +1,21 @@
 ﻿using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.SimpleScript;
+using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 
-public class LandPoint(Coordinate coordinate, double altitudeRatio, PointTypes type)
+public class LandPoint(Coordinate site, SingleLandTypes landType)
 {
-    [SsItem(Name = "c")]
-    public Coordinate Coordinate { get; private set; } = coordinate;
+    public Coordinate Site => new(X, Y);
 
-    [SsItem(Name = "a")]
-    public double AltitudeRatio { get; private set; } = altitudeRatio;
+    public int X { get; private set; } = site.X;
 
-    [SsItem(Name = "t")]
-    public PointTypes Type { get; private set; } = type;
+    public int Y { get; private set; } = site.Y;
 
-    public LandPoint() : this(new(), 0, PointTypes.Normal)
+    public SingleLandTypes Type { get; private set; } = landType;
+
+    public LandPoint() : this(new(), SingleLandTypes.None)
     {
 
     }

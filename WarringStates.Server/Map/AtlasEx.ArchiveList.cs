@@ -3,6 +3,7 @@ using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
+using System.Drawing;
 using WarringStates.Map;
 using WarringStates.Server.Events;
 
@@ -46,75 +47,25 @@ partial class AtlasEx
 
     public static List<LandPoint> ConvertToLandPoints(AltitudeMap altitudeMap)
     {
+        var random = new RandomTable(1000);
         var landPoints = new Dictionary<Coordinate, LandPoint>();
         foreach (var (coordinate, point) in altitudeMap.AltitudePoints)
         {
             var site = SetPointWithin(coordinate, altitudeMap.Size);
-            landPoints[site] = new(site, point.Altitude / altitudeMap.AltitudeMax, PointTypes.Normal);
+            var type = AltitudeFilter(point.Altitude / altitudeMap.AltitudeMax, random.Next());
+            landPoints[site] = new(site, type);
         }
         foreach (var coordinate in altitudeMap.RiverPoints)
         {
             var site = SetPointWithin(coordinate, altitudeMap.Size);
-            if (landPoints.TryGetValue(site, out var point))
-                landPoints[site] = new(site, point.AltitudeRatio, PointTypes.River);
-            else
-                landPoints[site] = new(site, 0d, PointTypes.River);
+            landPoints[site] = new(site, SingleLandTypes.Stream);
         }
         foreach (var coordinate in altitudeMap.OriginPoints)
         {
             var site = SetPointWithin(coordinate, altitudeMap.Size);
-            if (landPoints.TryGetValue(site, out var point))
-                landPoints[site] = new(site, point.AltitudeRatio, PointTypes.Origin);
-            else
-                landPoints[site] = new(site, 1d, PointTypes.Origin);
+            landPoints[site] = new(site, SingleLandTypes.Hill);
         }
         return landPoints.Values.ToList();
-    }
-
-    public static void SetCurrentArchive(int index)
-    {
-        if (index < 0 || index >= Archives.Count)
-            return;
-        CurrentArchiveInfo = Archives[index];
-        Relocate();
-        //using var query = CurrentArchiveInfo?.GetQuery();
-        //if (query is null)
-        //    return;
-        //var ownerSites = query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList() ?? [];
-        //foreach (var ownerSite in ownerSites)
-        //{
-        //    if (!AddSouceLand(ownerSite.Site, ownerSite.LandType))
-        //        RemoveOwnerSite(ownerSite.Site);
-        //}
-        LocalEvents.TryBroadcast(LocalEvents.UserInterface.CurrentArchiveChange);
-    }
-
-    public static void Relocate()
-    {
-        SingleLands.Clear();
-        SourceLands.Clear();
-        Size = new();
-        if (CurrentArchiveInfo is null)
-            return;
-        Size = CurrentArchiveInfo.WorldSize;
-        var randomTable = CurrentArchiveInfo.RandomTable;
-        randomTable.ResetIndex();
-        foreach (var point in LoadLandPoints(CurrentArchiveInfo))
-        {
-            SingleLandTypes type;
-            if (point.Type is PointTypes.River)
-                type = SingleLandTypes.Stream;
-            else
-                type = AltitudeFilter(point.AltitudeRatio, randomTable.Next());
-            var singleLand = new SingleLand(point.Coordinate, type);
-            SingleLands[point.Coordinate] = singleLand;
-            if (LandTypesCount.TryGetValue(type, out var value))
-                LandTypesCount[type] = ++value;
-            else
-                LandTypesCount[type] = 1;
-        }
-        var area = Width * Height;
-        LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
     }
 
     private static SingleLandTypes AltitudeFilter(double altitudeRatio, double random)
@@ -143,6 +94,29 @@ partial class AtlasEx
         return SingleLandTypes.Stream;
     }
 
+    public static void SetCurrentArchive(int index)
+    {
+        if (index < 0 || index >= Archives.Count)
+            return;
+        SingleLands.Clear();
+        SourceLands.Clear();
+        Size = new();
+        CurrentArchiveInfo = Archives[index];
+        if (CurrentArchiveInfo is null)
+            return;
+        foreach (var point in LoadLandPoints(CurrentArchiveInfo))
+        {
+            SingleLands[point.Site] = new(point.Site, point.Type);
+            if (LandTypesCount.TryGetValue(point.Type, out var value))
+                LandTypesCount[point.Type] = ++value;
+            else
+                LandTypesCount[point.Type] = 1;
+        }
+        Size = CurrentArchiveInfo.WorldSize;
+        var area = Width * Height;
+        LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
+        LocalEvents.TryBroadcast(LocalEvents.UserInterface.CurrentArchiveChange);
+    }
     public static bool Delete(int index)
     {
         if (index < 0 || index >= Archives.Count)
