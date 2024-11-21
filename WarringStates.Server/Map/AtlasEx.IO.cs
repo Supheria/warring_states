@@ -2,6 +2,7 @@
 using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
+using LocalUtilities.TypeToolKit.Graph;
 using System.IO;
 using WarringStates.Flow;
 using WarringStates.Map;
@@ -11,8 +12,7 @@ namespace WarringStates.Server.Map;
 
 partial class AtlasEx
 {
-    public const string ARCHIVE_INFO = "archive_info.ss";
-    public const string OWNER_SITES = "owner_sites.ss";
+    public const string OWNER_SITES = "owner sites";
 
     public static string RootPath { get; } = Directory.CreateDirectory("saves").FullName;
 
@@ -25,12 +25,12 @@ partial class AtlasEx
 
     public static string GetArchiveInfoPath(string archiveId)
     {
-        return Path.Combine(GetFolderPath(archiveId), ARCHIVE_INFO);
+        return Path.Combine(GetFolderPath(archiveId), nameof(ArchiveInfo) + ".ss");
     }
 
     public static string GetLandPointsPath(string archiveId)
     {
-        return Path.Combine(GetFolderPath(archiveId), OWNER_SITES);
+        return Path.Combine(GetFolderPath(archiveId), nameof(LandPoint) + ".ss");
     }
 
     public static void SaveArchiveInfo(ArchiveInfo archiveInfo)
@@ -43,7 +43,7 @@ partial class AtlasEx
         return SerializeTool.DeserializeFile<ArchiveInfo>(new(), SignTable, GetArchiveInfoPath(archiveId));
     }
 
-    public static void SaveLandPoints(ArchiveInfo archiveInfo, List<LandPoint>landPoints)
+    public static void SaveLandPoints(ArchiveInfo archiveInfo, List<LandPoint> landPoints)
     {
         SerializeTool.SerializeFile(landPoints, new(), SignTable, false, GetLandPointsPath(archiveInfo.Id));
     }
@@ -55,7 +55,7 @@ partial class AtlasEx
 
     public static SQLiteQuery GetPlayerDatabaseQuery(ArchiveInfo archiveInfo, Player player)
     {
-        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), player.GetHashId() + ".db"));
+        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), player.GetNameHash() + ".db"));
     }
 
     public static long CurrentSpan

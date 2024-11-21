@@ -11,6 +11,37 @@ internal partial class AtlasEx : Atlas
 {
     static Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
 
+    public static void AddPlayer(Player player)
+    {
+        if (CurrentArchiveInfo is null)
+            return;
+        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo, player);
+        query.CreateTable<OwnerSite>(OWNER_SITES);
+        var owners = query.SelectItems<OwnerSite>(OWNER_SITES, null);
+        if (owners.Length is 0)
+            SetRandomSite(player);
+    }
+
+    public static OwnerSite SetRandomSite(Player player)
+    {
+        var random = new Random();
+        var gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
+        var site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
+        var type = (SourceLandTypes)(random.Next() % 8);
+        var lands = GetSurrounds(site, type);
+        while (lands.Count < 1)
+        {
+            gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
+            site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
+            type = (SourceLandTypes)(random.Next() % 8);
+            lands = GetSurrounds(site, type);
+        }
+        SourceLands.AddArange(lands);
+        var owner = new OwnerSite(site, type);
+        SetOwnerSites(owner.Site, owner.LandType, player);
+        return owner;
+    }
+
     public static bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
     {
         var surrounds = GetSurrounds(site, targetType);
@@ -34,26 +65,6 @@ internal partial class AtlasEx : Atlas
         if (SingleLands.TryGetValue(point, out var singleLand))
             return singleLand;
         return new SingleLand(point, SingleLandTypes.Plain);
-    }
-
-    public static OwnerSite SetRandomSite(Player player)
-    {
-        var random = new Random();
-        var gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
-        var site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
-        var type = (SourceLandTypes)(random.Next() % 8);
-        var lands = GetSurrounds(site, type);
-        while (lands.Count < 1)
-        {
-            gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
-            site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
-            type = (SourceLandTypes)(random.Next() % 8);
-            lands = GetSurrounds(site, type);
-        }
-        SourceLands.AddArange(lands);
-        var owner = new OwnerSite(site, type);
-        SetOwnerSites(owner.Site, owner.LandType, player);
-        return owner;
     }
 
     public static void GetVision(Coordinate site, VisibleLands vision)

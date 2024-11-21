@@ -23,8 +23,10 @@ partial class AtlasEx
         {
             try
             {
-                var archiveInfo = LoadArchiveInfo(folder.Name);
-                if (archiveInfo is not null)
+                var archiveId = folder.Name;
+                var archiveInfo = LoadArchiveInfo(archiveId);
+                if (archiveInfo is not null &&
+                    archiveInfo.Id == archiveId)
                     Archives.Add(archiveInfo);
             }
             catch { }

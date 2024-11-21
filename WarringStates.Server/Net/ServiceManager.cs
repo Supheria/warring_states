@@ -8,6 +8,7 @@ using WarringStates.Flow;
 using WarringStates.Net.Common;
 using WarringStates.Server.Events;
 using WarringStates.Server.Map;
+using WarringStates.User;
 
 namespace WarringStates.Server.Net;
 
@@ -154,17 +155,8 @@ internal class ServiceManager : INetLogger
             RemovePlayer(service);
         };
         service.Server = this;
-        CheckNewPlayer(service);
+        AtlasEx.AddPlayer(service.Player);
         HandleUpdateConnection();
-    }
-
-    private static void CheckNewPlayer(ServerService service)
-    {
-        var owners = AtlasEx.GetOwnerSites(service.Player);
-        if (owners.Count is 0)
-            AtlasEx.SetRandomSite(service.Player);
-        //var owner = Atlas.SetRandomSite(service.Player.Name);
-        //Atlas.SetOwnerSites(owner.Site, owner.LandType, service.Player.Name);
     }
 
     private void RemovePlayer(ServerService service)
