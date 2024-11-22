@@ -32,7 +32,6 @@ partial class ServerService
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode)
                 .AppendArgs(ServiceKey.Player, Player);
             CallbackSuccess(sender);
-            UpdateArchiveList();
         }
         catch (Exception ex)
         {
@@ -111,20 +110,6 @@ partial class ServerService
         }
     }
 
-    public void UpdateArchiveList()
-    {
-        try
-        {
-            var sender = new CommandSender(DateTime.Now, (byte)CommandCode.Archive, (byte)OperateCode.List)
-                .AppendArgs(ServiceKey.List, AtlasEx.Archives.ToArray());
-            SendCommand(sender);
-        }
-        catch (Exception ex)
-        {
-            this.HandleException(ex);
-        }
-    }
-
     private void HandleArchive(CommandReceiver receiver)
     {
         var operateCode = (OperateCode)receiver.OperateCode;
@@ -146,8 +131,6 @@ partial class ServerService
         else if (operateCode is OperateCode.Callback)
         {
             Joined = true;
-            var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            CallbackSuccess(sender);
         }
     }
 

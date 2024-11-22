@@ -96,22 +96,12 @@ internal class ServiceManager : INetLogger
 
     private void EnableListener()
     {
-        LocalEvents.TryAddListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
         //LocalEvents.TryAddListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
     }
 
     private void DisableListener()
     {
-        LocalEvents.TryRemoveListener(LocalEvents.UserInterface.ArchiveListRefreshed, BroadcastArchiveList);
         //LocalEvents.TryRemoveListener<CommandRelayArgs>(LocalEvents.NetService.RelayCommand, RelayCommand);
-    }
-
-    private void BroadcastArchiveList()
-    {
-        Parallel.ForEach(Players, service =>
-        {
-            service.UpdateArchiveList();
-        });
     }
 
     private void AcceptAsync(SocketAsyncEventArgs? acceptArgs)

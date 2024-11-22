@@ -15,9 +15,10 @@ internal partial class AtlasEx : Atlas
     {
         if (CurrentArchiveInfo is null)
             return;
-        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo, player);
-        query.CreateTable<OwnerSite>(OWNER_SITES);
-        var owners = query.SelectItems<OwnerSite>(OWNER_SITES, null);
+        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
+        var tableName = GetPlayerTableName(player);
+        query.CreateTable<OwnerSite>(tableName);
+        var owners = query.SelectItems<OwnerSite>(tableName, null);
         if (owners.Length is 0)
             SetRandomSite(player);
     }

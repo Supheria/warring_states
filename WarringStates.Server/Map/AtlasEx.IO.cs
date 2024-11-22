@@ -12,8 +12,6 @@ namespace WarringStates.Server.Map;
 
 partial class AtlasEx
 {
-    public const string OWNER_SITES = "owner sites";
-
     public static string RootPath { get; } = Directory.CreateDirectory("saves").FullName;
 
     static SsSignTable SignTable { get; } = new();
@@ -53,9 +51,14 @@ partial class AtlasEx
         return SerializeTool.DeserializeFile<List<LandPoint>>(new(), SignTable, GetLandPointsPath(archiveInfo.Id)) ?? [];
     }
 
-    public static SQLiteQuery GetPlayerDatabaseQuery(ArchiveInfo archiveInfo, Player player)
+    public static SQLiteQuery GetOwnerSitesQuery(ArchiveInfo archiveInfo)
     {
-        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), player.GetNameHash() + ".db"));
+        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), nameof(OwnerSite) + ".db"));
+    }
+
+    public static string GetPlayerTableName(Player player)
+    {
+        return player.GetNameHash();
     }
 
     public static long CurrentSpan
@@ -74,21 +77,21 @@ partial class AtlasEx
     {
         if (CurrentArchiveInfo is null)
             return;
-        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo, player);
-        query.CreateTable<OwnerSite>(OWNER_SITES);
+        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
         var ownerSite = new OwnerSite() { Site = site, LandType = landType };
-        if (query.Exist(OWNER_SITES, ownerSite))
-            query.UpdateItem(OWNER_SITES, ownerSite);
+        var tableName = GetPlayerTableName(player);
+        if (query.Exist(tableName, ownerSite))
+            query.UpdateItem(tableName, ownerSite);
         else
-            query.InsertItem(OWNER_SITES, ownerSite);
+            query.InsertItem(tableName, ownerSite);
     }
 
     public static List<OwnerSite> GetOwnerSites(Player player)
     {
         if (CurrentArchiveInfo is null)
             return [];
-        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo, player);
-        return query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
+        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
+        return query.SelectItems<OwnerSite>(GetPlayerTableName(player), null).ToList();
     }
 
     //public static List<OwnerSite> GetAllOwnerSites()
@@ -103,9 +106,9 @@ partial class AtlasEx
     {
         if (CurrentArchiveInfo is null)
             return;
-        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo, player);
+        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
         var ownerSite = new OwnerSite() { Site = site };
         var condition = SQLiteQuery.GetCondition(ownerSite, Operators.Equal, nameof(OwnerSite.Site));
-        query.DeleteItems(OWNER_SITES, condition);
+        query.DeleteItems(GetPlayerTableName(player), condition);
     }
 }

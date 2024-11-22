@@ -122,10 +122,6 @@ partial class ClientService
             SendCommand(sender);
             LocalEvents.TryBroadcast(LocalEvents.UserInterface.StartGamePlay);
         }
-        else if (operateCode is OperateCode.Callback)
-        {
-            ReceiveCallback(receiver);
-        }
     }
 
     private void HandleTimer(CommandReceiver receiver)
