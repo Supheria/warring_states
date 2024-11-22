@@ -16,6 +16,8 @@ for (var i = 0; i < 50000; i++)
 }
 using var q = new SQLiteQuery("test.db");
 q.CreateTable<Player>("test");
+q.CreateTable<Player>("shit");
+var names = q.ListAllTableNames();
 stop.Start();
 q.InsertItems("test", players.ToArray());
 q.Commit();
