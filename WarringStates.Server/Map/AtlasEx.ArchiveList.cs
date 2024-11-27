@@ -41,14 +41,14 @@ partial class AtlasEx
         Directory.CreateDirectory(GetFolderPath(archiveInfo.Id));
         SaveArchiveInfo(archiveInfo);
         var altitudeMap = new AltitudeMap(mapData, progressor);
-        SaveLandPoints(archiveInfo, ConvertToLandPoints(altitudeMap));
+        SaveTerrainSites(archiveInfo, ConvertToLandPoints(altitudeMap));
         RefreshArchiveList();
     }
 
-    public static List<LandPoint> ConvertToLandPoints(AltitudeMap altitudeMap)
+    public static List<TerrainSite> ConvertToLandPoints(AltitudeMap altitudeMap)
     {
         var random = new RandomTable(1000);
-        var landPoints = new Dictionary<Coordinate, LandPoint>();
+        var landPoints = new Dictionary<Coordinate, TerrainSite>();
         foreach (var (coordinate, point) in altitudeMap.AltitudePoints)
         {
             var site = SetPointWithin(coordinate, altitudeMap.Size);
@@ -99,7 +99,6 @@ partial class AtlasEx
         if (index < 0 || index >= Archives.Count)
             return;
         SingleLands.Clear();
-        SourceLands.Clear();
         Size = new();
         CurrentArchiveInfo = Archives[index];
         if (CurrentArchiveInfo is null)
@@ -133,7 +132,7 @@ partial class AtlasEx
     protected static VisibleLands GetAllSingleLands()
     {
         var lands = new VisibleLands();
-        SingleLands.ToList().ForEach(x => lands.AddLand(x));
+        SingleLands.ToList().ForEach(x => lands.Add(x));
         return lands;
     }
 }

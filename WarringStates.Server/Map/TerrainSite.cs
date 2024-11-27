@@ -5,7 +5,7 @@ using WarringStates.Map;
 
 namespace WarringStates.Server.Map;
 
-public class LandPoint(Coordinate site, SingleLandTypes landType)
+public class TerrainSite(Coordinate site, SingleLandTypes landType)
 {
     public Coordinate Site => new(X, Y);
 
@@ -15,7 +15,7 @@ public class LandPoint(Coordinate site, SingleLandTypes landType)
 
     public SingleLandTypes Type { get; private set; } = landType;
 
-    public LandPoint() : this(new(), SingleLandTypes.None)
+    public TerrainSite() : this(new(), SingleLandTypes.None)
     {
 
     }

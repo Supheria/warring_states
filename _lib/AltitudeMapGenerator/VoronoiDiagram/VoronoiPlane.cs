@@ -2,7 +2,6 @@
 using AltitudeMapGenerator.VoronoiDiagram.Data;
 using AltitudeMapGenerator.VoronoiDiagram.Model;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
 using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.VoronoiDiagram;
@@ -37,14 +36,14 @@ internal class VoronoiPlane(Size size)
             excludes[key] = site;
         }
         var sites = new List<Coordinate>();
-        var random = new Random();
+        RandomGenerator.Reset();
         for (int i = 0; i < segmentNumber.Width; i++)
         {
             for (int j = 0; j < segmentNumber.Height; j++)
             {
                 if (excludes.ContainsKey((i, j)))
                     continue;
-                var (X, Y) = PointGenerator.GeneratePoint(random, widthSegment * i, heightSegment * j, widthSegment * (i + 1), heightSegment * (j + 1), 1).First();
+                var (X, Y) = RandomGenerator.GeneratePoints(widthSegment * i, heightSegment * j, widthSegment * (i + 1), heightSegment * (j + 1), 1).First();
                 sites.Add(new(X.ToRoundInt(), Y.ToRoundInt()));
             }
         }

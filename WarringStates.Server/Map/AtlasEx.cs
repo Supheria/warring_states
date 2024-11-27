@@ -1,5 +1,5 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
+﻿using LocalUtilities.SQLiteHelper;
+using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
@@ -9,112 +9,109 @@ namespace WarringStates.Server.Map;
 
 internal partial class AtlasEx : Atlas
 {
+    protected static Roster<Coordinate, SingleLand> SingleLands { get; } = [];
+
     static Dictionary<SingleLandTypes, int> LandTypesCount { get; } = [];
 
-    public static void AddPlayer(Player player)
+    public static SingleLand GetSingleLand(Coordinate site)
+    {
+        if (SingleLands.TryGetValue(site, out var singleLand))
+            return singleLand;
+        return new SingleLand(site, SingleLandTypes.Plain);
+    }
+
+    public static bool AddPlayer(Player player)
     {
         if (CurrentArchiveInfo is null)
-            return;
-        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
-        var tableName = GetPlayerTableName(player);
-        query.CreateTable<OwnerSite>(tableName);
-        var owners = query.SelectItems<OwnerSite>(tableName, null);
-        if (owners.Length is 0)
-            SetRandomSite(player);
-    }
-
-    public static OwnerSite SetRandomSite(Player player)
-    {
-        var random = new Random();
-        var gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
-        var site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
-        var type = (SourceLandTypes)(random.Next() % 8);
-        var lands = GetSurrounds(site, type);
-        while (lands.Count < 1)
-        {
-            gen = PointGenerator.GeneratePoint(random, 0, 0, Width, Height, 1);
-            site = new Coordinate(gen[0].X.ToRoundInt(), gen[0].Y.ToRoundInt());
-            type = (SourceLandTypes)(random.Next() % 8);
-            lands = GetSurrounds(site, type);
-        }
-        SourceLands.AddArange(lands);
-        var owner = new OwnerSite(site, type);
-        SetOwnerSites(owner.Site, owner.LandType, player);
-        return owner;
-    }
-
-    public static bool AddSouceLand(Coordinate site, SourceLandTypes targetType)
-    {
-        var surrounds = GetSurrounds(site, targetType);
-        if (surrounds.Count is not 9)
             return false;
-        foreach (var land in surrounds)
-        {
-            if (!SourceLands.TryAdd(land))
-            {
-                surrounds.ForEach(s => SourceLands.TryRemove(s));
-                return false;
-            }
-        }
-        return true;
+        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo);
+        query.Begin();
+        var tableName = player.GetNameHash();
+        query.CreateTable<VisibleSite>(tableName);
+        var center = new VisibleSite() { Direction = Directions.Center };
+        var condition = SQLiteQuery.GetCondition(center, Operators.Equal, nameof(VisibleSite.Direction));
+        if (query.SelectItems<VisibleSite>(player.GetNameHash(), condition).Length is not 0)
+            return true;
+        query.Commit();
+        RandomGenerator.Reset();
+        var (x, y) = RandomGenerator.GeneratePoint(0, 0, Width, Height);
+        var site = new Coordinate(x.ToRoundInt(), y.ToRoundInt());
+        var types = GetCanBuildTypes(site);
+        if (types.Length is 0)
+            return false;
+        return CreateSourceLand(player, site, types[new Random().Next() % types.Length]);
     }
 
-    public static Land GetLand(Coordinate point)
+    public static VisibleLands GetSiteVision(Coordinate site, Player player)
     {
-        if (SourceLands.TryGetValue(point, out var sourceLand))
-            return sourceLand;
-        if (SingleLands.TryGetValue(point, out var singleLand))
-            return singleLand;
-        return new SingleLand(point, SingleLandTypes.Plain);
-    }
-
-    public static void GetVision(Coordinate site, VisibleLands vision)
-    {
-        var left = site.X - 2;
-        var top = site.Y - 2;
-        for (var i = 0; i < 5; i++)
-        {
-            for (var j = 0; j < 5; j++)
-            {
-                var point = SetPointWithin(new(left + i, top + j));
-                vision.AddLand(GetLand(point));
-            }
-        }
-    }
-
-    public static VisibleLands GetSiteVision(Coordinate site)
-    {
+        if (CurrentArchiveInfo is null)
+            return new();
+        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo);
+        query.Begin();
+        var tableName = player.GetNameHash();
+        VisibleSite? visibleSite = new() { Site = site };
+        var condition = SQLiteQuery.GetCondition(visibleSite, Operators.Equal, nameof(VisibleSite.Site));
+        visibleSite = query.SelectItems<VisibleSite>(tableName, condition).FirstOrDefault();
         var vision = new VisibleLands();
-        GetVision(site, vision);
+        if (visibleSite is null || visibleSite.SourceType is SourceLandTypes.None)
+        {
+            vision.Add(GetSingleLand(site));
+            return vision;
+        }
+        var center = visibleSite.GetCenter();
+        for (var i = -2; i < 3; i++) 
+        {
+            for (var j = -2; j < 3; j++)
+            {
+                visibleSite = new() { Site = SetPointWithin(center + (i, j)) };
+                condition = SQLiteQuery.GetCondition(visibleSite, Operators.Equal, nameof(VisibleSite.Site));
+                visibleSite = query.SelectItems<VisibleSite>(tableName, condition).FirstOrDefault();
+                if (visibleSite is null)
+                    continue;
+                if (visibleSite.SourceType is SourceLandTypes.None)
+                    vision.Add(GetSingleLand(visibleSite.Site));
+                else
+                    vision.Add(new SourceLand(visibleSite.Site, visibleSite.SourceType, visibleSite.Direction));
+            }
+        }
         return vision;
     }
 
-    public static VisibleLands GetAllVision(Player player)
+    public static bool CreateSourceLand(Player player, Coordinate center, SourceLandTypes type)
     {
-        var visibleLands = new VisibleLands();
-        var ownerSites = GetOwnerSites(player);
-        foreach (var ownerSite in ownerSites)
-        {
-            GetVision(ownerSite.Site, visibleLands);
-        }
-        return visibleLands;
+        if (CurrentArchiveInfo is null)
+            return false;
+        var sites = GetSourceLandSites(center, type);
+        if (sites.Length is not 9)
+            return false;
+        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo);
+        query.Begin();
+        var tableName = player.GetNameHash();
+        query.InsertItems(tableName, sites.ToArray(), InsertTypes.ReplaceIfExists);
+        var visibles = GetSourceLandSurroundVision(CurrentArchiveInfo, player, center);
+        query.InsertItems(tableName, visibles.ToArray(), InsertTypes.IgnoreIfExists);
+        return true;
     }
 
-    public static bool BuildSourceLand(Coordinate site, SourceLandTypes type, Player player)
+    public static List<VisibleSite> GetSourceLandSurroundVision(ArchiveInfo archiveInfo, Player player, Coordinate center)
     {
-        var surrounds = GetSurrounds(site, type);
-        if (surrounds.Count is not 9)
-            return false;
-        foreach (var land in surrounds)
+        var visibles = new List<VisibleSite>();
+        for (var i = -1; i < 2; i++)
         {
-            if (!SourceLands.TryAdd(land))
-            {
-                surrounds.ForEach(s => SourceLands.TryRemove(s));
-                return false;
-            }
+            visibles.AddRange([
+                new(SetPointWithin(center + (-2, i))),
+                new(SetPointWithin(center + (2, i))),
+                new(SetPointWithin(center + (i, -2))),
+                new(SetPointWithin(center + (i, 2)))
+                ]);
         }
-        SetOwnerSites(site, type, player);
-        return true;
+        visibles.AddRange([
+            new(SetPointWithin(center + (-2, -2))),
+            new(SetPointWithin(center + (2, -2))),
+            new(SetPointWithin(center + (-2, 2))),
+            new(SetPointWithin(center + (2, 2))),
+            ]);
+        return visibles;
     }
 
     public static SourceLandTypes[] GetCanBuildTypes(Coordinate site)
@@ -136,14 +133,14 @@ internal partial class AtlasEx : Atlas
     /// <param name="site"></param>
     /// <param name="targetType"></param>
     /// <returns>return empty if build failed</returns>
-    private static List<SourceLand> GetSurrounds(Coordinate site, SourceLandTypes targetType)
+    private static VisibleSite[] GetSourceLandSites(Coordinate site, SourceLandTypes targetType)
     {
-        if (!CheckSurround(site, out var counts, out var points))
+        if (!CheckSurround(site, out var counts, out var surrounds))
             return [];
         var canBuild = CanBuild(targetType, counts);
         if (!canBuild)
             return [];
-        return points.Select(p => new SourceLand(p.Key, p.Value, targetType)).ToList();
+        return surrounds.Select(s=>new VisibleSite(s.Key, targetType, s.Value)).ToArray();
     }
 
     private static bool CanBuild(SourceLandTypes type, Dictionary<SingleLandTypes, int> counts)
@@ -163,27 +160,29 @@ internal partial class AtlasEx : Atlas
         };
     }
 
-    public static bool CheckSurround(Coordinate site, out Dictionary<SingleLandTypes, int> counts, out Dictionary<Coordinate, Directions> points)
+    public static bool CheckSurround(Coordinate center, out Dictionary<SingleLandTypes, int> counts, out Dictionary<Coordinate, Directions> sites)
     {
-        points = [];
-        counts = new()
+        sites = [];
+        counts = new ()
         {
             [SingleLandTypes.Plain] = 0,
             [SingleLandTypes.Stream] = 0,
             [SingleLandTypes.Wood] = 0,
             [SingleLandTypes.Hill] = 0,
         };
-        var left = site.X - 1;
-        var top = site.Y - 1;
+        if (CurrentArchiveInfo is null)
+            return false;
         var directionOrder = 0;
-        for (var i = 0; i < 3; i++)
+        for (var i = -1; i < 2; i++)
         {
-            for (var j = 0; j < 3; j++)
+            for (var j = -1; j < 2; j++)
             {
-                var point = SetPointWithin(new(left + i, top + j));
-                if (GetLand(point) is not SingleLand singleLand)
+                var site = SetPointWithin(center + (i, j));
+                var exist = GetVisibleSite(CurrentArchiveInfo, site);
+                if (exist is not null && exist.SourceType is not SourceLandTypes.None)
                     return false;
-                points[point] = directionOrder switch
+                counts[GetSingleLand(site).Type]++;
+                sites[site] = directionOrder switch
                 {
                     0 => Directions.LeftTop,
                     1 => Directions.Left,
@@ -197,15 +196,30 @@ internal partial class AtlasEx : Atlas
                     _ => Directions.None,
                 };
                 directionOrder++;
-                counts[singleLand.LandType]++;
             }
         }
         return true;
     }
 
+    public static VisibleSite? GetVisibleSite(ArchiveInfo archiveInfo, Coordinate site)
+    {
+        using var query = GetPlayerDatabaseQuery(archiveInfo);
+        query.Begin();
+        var tableNames = query.ListAllTableNames();
+        foreach (var table in tableNames)
+        {
+            var v = new VisibleSite() { Site = site };
+            var condition = SQLiteQuery.GetCondition(v, Operators.Equal, nameof(VisibleSite.Site));
+            var visible = query.SelectItems<VisibleSite>(table, condition).FirstOrDefault();
+            if (visible is not null)
+                return visible;
+        }
+        return null;
+    }
+
     public static Bitmap? GetThumbnail()
     {
-        if (Width is 0 || Height is 0)
+        if (CurrentArchiveInfo is null|| Width is 0 || Height is 0)
             return null;
         var thumbnail = new Bitmap(Width, Height);
         var pThumbnail = new PointBitmap(thumbnail);
@@ -214,7 +228,7 @@ internal partial class AtlasEx : Atlas
         {
             for (int j = 0; j < Height; j++)
             {
-                var color = GetLand(new(i, j)).Color;
+                var color = GetSingleLand(new(i, j)).Color;
                 pThumbnail.SetPixel(i, j, color);
             }
         }
@@ -222,17 +236,26 @@ internal partial class AtlasEx : Atlas
         return thumbnail;
     }
 
-    public static bool GetAtlasData(Player player, [NotNullWhen(true)] out AtlasData? playerArchive)
+    public static bool GetAtlasData(Player player, [NotNullWhen(true)] out AtlasData? data)
     {
-        playerArchive = null;
+        data = null;
         if (CurrentArchiveInfo is null)
             return false;
-        playerArchive = new()
+        data = new()
         {
             WorldSize = CurrentArchiveInfo.WorldSize,
-            VisibleLands = GetAllVision(player),
-            //VisibleLands = GetAllSingleLands(),
         };
+        using var query = GetPlayerDatabaseQuery(CurrentArchiveInfo);
+        var sites = query.SelectItems<VisibleSite>(player.GetNameHash(), null);
+        foreach (var site in sites)
+        {
+            Land land;
+            if (site.SourceType is SourceLandTypes.None)
+                land = GetSingleLand(site.Site);
+            else
+                land = new SourceLand(site.Site, site.SourceType, site.Direction);
+            data.VisibleLands.Add(land);
+        }
         return true;
     }
 }

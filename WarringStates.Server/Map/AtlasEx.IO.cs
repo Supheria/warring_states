@@ -3,7 +3,9 @@ using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Graph;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Security.Policy;
 using WarringStates.Flow;
 using WarringStates.Map;
 using WarringStates.User;
@@ -28,7 +30,7 @@ partial class AtlasEx
 
     public static string GetLandPointsPath(string archiveId)
     {
-        return Path.Combine(GetFolderPath(archiveId), nameof(LandPoint) + ".ss");
+        return Path.Combine(GetFolderPath(archiveId), nameof(TerrainSite) + ".ss");
     }
 
     public static void SaveArchiveInfo(ArchiveInfo archiveInfo)
@@ -41,24 +43,30 @@ partial class AtlasEx
         return SerializeTool.DeserializeFile<ArchiveInfo>(new(), SignTable, GetArchiveInfoPath(archiveId));
     }
 
-    public static void SaveLandPoints(ArchiveInfo archiveInfo, List<LandPoint> landPoints)
+    public static SQLiteQuery GetTerrainSiteDatabaseQuery(ArchiveInfo archiveInfo)
     {
-        SerializeTool.SerializeFile(landPoints, new(), SignTable, false, GetLandPointsPath(archiveInfo.Id));
+        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), nameof(TerrainSite) + ".db"));
     }
 
-    public static List<LandPoint> LoadLandPoints(ArchiveInfo archiveInfo)
+    public static SQLiteQuery GetPlayerDatabaseQuery(ArchiveInfo archiveInfo)
     {
-        return SerializeTool.DeserializeFile<List<LandPoint>>(new(), SignTable, GetLandPointsPath(archiveInfo.Id)) ?? [];
+        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), nameof(Player) + ".db"));
     }
 
-    public static SQLiteQuery GetOwnerSitesQuery(ArchiveInfo archiveInfo)
+    public static void SaveTerrainSites(ArchiveInfo archiveInfo, List<TerrainSite> sites)
     {
-        return new SQLiteQuery(Path.Combine(GetFolderPath(archiveInfo.Id), nameof(OwnerSite) + ".db"));
+        using var query = GetTerrainSiteDatabaseQuery(archiveInfo);
+        query.Begin();
+        var tableName = nameof(TerrainSite);
+        query.CreateTable<TerrainSite>(tableName);
+        query.InsertItems(tableName, sites.ToArray(), InsertTypes.ReplaceIfExists);
     }
 
-    public static string GetPlayerTableName(Player player)
+    public static TerrainSite[] LoadLandPoints(ArchiveInfo archiveInfo)
     {
-        return player.GetNameHash();
+        using var query = GetTerrainSiteDatabaseQuery(archiveInfo);
+        query.Begin();
+        return query.SelectItems<TerrainSite>(nameof(TerrainSite), null);
     }
 
     public static long CurrentSpan
@@ -73,26 +81,33 @@ partial class AtlasEx
         }
     }
 
-    public static void SetOwnerSites(Coordinate site, SourceLandTypes landType, Player player)
-    {
-        if (CurrentArchiveInfo is null)
-            return;
-        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
-        var ownerSite = new OwnerSite() { Site = site, LandType = landType };
-        var tableName = GetPlayerTableName(player);
-        if (query.Exist(tableName, ownerSite))
-            query.UpdateItem(tableName, ownerSite);
-        else
-            query.InsertItem(tableName, ownerSite);
-    }
+    //public static bool CheckSourceSite(ArchiveInfo archiveInfo, Coordinate site)
+    //{
+    //    using var query = GetPlayerDatabaseQuery(archiveInfo);
+    //    var sourceSite = new SourceSite() { Site = site };
+    //    var condition = SQLiteQuery.GetCondition(sourceSite, Operators.Equal, nameof(SourceSite.Site));
+    //    return query.SelectItems<SourceSite>(SOURCE_SITE, condition).Length is not 0;
+    //}
 
-    public static List<OwnerSite> GetOwnerSites(Player player)
-    {
-        if (CurrentArchiveInfo is null)
-            return [];
-        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
-        return query.SelectItems<OwnerSite>(GetPlayerTableName(player), null).ToList();
-    }
+    //public static bool CheckOwnerSite(ArchiveInfo archiveInfo, Coordinate site, [NotNullWhen(true)] out SourceSite? sourceSite, out string playerHashName)
+    //{
+    //    sourceSite = new SourceSite() { Site = site };
+    //    var condition = SQLiteQuery.GetCondition(sourceSite, Operators.Equal, nameof(SourceSite.Site));
+    //    using var query = GetOwnerSitesQuery(archiveInfo);
+    //    query.Begin();
+    //    var tableNames = query.ListAllTableNames();
+    //    foreach (var table in tableNames)
+    //    {
+    //        sourceSite = query.SelectItems<SourceSite>(table, condition).FirstOrDefault();
+    //        if (sourceSite is not null)
+    //        {
+    //            playerHashName = table;
+    //            return true;
+    //        }
+    //    }
+    //    playerHashName = string.Empty;
+    //    return false;
+    //}
 
     //public static List<OwnerSite> GetAllOwnerSites()
     //{
@@ -102,13 +117,11 @@ partial class AtlasEx
     //    return query.SelectItems<OwnerSite>(OWNER_SITES, null).ToList();
     //}
 
-    public static void RemoveOwnerSite(Player player, Coordinate site)
-    {
-        if (CurrentArchiveInfo is null)
-            return;
-        using var query = GetOwnerSitesQuery(CurrentArchiveInfo);
-        var ownerSite = new OwnerSite() { Site = site };
-        var condition = SQLiteQuery.GetCondition(ownerSite, Operators.Equal, nameof(OwnerSite.Site));
-        query.DeleteItems(GetPlayerTableName(player), condition);
-    }
+    //public static void RemoveOwnerSite(ArchiveInfo archiveInfo, Coordinate site)
+    //{
+    //    using var query = GetPlayerDatabaseQuery(archiveInfo);
+    //    var sourceSite = new SourceSite() { Site = site };
+    //    var condition = SQLiteQuery.GetCondition(sourceSite, Operators.Equal, nameof(SourceSite.Site));
+    //    query.DeleteItems(SOURCE_SITE, condition);
+    //}
 }

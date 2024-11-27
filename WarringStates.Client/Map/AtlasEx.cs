@@ -7,6 +7,10 @@ namespace WarringStates.Client.Map;
 
 public class AtlasEx : Atlas
 {
+    protected static Roster<Coordinate, SingleLand> SingleLands { get; } = [];
+
+    protected static Roster<Coordinate, SourceLand> SourceLands { get; } = [];
+
     public static Land GetLand(Coordinate point)
     {
         if (SourceLands.TryGetValue(point, out var sourceLand))
@@ -19,16 +23,16 @@ public class AtlasEx : Atlas
     public static void Relocate(AtlasData playerArchive)
     {
         SingleLands.Clear();
-        SingleLands.AddArange(playerArchive.VisibleLands.SingleLands);
+        SingleLands.AddRange(playerArchive.VisibleLands.SingleLands);
         SourceLands.Clear();
-        SourceLands.AddArange(playerArchive.VisibleLands.SourceLands);
+        SourceLands.AddRange(playerArchive.VisibleLands.SourceLands);
         Size = playerArchive.WorldSize;
     }
 
     public static void AddVision(VisibleLands vision)
     {
-        SingleLands.AddArange(vision.SingleLands);
-        SourceLands.AddArange(vision.SourceLands);
+        SingleLands.AddRange(vision.SingleLands);
+        SourceLands.AddRange(vision.SourceLands);
         LocalEvents.TryBroadcast(LocalEvents.Map.AtlasUpdate);
     }
 

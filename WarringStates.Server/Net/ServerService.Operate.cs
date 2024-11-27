@@ -174,11 +174,11 @@ partial class ServerService
             var site = receiver.GetArgs<Coordinate>(ServiceKey.Site);
             var type = receiver.GetArgs<SourceLandTypes>(ServiceKey.Type);
             var sender = new CommandSender(receiver.TimeStamp, receiver.CommandCode, receiver.OperateCode);
-            if (!AtlasEx.BuildSourceLand(site, type, Player))
+            if (!AtlasEx.CreateSourceLand(Player, site, type))
                 CallbackFailure(sender, new MapException(Localize.Table.BuildSourceLandFailed));
             else
             {
-                sender.AppendArgs(ServiceKey.Object, AtlasEx.GetSiteVision(site));
+                sender.AppendArgs(ServiceKey.Object, AtlasEx.GetSiteVision(site, Player));
                 CallbackSuccess(sender);
             }
         }

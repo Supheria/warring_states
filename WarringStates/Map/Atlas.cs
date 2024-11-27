@@ -10,10 +10,6 @@ public class Atlas
 
     public static int Height => Size.Height;
 
-    protected static LandRoster<SingleLand> SingleLands { get; } = [];
-
-    protected static LandRoster<SourceLand> SourceLands { get; } = [];
-
     public static Coordinate SetPointWithin(Coordinate point, Size range)
     {
         var x = point.X % range.Width;

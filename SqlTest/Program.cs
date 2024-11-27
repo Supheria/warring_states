@@ -12,14 +12,19 @@ for (var i = 0; i < 50000; i++)
 }
 for (var i = 0; i < 50000; i++)
 {
-    players.Add(new Player("fuck", "54321"));
+    players.Add(new Player("fuck", "54321" + i.ToString()));
 }
 using var q = new SQLiteQuery("test.db");
 q.CreateTable<Player>("test");
 q.CreateTable<Player>("shit");
 var names = q.ListAllTableNames();
 stop.Start();
-q.InsertItems("test", players.ToArray());
+q.InsertItem("test", new Player("shit", "12345"), InsertTypes.ReplaceIfExists);
+q.Commit();
+q.InsertItem("test", new Player(null, "54321"), InsertTypes.IgnoreIfExists);
+q.Commit();
+var p = q.SelectItems<Player>("test", null).FirstOrDefault();
+q.InsertItems("test", players.ToArray(), InsertTypes.ReplaceIfExists);
 q.Commit();
 stop.Stop();
 Console.WriteLine("insert: " + stop.ElapsedMilliseconds);
@@ -47,7 +52,7 @@ q.UpdateItems(
     SQLiteQuery.GetFieldValues(playerWorld),
     SQLiteQuery.GetCondition(playerHello, Operators.Equal, nameof(Player.Name)));
 var player = new Player("tte", "35");
-q.InsertItem("test", player);
+q.InsertItem("test", player, InsertTypes.IgnoreIfExists);
 player = new Player("tte", "35");
 Console.WriteLine("exist: " + q.Exist("test", player).ToString());
 //q.UpdateItems(
@@ -57,15 +62,19 @@ Console.WriteLine("exist: " + q.Exist("test", player).ToString());
 //    ConditionCombo.And);
 //q.Dispose();
 
-public class Player(string name, string password)
+public class Player(string? name, string password)
 {
-    [TableField(IsPrimaryKey = true, Name = "shit fuck it")]
-    public string Id { get; private set; } = HashTool.ToMd5HashString(name + DateTime.Now.ToBinary());
+    [TableField(IsPrimaryKey = true/*, Name = "shit fuck it"*/)]
+    public string Id { get; private set; } = "10";
 
-    [TableField(Name = "shit the shit wha tfuch @@\' \" # sjf= -dsmsdf oiwee9\" ")]
-    public string Name { get; set; } = name;
+    //[TableField(Name = "shit the shit wha tfuch @@\' \" # sjf= -dsmsdf oiwee9\" ")]
+    [TableField(IsUnique = true )]
+    public string? Name { get; set; } = name;
 
-    public string Password { get; private set; } = HashTool.ToMd5HashString(password);
+    public string Password { get; private set; } = password;
+
+    [TableField(IsUnique = true)]
+    public Coordinate? Coordinate { get; set; } = null;
 
     public Player() : this("admin", "password")
     {

@@ -2,19 +2,19 @@
 
 namespace WarringStates.Map;
 
-public class SourceLand(Coordinate site, Directions direction, SourceLandTypes type/*, List<Product> products*/) : Land
+public class SourceLand(Coordinate site, SourceLandTypes type, Directions direction/*, List<Product> products*/) : Land
 {
-    public SourceLandTypes LandType { get; set; } = type;
+    public SourceLandTypes Type { get; set; } = type;
 
     public override Coordinate Site { get; set; } = site;
 
     public static ColorSelector Colors { get; } = new SourceLandColors();
 
-    public override Color Color => Colors[LandType];
+    public override Color Color => Colors[Type];
 
     public Directions Direction { get; set; } = direction;
 
-    public SourceLand() : this(new(), Directions.None, SourceLandTypes.None)
+    public SourceLand() : this(new(), SourceLandTypes.None, Directions.None)
     {
 
     }

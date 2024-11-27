@@ -135,7 +135,8 @@ internal class ServiceManager : INetLogger
 
     private void AddPlayer(ServerService service)
     {
-        if (!Players.TryAdd(service))
+        if (!AtlasEx.AddPlayer(service.Player) ||
+            !Players.TryAdd(service))
         {
             service.Dispose();
             return;
@@ -145,7 +146,6 @@ internal class ServiceManager : INetLogger
             RemovePlayer(service);
         };
         service.Server = this;
-        AtlasEx.AddPlayer(service.Player);
         HandleUpdateConnection();
     }
 

@@ -6,7 +6,7 @@ public class VisibleLands
 
     public List<SourceLand> SourceLands { get; private set; } = [];
 
-    public void AddLand(Land land)
+    public void Add(Land land)
     {
         if (land is SingleLand singleLand)
             SingleLands.Add(singleLand);

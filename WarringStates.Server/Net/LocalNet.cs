@@ -76,7 +76,7 @@ internal class LocalNet
             return false;
         }
         player = new Player(name, Player.ConvertPasswortText(passwordText));
-        query.InsertItem(LocalDataBase.PLAYER, player);
+        query.InsertItem(LocalDataBase.PLAYER, player, InsertTypes.ReplaceIfExists);
         code = ServiceCode.Success;
         return true;
     }

@@ -130,9 +130,9 @@ partial class GridDrawer
 
     private static void DrawCell(Graphics g, Cell cell)
     {
-        if (cell.Land is SingleLand singleLand && singleLand.LandType is not SingleLandTypes.None)
+        if (cell.Land is SingleLand singleLand && singleLand.Type is not SingleLandTypes.None)
             g.FillRectangle(new SolidBrush(cell.Land.Color), cell.GetPartBounds(Directions.Center));
-        else if (cell.Land is SourceLand sourceLand && sourceLand.LandType is not SourceLandTypes.None)
+        else if (cell.Land is SourceLand sourceLand && sourceLand.Type is not SourceLandTypes.None)
             g.FillRectangle(new SolidBrush(cell.Land.Color), cell.GetBoundsInDirection(sourceLand.Direction));
         else
             g.DrawRectangle(new Pen(cell.Land.Color), cell.GetPartBounds(Directions.Center));
