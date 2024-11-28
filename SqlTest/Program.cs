@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Text;
 using System.Diagnostics;
 
 var stop = new Stopwatch();
@@ -68,7 +67,7 @@ public class Player(string? name, string password)
     public string Id { get; private set; } = "10";
 
     //[TableField(Name = "shit the shit wha tfuch @@\' \" # sjf= -dsmsdf oiwee9\" ")]
-    [TableField(IsUnique = true )]
+    [TableField(IsUnique = true)]
     public string? Name { get; set; } = name;
 
     public string Password { get; private set; } = password;

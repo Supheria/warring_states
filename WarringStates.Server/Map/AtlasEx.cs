@@ -59,7 +59,7 @@ internal partial class AtlasEx : Atlas
             return vision;
         }
         var center = visibleSite.GetCenter();
-        for (var i = -2; i < 3; i++) 
+        for (var i = -2; i < 3; i++)
         {
             for (var j = -2; j < 3; j++)
             {
@@ -140,7 +140,7 @@ internal partial class AtlasEx : Atlas
         var canBuild = CanBuild(targetType, counts);
         if (!canBuild)
             return [];
-        return surrounds.Select(s=>new VisibleSite(s.Key, targetType, s.Value)).ToArray();
+        return surrounds.Select(s => new VisibleSite(s.Key, targetType, s.Value)).ToArray();
     }
 
     private static bool CanBuild(SourceLandTypes type, Dictionary<SingleLandTypes, int> counts)
@@ -163,7 +163,7 @@ internal partial class AtlasEx : Atlas
     public static bool CheckSurround(Coordinate center, out Dictionary<SingleLandTypes, int> counts, out Dictionary<Coordinate, Directions> sites)
     {
         sites = [];
-        counts = new ()
+        counts = new()
         {
             [SingleLandTypes.Plain] = 0,
             [SingleLandTypes.Stream] = 0,
@@ -219,7 +219,7 @@ internal partial class AtlasEx : Atlas
 
     public static Bitmap? GetThumbnail()
     {
-        if (CurrentArchiveInfo is null|| Width is 0 || Height is 0)
+        if (CurrentArchiveInfo is null || Width is 0 || Height is 0)
             return null;
         var thumbnail = new Bitmap(Width, Height);
         var pThumbnail = new PointBitmap(thumbnail);

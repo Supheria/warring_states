@@ -1,9 +1,6 @@
 ﻿using AltitudeMapGenerator;
-using LocalUtilities.SimpleScript;
-using LocalUtilities.SQLiteHelper;
 using LocalUtilities.TypeGeneral;
 using LocalUtilities.TypeToolKit.Mathematic;
-using System.Drawing;
 using WarringStates.Map;
 using WarringStates.Server.Events;
 
@@ -20,7 +17,7 @@ partial class AtlasEx
     public static void RefreshArchiveList()
     {
         Archives.Clear();
-        foreach (var folder in new DirectoryInfo(RootPath).GetDirectories()) 
+        foreach (var folder in new DirectoryInfo(RootPath).GetDirectories())
         {
             try
             {
