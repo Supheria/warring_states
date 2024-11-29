@@ -1,0 +1,69 @@
+<Window
+    x:Class="WarringStates.Server.GUI.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:WarringStates.Server.GUI.Views"
+    xmlns:vm="using:WarringStates.Server.GUI.ViewModels"
+    Title="WarringStates.Server.GUI"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:MainWindowViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <!--
+            This only sets the DataContext for the previewer in an IDE,
+            to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs)
+        -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="* *">
+        <Grid ColumnDefinitions="* 200">
+            <Grid ColumnDefinitions=" * *">
+                <StackPanel Margin="10,10,0,5" VerticalAlignment="Center">
+                    <TextBox
+                        Margin="0,5"
+                        HorizontalAlignment="Stretch"
+                        Watermark="IP地址" />
+                    <NumericUpDown HorizontalAlignment="Stretch" Watermark="端口" />
+                    <Grid
+                        Grid.Row="1"
+                        Margin="0,20,0,20"
+                        ColumnDefinitions="*, *, *">
+                        <Button
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            Content="开启" />
+                        <Button
+                            Grid.Column="1"
+                            HorizontalAlignment="Stretch"
+                            Content="新建" />
+                        <Button
+                            Grid.Column="2"
+                            HorizontalAlignment="Stretch"
+                            Content="删除" />
+                    </Grid>
+                    <ProgressBar Grid.Row="1" Height="20" />
+                </StackPanel>
+                <views:Thumbnail
+                    Grid.Column="1"
+                    Margin="10,20,5,0"
+                    DataContext="{Binding ThumbnailViewModel}" />
+                <!--<ListBox Grid.Column="1"/>-->
+            </Grid>
+            <ListBox
+                Grid.Column="1"
+                Margin="5,10,10,0"
+                ItemsSource="{Binding ArchiveList}"
+                SelectedIndex="{Binding ThumbnailViewModel.SelectedIndex}" />
+        </Grid>
+
+        <StackPanel Grid.Row="1" />
+        <StackPanel Grid.Column="1" />
+    </Grid>
+
+</Window>
