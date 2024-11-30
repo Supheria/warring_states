@@ -1,5 +1,5 @@
 ﻿using LocalUtilities.SQLiteHelper;
-using LocalUtilities.TypeGeneral;
+using LocalUtilities;
 using LocalUtilities.TypeToolKit.Text;
 
 namespace WarringStates.User;

@@ -1,5 +1,5 @@
 ﻿using AltitudeMapGenerator.VoronoiDiagram;
-using LocalUtilities.TypeGeneral;
+using LocalUtilities;
 
 namespace AltitudeMapGenerator.DijkstraShortestPath;
 

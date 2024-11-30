@@ -1,4 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities;
 
 namespace WarringStates.Map;
 

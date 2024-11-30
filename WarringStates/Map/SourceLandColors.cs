@@ -1,4 +1,6 @@
-﻿namespace WarringStates.Map;
+﻿using LocalUtilities;
+
+namespace WarringStates.Map;
 
 public class SourceLandColors : ColorSelector
 {

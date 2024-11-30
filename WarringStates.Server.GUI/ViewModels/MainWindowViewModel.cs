@@ -1,20 +1,34 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using WarringStates.Map;
 
 namespace WarringStates.Server.GUI.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public ThumbnailViewModel ThumbnailViewModel { get; } = new();
+    [ObservableProperty]
+    List<ArchiveInfo> _archiveList = [new("存档一", 0, 0), new("存档二", 0, 0)];
 
     [ObservableProperty]
-    List<string> _archiveList = ["存档一", "存档二"];
+    ArchiveInfo? _selectedArchive = null;
 
     [ObservableProperty]
-    RenderTargetBitmap _ThumbnailSource;
+    Color _thumbnailBackColor = Colors.Black;
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        switch (e.PropertyName)
+        {
+
+        }
+    }
 
     //private RenderTargetBitmap GetThumbnail()
     //{

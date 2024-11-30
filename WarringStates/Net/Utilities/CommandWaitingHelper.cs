@@ -1,5 +1,5 @@
 ﻿using LocalUtilities.IocpNet.Common;
-using LocalUtilities.TypeGeneral;
+using LocalUtilities;
 using System.Text;
 using WarringStates.Common;
 using WarringStates.Net.Common;

@@ -2,7 +2,7 @@
 using LocalUtilities.IocpNet.Common;
 using LocalUtilities.SimpleScript;
 using LocalUtilities.SimpleScript.Common;
-using LocalUtilities.TypeGeneral;
+using LocalUtilities;
 using System.Text;
 using WarringStates.Net.Common;
 using WarringStates.Net.Utilities;

@@ -50,16 +50,17 @@
                     <ProgressBar Grid.Row="1" Height="20" />
                 </StackPanel>
                 <views:Thumbnail
+					SelectedArchive="{Binding SelectedArchive}"
+					BackColor="{Binding ThumbnailBackColor}"
                     Grid.Column="1"
-                    Margin="10,20,5,0"
-                    DataContext="{Binding ThumbnailViewModel}" />
+                    Margin="10,20,5,0"/>
                 <!--<ListBox Grid.Column="1"/>-->
             </Grid>
             <ListBox
                 Grid.Column="1"
                 Margin="5,10,10,0"
                 ItemsSource="{Binding ArchiveList}"
-                SelectedIndex="{Binding ThumbnailViewModel.SelectedIndex}" />
+                SelectedItem="{Binding SelectedArchive}" />
         </Grid>
 
         <StackPanel Grid.Row="1" />

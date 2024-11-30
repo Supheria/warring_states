@@ -18,9 +18,7 @@
   <ItemGroup>
     <Compile Update="UI\Component\ArchiveSelector.cs" />
     <Compile Update="UI\Component\ArchiveSelector.Operate.cs" />
-    <Compile Update="UI\Component\Selector.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\Component\Selector.cs" />
     <Compile Update="UI\Component\Selector.Operate.cs" />
     <Compile Update="UI\ServerForm.cs" />
     <Compile Update="UI\TestForm.cs" />

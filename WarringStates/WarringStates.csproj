@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64;ARM64</Platforms>
@@ -17,11 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\_lib\AltitudeMapGenerator\AltitudeMapGenerator.csproj" />
     <ProjectReference Include="..\_lib\LocalUtilities\LocalUtilities.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="UI\ImageButton.cs" />
-    <Compile Update="UI\Thumbnail.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,4 @@
-﻿using Timer = System.Windows.Forms.Timer;
-
-namespace WarringStates.Flow;
+﻿namespace WarringStates.Flow;
 
 public class AnimateFlow : Flower
 {

@@ -1,4 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities;
 using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.VoronoiDiagram.Data;
@@ -72,8 +72,8 @@ internal class VoronoiVertex(double x, double y, Directions borderLocation = Dir
         return this == obj;
     }
 
-    public static implicit operator PointF(VoronoiVertex vertex)
+    public static implicit operator CoordinateD(VoronoiVertex vertex)
     {
-        return new((float)vertex.X, (float)vertex.Y);
+        return new(vertex.X, vertex.Y);
     }
 }

@@ -1,4 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
+﻿using LocalUtilities;
 using LocalUtilities.TypeToolKit.Mathematic;
 
 namespace AltitudeMapGenerator.VoronoiDiagram.Data;
@@ -125,23 +125,7 @@ internal class VoronoiCell(Coordinate coordinate)
 
     internal bool ContainPoint(double x, double y)
     {
-        // helper method to determine if a point is inside the cell
-        // based on meowNET's answer from: https://stackoverflow.com/questions/4243042/c-sharp-point-in-polygon
-        bool result = false;
-        int j = Vertexes.Count - 1;
-        for (int i = 0; i < Vertexes.Count; i++)
-        {
-            if (Vertexes[i].Y < y && Vertexes[j].Y >= y ||
-                Vertexes[j].Y < y && Vertexes[i].Y >= y)
-            {
-                if (Vertexes[i].X + (y - Vertexes[i].Y) /
-                    (Vertexes[j].Y - Vertexes[i].Y) *
-                    (Vertexes[j].X - Vertexes[i].X) < x)
-                    result = !result;
-            }
-            j = i;
-        }
-        return result;
+        return GeometryTool.PointInPolygon(Vertexes.Select(v => new CoordinateD(v.X, v.Y)).ToList(), x, y);
     }
 
     internal bool ContainVertice(VoronoiVertex vertice)

@@ -19,9 +19,7 @@
     <Compile Update="UI\ClientForm.cs" />
     <Compile Update="UI\Component\GamePlane.cs" />
     <Compile Update="UI\Component\GamePlane.Operate.cs" />
-    <Compile Update="UI\Component\Selector.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="UI\Component\Selector.cs" />
     <Compile Update="UI\Component\Selector.Operate.cs" />
     <Compile Update="UI\GamePlayer.cs" />
     <Compile Update="UI\Component\InfoBar.cs" />
