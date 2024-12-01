@@ -1,5 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.UI;
+﻿using WarringStates.Client.UI;
 
 namespace WarringStates.Client.Events;
 

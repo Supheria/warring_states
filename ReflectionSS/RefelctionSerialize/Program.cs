@@ -1,8 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using LocalUtilities.SimpleScript;
-using LocalUtilities.SimpleScript.Common;
-using LocalUtilities.TypeGeneral;
-using System.Windows.Forms;
 
 namespace RefelctionSerialize;
 

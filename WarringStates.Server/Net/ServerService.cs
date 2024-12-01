@@ -1,7 +1,5 @@
-﻿using LocalUtilities.IocpNet;
-using LocalUtilities.IocpNet.Common;
-using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Text;
+﻿using LocalUtilities.General;
+using LocalUtilities.IocpNet;
 using System.Net.Sockets;
 using System.Text;
 using WarringStates.Net;

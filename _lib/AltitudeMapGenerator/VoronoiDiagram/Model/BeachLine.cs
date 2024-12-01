@@ -1,5 +1,5 @@
 ﻿using AltitudeMapGenerator.VoronoiDiagram.Data;
-using LocalUtilities.TypeToolKit.Mathematic;
+using LocalUtilities.General;
 
 namespace AltitudeMapGenerator.VoronoiDiagram.Model;
 

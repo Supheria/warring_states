@@ -1,6 +1,5 @@
-﻿using LocalUtilities.IocpNet.Common;
+﻿using LocalUtilities.IocpNet;
 using LocalUtilities.SimpleScript;
-using LocalUtilities.TypeGeneral;
 using WarringStates.Data;
 using WarringStates.Flow;
 using WarringStates.Map;

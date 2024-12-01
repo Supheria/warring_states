@@ -1,4 +1,4 @@
-﻿using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities.General;
 using System.Runtime.CompilerServices;
 
 namespace AltitudeMapGenerator.VoronoiDiagram.Model;

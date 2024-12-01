@@ -1,6 +1,5 @@
 ﻿using AltitudeMapGenerator;
-using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
+using LocalUtilities.General;
 using WarringStates.Map;
 using WarringStates.Server.Events;
 

@@ -1,16 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Metadata;
-using Avalonia.Platform;
-using CommunityToolkit.Mvvm.ComponentModel;
-using LocalUtilities.TypeToolKit.Mathematic;
-using System;
-using System.ComponentModel;
 using WarringStates.Map;
-using WarringStates.Server.GUI.ViewModels;
 
 namespace WarringStates.Server.GUI.Views;
 
@@ -32,45 +24,28 @@ public partial class Thumbnail : Control
     public static readonly StyledProperty<Color> BackColorProperty =
         AvaloniaProperty.Register<Thumbnail, Color>(nameof(BackColor));
 
-    public Color FrontColor
-    {
-        get => GetValue(FrontColorProperty);
-        set => SetValue(FrontColorProperty, value);
-    }
-    public static readonly StyledProperty<Color> FrontColorProperty =
-        AvaloniaProperty.Register<Thumbnail, Color>(nameof(FrontColor));
-
-    public Bitmap? Source
-    {
-        get => GetValue(SourceProperty);
-        set => SetValue(SourceProperty, value);
-    }
-    public static readonly StyledProperty<Bitmap?> SourceProperty = 
-        AvaloniaProperty.Register<Thumbnail, Bitmap?>(nameof(Source));
-
     public Thumbnail()
     {
         InitializeComponent();
-        AffectsRender<Thumbnail>(SourceProperty);
+        AffectsRender<Thumbnail>(SelectedArchiveProperty);
     }
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    {
-        base.OnPropertyChanged(change);
-        switch (change.Property.Name)
-        {
-            case nameof(SelectedArchive):
-            //case nameof(Bounds):
-                ResetSource();
-                break;
-        }
-        //InvalidateVisual();
-    }
+    //protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    //{
+    //    base.OnPropertyChanged(change);
+    //    switch (change.Property.Name)
+    //    {
+    //        case nameof(SelectedArchive):
+    //        case nameof(Bounds):
+    //            ResetSource();
+    //            break;
+    //    }
+    //}
 
     public sealed override void Render(DrawingContext context)
     {
         base.Render(context);
-        var source = Source;
+        using var source = GetThumbnail();
         var width = (int)Bounds.Width;
         var height = (int)Bounds.Height;
         if (source is null || width <= 0 || height <= 0)
@@ -89,27 +64,28 @@ public partial class Thumbnail : Control
         if (sourceRatio > toRatio)
         {
             toWidth = toSize.Width;
-            toHeight = (toWidth / sourceRatio).ToRoundInt();
+            toHeight = toWidth / sourceRatio;
         }
         else if (sourceRatio < toRatio)
         {
             toHeight = toSize.Height;
-            toWidth = (toHeight * sourceRatio).ToRoundInt();
+            toWidth = toHeight * sourceRatio;
         }
         return new(toWidth, toHeight);
     }
 
-    public void ResetSource()
+    public Bitmap? GetThumbnail()
     {
+        var width = (int)Bounds.Width;
+        var height = (int)Bounds.Height;
+        if (width <= 0 || height <= 0)
+            return null;
         //if (SelectedArchive is null)
         {
-            var width = (int)Bounds.Width;
-            var height = (int)Bounds.Height;
-            if (width <= 0 || height <= 0)
-                return;
-            Source?.Dispose();
-            var asset = AssetLoader.Open(new("avares://WarringStates.Server.GUI/Assets/Random.bmp"));
-            Source = new Bitmap(asset);
+            var source = new RenderTargetBitmap(new(width, height));
+            using var context = source.CreateDrawingContext();
+            context.FillRectangle(new SolidColorBrush(BackColor), new(new(width, height)));
+            return source;
             //using var writer = Source.CreateDrawingContext();
             //writer.FillRectangle(new SolidColorBrush(Colors.AliceBlue), new(Bounds.Size));
             //Source = new WriteableBitmap(new(width, height), new(96, 96));

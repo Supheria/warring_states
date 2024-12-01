@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlTest", "SqlTest\SqlTest.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RefelctionSerialize", "ReflectionSS\RefelctionSerialize\RefelctionSerialize.csproj", "{50BBB500-15F6-43FD-9369-4DB1857A0814}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarringStates.Server.GUI", "WarringStates.Server.GUI\WarringStates.Server.GUI.csproj", "{77C222E7-A617-4DD3-87F8-7B4F880293E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WarringStates.Server.GUI", "WarringStates.Server.GUI\WarringStates.Server.GUI.csproj", "{77C222E7-A617-4DD3-87F8-7B4F880293E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalUtilities.GUICore", "_lib\LocalUtilities.GUICore\LocalUtilities.GUICore.csproj", "{26E22FE1-4635-4371-A613-B19B152E6509}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,6 +161,22 @@ Global
 		{77C222E7-A617-4DD3-87F8-7B4F880293E1}.Release|x64.Build.0 = Release|Any CPU
 		{77C222E7-A617-4DD3-87F8-7B4F880293E1}.Release|x86.ActiveCfg = Release|Any CPU
 		{77C222E7-A617-4DD3-87F8-7B4F880293E1}.Release|x86.Build.0 = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|x64.Build.0 = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Debug|x86.Build.0 = Debug|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|ARM64.Build.0 = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|x64.ActiveCfg = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|x64.Build.0 = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|x86.ActiveCfg = Release|Any CPU
+		{26E22FE1-4635-4371-A613-B19B152E6509}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

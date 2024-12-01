@@ -3,7 +3,7 @@ using AltitudeMapGenerator.Layout;
 using AltitudeMapGenerator.VoronoiDiagram;
 using AltitudeMapGenerator.VoronoiDiagram.Data;
 using LocalUtilities;
-using LocalUtilities.TypeToolKit.Mathematic;
+using LocalUtilities.General;
 
 namespace AltitudeMapGenerator;
 

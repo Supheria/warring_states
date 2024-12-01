@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-
-namespace WarringStates.Client.UI;
+﻿namespace WarringStates.Client.UI;
 
 public partial class ClientForm : ResizeableForm
 {

@@ -1,6 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using LocalUtilities.SQLiteHelper;
-using LocalUtilities.TypeGeneral;
 using System.Diagnostics;
 
 var stop = new Stopwatch();

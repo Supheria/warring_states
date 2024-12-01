@@ -1,6 +1,5 @@
-﻿using LocalUtilities.TypeToolKit.Text;
-
-namespace WarringStates.Map;
+﻿namespace WarringStates.Map;
+using LocalUtilities.General;
 
 public class ArchiveInfo
 {

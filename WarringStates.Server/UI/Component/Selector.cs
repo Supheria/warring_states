@@ -1,5 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities.General;
 
 namespace WarringStates.Server.UI.Component;
 

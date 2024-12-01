@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-
-namespace WarringStates.Client.Events;
+﻿namespace WarringStates.Client.Events;
 
 internal class GridRedrawArgs(Image source, Rectangle drawRect, Coordinate origin) : EventArgs
 {

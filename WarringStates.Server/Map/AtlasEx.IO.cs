@@ -1,5 +1,4 @@
 ﻿using LocalUtilities.SimpleScript;
-using LocalUtilities.SimpleScript.Common;
 using LocalUtilities.SQLiteHelper;
 using WarringStates.Map;
 using WarringStates.User;

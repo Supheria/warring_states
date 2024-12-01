@@ -1,5 +1,5 @@
 ﻿using LocalUtilities;
-using LocalUtilities.TypeToolKit.Mathematic;
+using LocalUtilities.General;
 
 namespace AltitudeMapGenerator.VoronoiDiagram.BorderDisposal;
 

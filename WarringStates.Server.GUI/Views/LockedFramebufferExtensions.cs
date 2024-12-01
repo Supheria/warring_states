@@ -1,10 +1,6 @@
-﻿using Avalonia.Platform;
+﻿using Avalonia.Media;
+using Avalonia.Platform;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Media;
 
 namespace WarringStates.Server.GUI.Views;
 
@@ -12,7 +8,7 @@ public static class LockedFramebufferExtensions
 {
     public static int GetBytesPerPixel(this PixelFormat pixelFormat)
     {
-        if (PixelFormat.Rgb565.Equals(pixelFormat)) 
+        if (PixelFormat.Rgb565.Equals(pixelFormat))
             return 2;
         if (PixelFormat.Rgba8888.Equals(pixelFormat))
             return 4;

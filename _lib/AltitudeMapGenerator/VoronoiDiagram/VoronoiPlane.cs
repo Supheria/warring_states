@@ -1,8 +1,7 @@
 ﻿using AltitudeMapGenerator.VoronoiDiagram.BorderDisposal;
 using AltitudeMapGenerator.VoronoiDiagram.Data;
 using AltitudeMapGenerator.VoronoiDiagram.Model;
-using LocalUtilities;
-using LocalUtilities.TypeToolKit.Mathematic;
+using LocalUtilities.General;
 
 namespace AltitudeMapGenerator.VoronoiDiagram;
 

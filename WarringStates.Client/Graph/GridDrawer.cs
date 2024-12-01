@@ -1,8 +1,6 @@
 ﻿using LocalUtilities.FileHelper;
+using LocalUtilities.General;
 using LocalUtilities.SimpleScript;
-using LocalUtilities.SimpleScript.Common;
-using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Client.UI;

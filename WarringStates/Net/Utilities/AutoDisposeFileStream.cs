@@ -1,4 +1,4 @@
-﻿using LocalUtilities.IocpNet.Common;
+﻿using LocalUtilities.IocpNet;
 
 namespace WarringStates.Net.Utilities;
 

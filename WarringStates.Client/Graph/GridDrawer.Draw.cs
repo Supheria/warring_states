@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
-using WarringStates.Client.Events;
+﻿using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 using WarringStates.Map;
 

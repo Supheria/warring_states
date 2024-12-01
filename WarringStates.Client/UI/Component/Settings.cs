@@ -1,5 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities.General;
 using WarringStates.Client.Events;
 using WarringStates.Client.Map;
 

@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Data;
-using WarringStates.UI;
+﻿using WarringStates.Data;
 
 namespace WarringStates.Client.UI.Component;
 

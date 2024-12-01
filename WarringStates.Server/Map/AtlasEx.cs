@@ -1,6 +1,6 @@
-﻿using LocalUtilities.SQLiteHelper;
-using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities;
+using LocalUtilities.General;
+using LocalUtilities.SQLiteHelper;
 using System.Diagnostics.CodeAnalysis;
 using WarringStates.Map;
 using WarringStates.User;

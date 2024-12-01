@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-
-namespace WarringStates.Client.UI.Component;
+﻿namespace WarringStates.Client.UI.Component;
 
 public class InfoBar : Displayer
 {

@@ -1,5 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using WarringStates.Client.Events;
+﻿using WarringStates.Client.Events;
 using WarringStates.Client.Graph;
 
 namespace WarringStates.Client.UI.Component;

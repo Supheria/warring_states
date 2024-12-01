@@ -1,5 +1,5 @@
 ﻿using AltitudeMapGenerator.Layout;
-using LocalUtilities;
+using LocalUtilities.General;
 
 namespace AltitudeMapGenerator;
 

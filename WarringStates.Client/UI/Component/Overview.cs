@@ -1,6 +1,4 @@
-﻿using LocalUtilities.TypeGeneral;
-using LocalUtilities.TypeToolKit.Graph;
-using LocalUtilities.TypeToolKit.Mathematic;
+﻿using LocalUtilities.General;
 using System.Drawing.Drawing2D;
 using WarringStates.Client.Graph;
 using WarringStates.Client.Map;

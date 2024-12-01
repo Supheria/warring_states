@@ -29,5 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WarringStates\WarringStates.csproj" />
+    <ProjectReference Include="..\_lib\LocalUtilities.GUICore\LocalUtilities.GUICore.csproj" />
   </ItemGroup>
 </Project>
