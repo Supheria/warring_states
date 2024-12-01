@@ -1,8 +1,8 @@
-﻿using Avalonia.Media;
+﻿using LocalUtilities.General;
 using Avalonia.Platform;
 using System;
 
-namespace WarringStates.Server.GUI.Views;
+namespace LocalUtilities.GUICore;
 
 public static class LockedFramebufferExtensions
 {

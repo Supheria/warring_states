@@ -38,8 +38,6 @@ public abstract class NetService : INetLogger
 
     protected Dictionary<CommandCode, CommandHandler> HandleCommands { get; } = [];
 
-    protected static SsSignTable SignTable { get; } = new();
-
     public NetService(Protocol protocol)
     {
         Protocol = protocol;
@@ -255,7 +253,7 @@ public abstract class NetService : INetLogger
             .Append(receiver.GetArgs<string>(ServiceKey.ReceiveName))
             .Append(SignCollection.Colon)
             .Append(SignCollection.Space)
-            .Append(SerializeTool.Deserialize<string>(new(), receiver.Data, 0, receiver.Data.Length, SignTable, null))
+            .Append(SerializeTool.Deserialize<string>(receiver.Data, 0, receiver.Data.Length))
             .ToString();
     }
 }

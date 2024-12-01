@@ -12,8 +12,6 @@ public abstract class InitializeableWindow : Window, IInitializeable
 
     public string IniFileExtension { get; } = "ss";
 
-    protected static SsSignTable SignTable { get; } = new();
-
     protected virtual Type WindowDataType => typeof(WindowData);
 
     protected class WindowData
@@ -42,7 +40,7 @@ public abstract class InitializeableWindow : Window, IInitializeable
         base.OnLoaded(e);
         try
         {
-            var data = SerializeTool.DeserializeFile(WindowDataType, new(), SignTable, this.GetInitializeFilePath());
+            var data = SerializeTool.DeserializeFile(WindowDataType, this.GetInitializeFilePath());
             OnLoad(ref data);
             if (data is not WindowData windowData)
                 return;
@@ -50,8 +48,10 @@ public abstract class InitializeableWindow : Window, IInitializeable
             MinHeight = windowData.MinHeight;
             MaxWidth = windowData.MaxWidth;
             MaxHeight = windowData.MaxHeight;
-            Bounds = new(0, 0, windowData.Width, windowData.Height);
+            Width = windowData.Width;
+            Height = windowData.Height;
             Position = new(windowData.Left, windowData.Top);
+            WindowState = windowData.WindowState;
         }
         catch { }
     }
@@ -71,11 +71,12 @@ public abstract class InitializeableWindow : Window, IInitializeable
             windowData.MinHeight = MinHeight;
             windowData.MaxWidth = MaxWidth;
             windowData.MaxHeight = MaxHeight;
-            windowData.Width = Bounds.Width;
-            windowData.Height = Bounds.Height;
+            windowData.Width = Width;
+            windowData.Height = Height;
             windowData.Left = Position.X;
             windowData.Top = Position.Y;
-            SerializeTool.SerializeFile(windowData, new(), SignTable, true, this.GetInitializeFilePath());
+            windowData.WindowState = WindowState;
+            SerializeTool.SerializeFile(windowData, true, this.GetInitializeFilePath());
         }
         catch { }
     }

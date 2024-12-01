@@ -26,4 +26,9 @@ public class Player(string name, string password) : IRosterItem<string>
     {
         return HashTool.ToMd5HashString(Name);
     }
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }

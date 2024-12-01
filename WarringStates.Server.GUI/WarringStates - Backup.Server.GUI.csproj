@@ -6,17 +6,12 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
-    <BaseOutputPath>..\_gen</BaseOutputPath>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="ViewLocator.cs" />
-    <Compile Remove="Views\LockedFramebufferExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>

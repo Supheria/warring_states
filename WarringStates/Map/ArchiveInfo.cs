@@ -9,19 +9,16 @@ public class ArchiveInfo
 
     public DateTime CreateTime { get; private set; }
 
-    public int Width { get; private set; }
-
-    public int Height { get; private set; }
+    public Size WorldSize { get; private set; } = new();
 
     public long CurrentSpan { get; set; }
 
-    public ArchiveInfo(string worldName, int width, int height)
+    public ArchiveInfo(string worldName, Size worldSize)
     {
         WorldName = worldName;
         CreateTime = DateTime.Now;
         Id = HashTool.ToMd5HashString(WorldName + CreateTime.ToBinary());
-        Width = width;
-        Height = height;
+        WorldSize = worldSize;
         CurrentSpan = 0;
     }
 
