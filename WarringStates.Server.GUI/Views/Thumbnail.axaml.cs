@@ -2,9 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using System;
-using WarringStates.Map;
-using WarringStates.Server.GUI.Models;
 
 namespace WarringStates.Server.GUI.Views;
 

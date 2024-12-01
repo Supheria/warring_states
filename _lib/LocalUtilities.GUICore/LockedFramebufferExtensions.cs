@@ -1,5 +1,5 @@
-﻿using LocalUtilities.General;
-using Avalonia.Platform;
+﻿using Avalonia.Platform;
+using LocalUtilities.General;
 using System;
 
 namespace LocalUtilities.GUICore;

@@ -1,11 +1,7 @@
 ﻿using LocalUtilities.SimpleScript;
 using LocalUtilities.SQLiteHelper;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WarringStates.Map;
 using WarringStates.User;
 
