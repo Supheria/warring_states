@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace LocalUtilities.GUICore;
+﻿namespace CommunityToolkit.Mvvm.ComponentModel;
 
 public abstract class ViewModelBase : ObservableObject
 {

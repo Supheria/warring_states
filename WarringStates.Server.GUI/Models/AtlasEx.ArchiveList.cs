@@ -28,7 +28,7 @@ partial class AtlasEx
             }
             catch { }
         }
-        LocalEvents.TryBroadcast(LocalEvents.ArchiveListRefreshed);
+        //LocalEvents.TryBroadcast(LocalEvents.ArchiveListRefreshed);
     }
 
     public static void CreateArchive(AltitudeMapData mapData, string worldName, IProgressor progressor)
@@ -92,8 +92,6 @@ partial class AtlasEx
 
     public static void SetCurrentArchive(ArchiveInfo? archiveInfo)
     {
-        if (archiveInfo is null)
-            return;
         SingleLands.Clear();
         Size = new();
         CurrentArchiveInfo = archiveInfo;
@@ -110,7 +108,7 @@ partial class AtlasEx
         Size = CurrentArchiveInfo.WorldSize;
         var area = Width * Height;
         LandTypesCount[SingleLandTypes.Plain] = area - LandTypesCount.Sum(x => x.Key is SingleLandTypes.Plain ? 0 : x.Value);
-        LocalEvents.TryBroadcast(LocalEvents.CurrentArchiveChanged);
+        //LocalEvents.TryBroadcast(LocalEvents.CurrentArchiveChanged);
     }
 
     public static bool Delete(int index)

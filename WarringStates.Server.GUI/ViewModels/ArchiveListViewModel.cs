@@ -7,6 +7,8 @@ using System.Diagnostics;
 using LocalUtilities.SimpleScript;
 using System.IO;
 using WarringStates.Server.GUI.Models;
+using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace WarringStates.Server.GUI.ViewModels;
 
@@ -14,32 +16,34 @@ internal partial class ArchiveListViewModel : ViewModelBase
 {
 
     [ObservableProperty]
-    List<ArchiveInfo> _archiveList = [];
+    List<ArchiveInfo> _ArchiveList = [];
 
     [ObservableProperty]
-    ArchiveInfo? _selectedArchive = null;
+    ArchiveInfo? _SelectedArchive = null;
 
-    //[RelayCommand]
-    //private void Load()
-    //{
-    //    Debug.WriteLine("OnLoad is run!");
-    //}
+    [ObservableProperty]
+    bool _IsEnabled = true;
 
     [RelayCommand]
-    private void RefreshItems()
+    private async Task RefreshItems()
     {
-        var archives = new List<ArchiveInfo>();
-        foreach (var folder in new DirectoryInfo(AtlasEx.RootPath).GetDirectories())
+        IsEnabled = false;
+        await Task.Run(() =>
         {
-            try
+            var archives = new List<ArchiveInfo>();
+            foreach (var folder in new DirectoryInfo(AtlasEx.RootPath).GetDirectories())
             {
-                var archiveId = folder.Name;
-                var archiveInfo = SerializeTool.DeserializeFile<ArchiveInfo>(AtlasEx.GetArchiveInfoPath(archiveId));
-                if (archiveInfo is not null && archiveInfo.Id == archiveId)
-                    archives.Add(archiveInfo);
+                try
+                {
+                    var archiveId = folder.Name;
+                    var archiveInfo = SerializeTool.DeserializeFile<ArchiveInfo>(AtlasEx.GetArchiveInfoPath(archiveId));
+                    if (archiveInfo is not null && archiveInfo.Id == archiveId)
+                        archives.Add(archiveInfo);
+                }
+                catch { }
             }
-            catch { }
-        }
-        ArchiveList = archives;
+            ArchiveList = archives;
+        });
+        IsEnabled = true;
     }
 }

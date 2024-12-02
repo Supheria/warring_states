@@ -1,10 +1,9 @@
-﻿using Avalonia.Controls;
-using Avalonia.Interactivity;
+﻿using Avalonia.Interactivity;
 using LocalUtilities.FileHelper;
 using LocalUtilities.SimpleScript;
 using System;
 
-namespace LocalUtilities.GUICore;
+namespace Avalonia.Controls;
 
 public abstract class InitializeableWindow : Window, IInitializeable
 {

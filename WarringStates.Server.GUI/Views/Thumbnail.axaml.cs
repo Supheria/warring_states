@@ -2,10 +2,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using SkiaSharp;
+using System.IO;
+using Avalonia.Skia.Helpers;
+using Avalonia.Skia;
 
 namespace WarringStates.Server.GUI.Views;
 
-public partial class Thumbnail : UserControl
+public partial class Thumbnail : Control
 {
     public Color BackColor
     {
@@ -14,6 +18,22 @@ public partial class Thumbnail : UserControl
     }
     public static readonly StyledProperty<Color> BackColorProperty =
         AvaloniaProperty.Register<Thumbnail, Color>(nameof(BackColor));
+
+    public Color FrontColor
+    {
+        get => GetValue(FrontColorProperty);
+        set => SetValue(FrontColorProperty, value);
+    }
+    public static readonly StyledProperty<Color> FrontColorProperty =
+        AvaloniaProperty.Register<Thumbnail, Color>(nameof(FrontColor));
+
+    public double BorderThickness
+    {
+        get => GetValue(BorderThicknessProperty);
+        set => SetValue(BorderThicknessProperty, value);
+    }
+    public static readonly StyledProperty<double> BorderThicknessProperty =
+        AvaloniaProperty.Register<Thumbnail, double>(nameof(FrontColor));
 
     public Bitmap? Source
     {
@@ -32,27 +52,37 @@ public partial class Thumbnail : UserControl
     public sealed override void Render(DrawingContext context)
     {
         base.Render(context);
-        var width = (int)Bounds.Width;
-        var height = (int)Bounds.Height;
-        if (width <= 0 || height <= 0)
+        var rect = new Rect(Bounds.Size);
+        if (rect.Width <= 0 || rect.Width <= 0)
             return;
+        var border = BorderThickness;
+        var border2x = BorderThickness * 2;
+        context.FillRectangle(new SolidColorBrush(BackColor), rect);
+        rect = new(border, border, rect.Width - border2x, rect.Height - border2x);
+        context.FillRectangle(new SolidColorBrush(FrontColor), rect);
         var source = Source;
         if (source is null)
         {
-            context.FillRectangle(new SolidColorBrush(BackColor), new(new(width, height)));
             return;
         }
-        var scaledSize = ScaleInRatio(source.Size, Bounds.Size);
-        var drawRect = new Rect(Bounds.Size).CenterRect(new(scaledSize));
-        context.DrawImage(source, new(source.Size), drawRect);
+        // TODO: will remove this judge after WriteableBitmap.CreateScaledBitmap bug fixed
+        if (source is WriteableBitmap || source is RenderTargetBitmap)
+        {
+            context.DrawImage(source, new(source.Size), rect);
+            return;
+        }
+        var scaled = GetScaledThumnail(source, rect.Size);
+        var scaledRect = new Rect(scaled.Size);
+        var drawRect = rect.CenterRect(scaledRect);
+        context.DrawImage(scaled, scaledRect, drawRect);
     }
 
-    private static Size ScaleInRatio(Size fromSize, Size toSize)
+    private static Bitmap GetScaledThumnail(Bitmap source, Size toSize)
     {
         var toWidth = toSize.Width;
         var toHeight = toSize.Height;
         var toRatio = toSize.Width / toSize.Height;
-        var sourceRatio = fromSize.Width / fromSize.Height;
+        var sourceRatio = source.Size.Width / source.Size.Height;
         if (sourceRatio > toRatio)
         {
             toWidth = toSize.Width;
@@ -63,6 +93,6 @@ public partial class Thumbnail : UserControl
             toHeight = toSize.Height;
             toWidth = toHeight * sourceRatio;
         }
-        return new(toWidth, toHeight);
+        return source.CreateScaledBitmap(new((int)toWidth, (int)toHeight));
     }
 }

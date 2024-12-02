@@ -1,4 +1,4 @@
-using LocalUtilities.GUICore;
+using Avalonia.Controls;
 
 namespace WarringStates.Server.GUI.Views;
 
@@ -9,10 +9,5 @@ public partial class MainWindow : InitializeableWindow
     public MainWindow()
     {
         InitializeComponent();
-    }
-
-    private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        //AtlasEx.RefreshArchiveList();
     }
 }

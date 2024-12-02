@@ -239,7 +239,10 @@ internal partial class AtlasEx : Atlas
                 lockedBuffer.SetPixel(i, j, color);
             }
         }
-        return thumbnail;
+        var cache = new MemoryStream();
+        thumbnail.Save(cache);
+        cache.Position = 0;
+        return new Bitmap(cache);
     }
 
     public static bool GetAtlasData(Player player, [NotNullWhen(true)] out AtlasData? data)

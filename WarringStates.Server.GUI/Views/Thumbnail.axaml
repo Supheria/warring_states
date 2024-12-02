@@ -9,5 +9,8 @@
     d:DesignWidth="800"
     x:DataType="vm:ThumbnailViewModel"
     BackColor="{Binding BackColor}"
+	FrontColor="{Binding FrontColor}"
+    Bounds="{Binding Bounds, Mode=OneWayToSource}"
     Source="{Binding Source}"
+	BorderThickness="{Binding BorderThickness}"
     mc:Ignorable="d" />

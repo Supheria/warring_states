@@ -12,10 +12,10 @@
     x:DataType="vm:ArchiveListViewModel"
     ItemsSource="{Binding ArchiveList}"
     SelectedItem="{Binding SelectedArchive}"
+	IsEnabled="{Binding IsEnabled}"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
         <ia:EventTriggerBehavior EventName="Loaded">
-            <!--<ia:InvokeCommandAction Command="{Binding LoadCommand}" />-->
             <ia:InvokeCommandAction Command="{Binding RefreshItemsCommand}" />
         </ia:EventTriggerBehavior>
     </i:Interaction.Behaviors>
