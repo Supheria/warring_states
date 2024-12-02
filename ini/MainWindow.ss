@@ -1,9 +1,0 @@
-﻿MinWidth=0
-MinHeight=0
-MaxWidth=∞
-MaxHeight=∞
-Width=800
-Height=450
-Left=0
-Top=0
-WindowState=Normal

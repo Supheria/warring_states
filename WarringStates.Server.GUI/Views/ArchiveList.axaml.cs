@@ -18,26 +18,26 @@ public partial class ArchiveList : ListBox
         InitializeComponent();
     }
 
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        RefreshItems();
-    }
+    //protected override void OnLoaded(RoutedEventArgs e)
+    //{
+    //    base.OnLoaded(e);
+    //    RefreshItems();
+    //}
 
-    public void RefreshItems()
-    {
-        var archives = new List<ArchiveInfo>();
-        foreach (var folder in new DirectoryInfo(AtlasEx.RootPath).GetDirectories())
-        {
-            try
-            {
-                var archiveId = folder.Name;
-                var archiveInfo = SerializeTool.DeserializeFile<ArchiveInfo>(AtlasEx.GetArchiveInfoPath(archiveId));
-                if (archiveInfo is not null && archiveInfo.Id == archiveId)
-                    archives.Add(archiveInfo);
-            }
-            catch { }
-        }
-        ItemsSource = archives;
-    }
+    //public void RefreshItems()
+    //{
+    //    var archives = new List<ArchiveInfo>();
+    //    foreach (var folder in new DirectoryInfo(AtlasEx.RootPath).GetDirectories())
+    //    {
+    //        try
+    //        {
+    //            var archiveId = folder.Name;
+    //            var archiveInfo = SerializeTool.DeserializeFile<ArchiveInfo>(AtlasEx.GetArchiveInfoPath(archiveId));
+    //            if (archiveInfo is not null && archiveInfo.Id == archiveId)
+    //                archives.Add(archiveInfo);
+    //        }
+    //        catch { }
+    //    }
+    //    ItemsSource = archives;
+    //}
 }
