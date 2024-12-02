@@ -1,12 +1,9 @@
-﻿using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using LocalUtilities.GUICore;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using WarringStates.Server.GUI.Models;
 using WarringStates.User;
-using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
 
 namespace WarringStates.Server.GUI.ViewModels;
 

@@ -1,20 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LocalUtilities.GUICore;
-using System.Collections.Generic;
-using WarringStates.Map;
-using System.Diagnostics;
 using LocalUtilities.SimpleScript;
+using System.Collections.Generic;
 using System.IO;
-using WarringStates.Server.GUI.Models;
 using System.Threading.Tasks;
-using System.ComponentModel;
+using WarringStates.Map;
+using WarringStates.Server.GUI.Models;
 
 namespace WarringStates.Server.GUI.ViewModels;
 
 internal partial class ArchiveListViewModel : ViewModelBase
 {
-
     [ObservableProperty]
     List<ArchiveInfo> _ArchiveList = [];
 
