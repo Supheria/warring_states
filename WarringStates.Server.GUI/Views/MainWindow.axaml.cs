@@ -2,7 +2,7 @@ using Avalonia.Controls;
 
 namespace WarringStates.Server.GUI.Views;
 
-public partial class MainWindow : InitializeableWindow
+internal partial class MainWindow : InitializeableWindow
 {
     public override string InitializeName => nameof(MainWindow);
 

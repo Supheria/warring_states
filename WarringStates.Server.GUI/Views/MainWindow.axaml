@@ -24,23 +24,26 @@
     <Grid RowDefinitions="* *">
         <Grid ColumnDefinitions=" 2* * 2*">
             <StackPanel Margin="10,20,5,0" VerticalAlignment="Center">
-                <TextBox
-                    x:Name="test"
-                    Margin="0,5"
+                <NumericUpDown
                     HorizontalAlignment="Stretch"
-                    Watermark="IP地址" />
-                <NumericUpDown HorizontalAlignment="Stretch" Watermark="端口" />
+                    FormatString="0"
+                    Increment="1"
+                    Maximum="65535"
+                    Minimum="1"
+                    Watermark="端口"
+                    Value="{Binding Port}" />
                 <Grid
                     Grid.Row="1"
                     Margin="0,20,0,20"
                     ColumnDefinitions="* * *"
                     RowDefinitions="* *">
-                    <Button
+                    <views:SwitchServerButton
                         Grid.Column="0"
                         Grid.ColumnSpan="3"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center"
-                        Content="开启" />
+                        Command="{Binding $parent[views:MainWindow].((vm:MainWindowViewModel)DataContext).SwitchServerCommand}"
+                        DataContext="{Binding SwitchServerButtonViewModel}" />
                     <Button
                         Grid.Row="1"
                         Grid.Column="0"

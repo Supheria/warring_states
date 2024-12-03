@@ -5,7 +5,7 @@ using Avalonia.Media.Imaging;
 
 namespace WarringStates.Server.GUI.Views;
 
-public partial class Thumbnail : Control
+internal partial class Thumbnail : Control
 {
     public Color BackColor
     {
@@ -58,9 +58,7 @@ public partial class Thumbnail : Control
         context.FillRectangle(new SolidColorBrush(FrontColor), rect);
         var source = Source;
         if (source is null)
-        {
             return;
-        }
         // TODO: will remove this judge after WriteableBitmap.CreateScaledBitmap bug fixed
         if (source is WriteableBitmap || source is RenderTargetBitmap)
         {

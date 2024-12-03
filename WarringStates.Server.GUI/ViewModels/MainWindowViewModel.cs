@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -13,6 +15,11 @@ internal partial class MainWindowViewModel : ViewModelBase
 
     public ArchiveListViewModel ArchiveListViewModel { get; } = new();
 
+    public SwitchServerButtonViewModel SwitchServerButtonViewModel { get; } = new();
+
+    [ObservableProperty]
+    int _Port = 60;
+
     [ObservableProperty]
     List<Player> _Players = [new("aa", ""), new("bb", "")];
 
@@ -22,6 +29,19 @@ internal partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         ArchiveListViewModel.PropertyChanged += ArchiveListViewModel_PropertyChanged;
+        LocalNet.Server.OnStart += Server_OnStart;
+        LocalNet.Server.OnClose += Server_OnClose;
+    }
+
+    private void Server_OnStart()
+    {
+        ArchiveListViewModel.IsEnabled = false;
+
+    }
+
+    private void Server_OnClose()
+    {
+        ArchiveListViewModel.IsEnabled = true;
     }
 
     private async void ArchiveListViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -37,4 +57,20 @@ internal partial class MainWindowViewModel : ViewModelBase
                 break;
         }
     }
+
+    [RelayCommand]
+    private void SwitchServer()
+    {
+        if (ArchiveListViewModel.SelectedArchive is null)
+        {
+            LocalNet.Server.Close();
+            return;
+        }
+        if (LocalNet.Server.IsStart)
+            LocalNet.Server.Close();
+        else
+            LocalNet.Server.Start(Port);
+    }
+
+    //private void CreateArchive
 }
