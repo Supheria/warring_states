@@ -3,10 +3,8 @@ using System;
 
 namespace WarringStates.Server.GUI.Views;
 
-internal partial class ArchiveList : ListBox
+internal partial class ArchiveList : UserControl
 {
-    protected override Type StyleKeyOverride => typeof(ListBox);
-
     public ArchiveList()
     {
         InitializeComponent();

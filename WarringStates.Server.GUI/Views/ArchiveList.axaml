@@ -1,4 +1,4 @@
-<Control
+<UserControl
     x:Class="WarringStates.Server.GUI.Views.ArchiveList"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -10,13 +10,34 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:ArchiveListViewModel"
-    ItemsSource="{Binding ArchiveList}"
-    SelectedItem="{Binding SelectedArchive}"
-	IsEnabled="{Binding IsEnabled}"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
         <ia:EventTriggerBehavior EventName="Loaded">
             <ia:InvokeCommandAction Command="{Binding RefreshItemsCommand}" />
         </ia:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-</Control>
+    <Grid RowDefinitions="5* *"
+            IsEnabled="{Binding IsEnabled}">
+        <ListBox
+            ItemsSource="{Binding ArchiveList}"
+            SelectedItem="{Binding SelectedArchive}" />
+        <Grid Grid.Row="1" ColumnDefinitions="* * *">
+            <Button
+                Grid.Column="0"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Content="新建" />
+            <Button
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Command="{Binding RefreshItemsCommand}"
+                Content="刷新" />
+            <Button
+                Grid.Column="2"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Content="删除" />
+        </Grid>
+    </Grid>
+</UserControl>

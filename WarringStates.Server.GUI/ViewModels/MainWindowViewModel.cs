@@ -15,10 +15,11 @@ internal partial class MainWindowViewModel : ViewModelBase
 
     public ArchiveListViewModel ArchiveListViewModel { get; } = new();
 
-    public SwitchServerButtonViewModel SwitchServerButtonViewModel { get; } = new();
-
     [ObservableProperty]
     int _Port = 60;
+
+    [ObservableProperty]
+    string _SwitchButtonContent = "开启";
 
     [ObservableProperty]
     List<Player> _Players = [new("aa", ""), new("bb", "")];
@@ -36,12 +37,14 @@ internal partial class MainWindowViewModel : ViewModelBase
     private void Server_OnStart()
     {
         ArchiveListViewModel.IsEnabled = false;
+        SwitchButtonContent = "关闭";
 
     }
 
     private void Server_OnClose()
     {
         ArchiveListViewModel.IsEnabled = true;
+        SwitchButtonContent = "开启";
     }
 
     private async void ArchiveListViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
